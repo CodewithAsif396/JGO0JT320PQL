@@ -319,6 +319,18 @@ router.post('/deposits/:id/approve', authMiddleware, adminMiddleware, async (req
     if (!deposit.user.tronWallet) return res.status(400).json({ error: 'User has no TRON wallet on record' });
 
     // Credit user balance
+    const currency = deposit.currency || 'USDT';
+    let creditAmount = deposit.amount;
+    
+    if (currency === 'TRX') {
+      const trxPriceObj = global.ms ? global.ms.getPrice('TRX/USDT') : { price: 0 };
+      const trxPrice = trxPriceObj.price || 0;
+      if (trxPrice <= 0) {
+        return res.status(400).json({ error: 'Unable to fetch real-time TRX price. Please try again later.' });
+      }
+      creditAmount = deposit.amount * trxPrice;
+    }
+
     await prisma.$transaction([
       prisma.deposit.update({
         where: { id: deposit.id },
@@ -326,11 +338,15 @@ router.post('/deposits/:id/approve', authMiddleware, adminMiddleware, async (req
       }),
       prisma.user.update({
         where: { id: deposit.userId },
-        data: { balance: { increment: deposit.amount } }
+        data: { balance: { increment: creditAmount } }
       })
     ]);
 
-    if (global.ns) await global.ns.send(deposit.userId, 'Deposit Approved', `Your deposit of ${deposit.amount} TRX has been credited to your account.`, 'DEPOSIT');
+    let notificationMsg = `Your deposit of ${deposit.amount} ${currency} has been credited to your account.`;
+    if (currency === 'TRX') {
+      notificationMsg = `Your deposit of ${deposit.amount} TRX (~${creditAmount.toFixed(4)} USDT) has been credited to your account.`;
+    }
+    if (global.ns) await global.ns.send(deposit.userId, 'Deposit Approved', notificationMsg, 'DEPOSIT');
 
     // Auto-activate + sweep in background (lock prevents concurrent runs)
     if (!_sweepInProgress.has(deposit.id)) {
