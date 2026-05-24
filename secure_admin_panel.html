@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trexis Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b0e17;
+    --card: #131a22;
+    --card2: #1a2332;
+    --border: #1e2d3d;
+    --accent: #f5b041;
+    --green: #02c076;
+    --red: #f84960;
+    --blue: #3498db;
+    --text: #e8eaf0;
+    --text2: #8b9ab0;
+    --sidebar-w: 240px;
+  }
+  html, body { height: 100%; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* LOGIN */
+  #loginScreen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; background: var(--bg);
+  }
+  .login-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 48px 40px; width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .login-logo { text-align: center; margin-bottom: 32px; }
+  .login-logo span { font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
+  .login-logo p { color: var(--text2); font-size: 13px; margin-top: 4px; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; color: var(--text); font-family: inherit;
+    font-size: 14px; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-group select option { background: var(--card); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px; font-family: inherit;
+    font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #0b0e17; }
+  .btn-primary:hover { background: #e8a030; }
+  .btn-success { background: var(--green); color: #0b0e17; }
+  .btn-success:hover { background: #01a864; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #d63849; }
+  .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-info { background: var(--blue); color: #fff; }
+  .btn-info:hover { background: #2980b9; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .alert {
+    padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
+    font-size: 13px; font-weight: 500;
+  }
+  .alert-error { background: rgba(248,73,96,0.15); border: 1px solid rgba(248,73,96,0.3); color: var(--red); }
+  .alert-success { background: rgba(2,192,118,0.15); border: 1px solid rgba(2,192,118,0.3); color: var(--green); }
+  .alert-info { background: rgba(52,152,219,0.15); border: 1px solid rgba(52,152,219,0.3); color: var(--blue); }
+
+  /* LAYOUT */
+  #appScreen { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 24px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sidebar-logo .logo-icon {
+    width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0b0e17; font-size: 16px;
+  }
+  .sidebar-logo .logo-text { font-weight: 700; font-size: 18px; color: var(--accent); letter-spacing: 1px; }
+  .nav-section { padding: 16px 12px 8px; }
+  .nav-section-title { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    color: var(--text2); font-weight: 500; transition: all 0.2s; margin-bottom: 2px;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--card2); color: var(--text); }
+  .nav-item.active { background: rgba(245,176,65,0.12); color: var(--accent); }
+  .nav-item.active i { color: var(--accent); }
+  .nav-item i { width: 18px; text-align: center; font-size: 15px; }
+  .sidebar-footer {
+    margin-top: auto; padding: 16px 12px; border-top: 1px solid var(--border);
+  }
+  .admin-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .admin-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0b0e17;
+  }
+  .admin-name { font-size: 13px; font-weight: 600; }
+  .admin-role { font-size: 11px; color: var(--text2); }
+
+  /* MAIN */
+  .main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .topbar {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .badge-count {
+    background: var(--red); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
+  }
+  .content { flex: 1; overflow-y: auto; padding: 28px; }
+
+  /* CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.accent::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-card.purple::before { background: #9b59b6; }
+  .stat-card.teal::before { background: #1abc9c; }
+  .stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px;
+  }
+  .stat-icon.accent { background: rgba(245,176,65,0.15); color: var(--accent); }
+  .stat-icon.green { background: rgba(2,192,118,0.15); color: var(--green); }
+  .stat-icon.red { background: rgba(248,73,96,0.15); color: var(--red); }
+  .stat-icon.blue { background: rgba(52,152,219,0.15); color: var(--blue); }
+  .stat-icon.purple { background: rgba(155,89,182,0.15); color: #9b59b6; }
+  .stat-icon.teal { background: rgba(26,188,156,0.15); color: #1abc9c; }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+  /* TABLES */
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .table-title { font-size: 16px; font-weight: 600; }
+  .search-input {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px 8px 36px; color: var(--text); font-family: inherit; font-size: 13px; width: 240px;
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+  .search-wrap { position: relative; }
+  .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 13px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700;
+    color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--card2); border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--card2); }
+  tbody tr.clickable { cursor: pointer; }
+  td { padding: 12px 16px; font-size: 13px; }
+  .empty-state {
+    padding: 48px; text-align: center; color: var(--text2);
+  }
+  .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: 0.4; display: block; }
+  .empty-state p { font-size: 14px; }
+  .loading-state { padding: 48px; text-align: center; color: var(--text2); }
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .badge-pending { background: rgba(245,176,65,0.15); color: var(--accent); border: 1px solid rgba(245,176,65,0.3); }
+  .badge-completed { background: rgba(2,192,118,0.15); color: var(--green); border: 1px solid rgba(2,192,118,0.3); }
+  .badge-failed { background: rgba(248,73,96,0.15); color: var(--red); border: 1px solid rgba(248,73,96,0.3); }
+  .badge-active { background: rgba(52,152,219,0.15); color: var(--blue); border: 1px solid rgba(52,152,219,0.3); }
+  .badge-suspended { background: rgba(248,73,96,0.15); color: var(--red); border: 1px solid rgba(248,73,96,0.3); }
+  .badge-up { background: rgba(2,192,118,0.15); color: var(--green); border: 1px solid rgba(2,192,118,0.3); }
+  .badge-down { background: rgba(248,73,96,0.15); color: var(--red); border: 1px solid rgba(248,73,96,0.3); }
+
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border); justify-content: flex-end; }
+  .pagination-info { color: var(--text2); font-size: 13px; margin-right: auto; }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card2); color: var(--text); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .page-btn:hover, .page-btn.active { background: var(--accent); color: #0b0e17; border-color: var(--accent); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); padding: 0 20px; background: var(--card); }
+  .tab-btn {
+    padding: 14px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: none; background: none; color: var(--text2); border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: all 0.2s; font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; max-width: 800px;
+    max-height: 90vh; overflow-y: auto; position: relative;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  }
+  .modal-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--card); z-index: 1;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: var(--card2); color: var(--text2); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--red); color: #fff; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* PROFILE */
+  .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding: 20px; background: var(--card2); border-radius: 12px; }
+  .profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #0b0e17; flex-shrink: 0; }
+  .profile-name { font-size: 18px; font-weight: 700; }
+  .profile-email { color: var(--text2); font-size: 13px; }
+  .profile-meta { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  .balance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .balance-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .balance-amount { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .balance-label { font-size: 11px; color: var(--text2); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .mini-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+
+  /* SIGNALS */
+  .signal-card {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+  }
+  .signal-pair { font-size: 16px; font-weight: 700; min-width: 80px; }
+  .signal-info { flex: 1; display: flex; flex-wrap: wrap; gap: 12px; }
+  .signal-meta { font-size: 12px; color: var(--text2); }
+  .signal-meta span { color: var(--text); font-weight: 600; }
+
+  /* SETTINGS */
+  .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-accent { color: var(--accent); }
+  .text-muted { color: var(--text2); }
+  .fw-600 { font-weight: 600; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+
+  /* hide sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── MOBILE RESPONSIVE ── */
+  .hamburger {
+    display: none; background: none; border: none; color: var(--text);
+    font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  }
+  .hamburger:hover { background: var(--card2); }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 99; backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.open { display: block; }
+
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 260px; }
+
+    /* Login */
+    .login-box { width: 100%; max-width: 400px; padding: 32px 24px; margin: 16px; }
+
+    /* Sidebar slides in from left */
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+
+    /* Main takes full width */
+    #appScreen { flex-direction: column; }
+    .main { width: 100%; }
+
+    /* Topbar */
+    .topbar { padding: 12px 16px; }
+    .hamburger { display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+    .page-title { font-size: 16px; }
+
+    /* Content padding */
+    .content { padding: 16px; }
+
+    /* Stats grid — 2 columns on tablet, 1 on phone */
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat-value { font-size: 20px; }
+
+    /* Grid-2 stacks */
+    .grid-2 { grid-template-columns: 1fr; gap: 16px; }
+
+    /* Balance grid — 3 → 1 column */
+    .balance-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Settings grid */
+    .settings-grid { grid-template-columns: 1fr; }
+
+    /* Search input full width */
+    .search-input { width: 100%; }
+    .table-header { flex-direction: column; align-items: stretch; gap: 10px; }
+    .table-header .search-wrap { width: 100%; }
+
+    /* Tabs scroll */
+    .tabs { overflow-x: auto; flex-wrap: nowrap; padding: 0 12px; }
+    .tab-btn { white-space: nowrap; padding: 12px 14px; }
+
+    /* Modal full screen on mobile */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal { max-width: 100%; border-radius: 16px 16px 0 0; max-height: 92vh; }
+
+    /* Signal cards */
+    .signal-card { flex-direction: column; align-items: flex-start; }
+
+    /* KYC filter buttons wrap */
+    .filter-btn { font-size: 12px; padding: 6px 12px; }
+
+    /* Topbar right — hide date on very small screens */
+    #topbarDate { display: none; }
+
+    /* Section title */
+    .section-title { font-size: 17px; }
+
+    /* Pagination */
+    .pagination { flex-wrap: wrap; gap: 6px; padding: 12px 16px; }
+    .pagination-info { width: 100%; text-align: center; margin-right: 0; }
+  }
+
+  @media (max-width: 400px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 10px 12px; }
+    .content { padding: 12px; }
+  }
+
+  /* KYC filter buttons */
+  .filter-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text2);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all 0.2s;}
+  .filter-btn:hover{background:var(--border);color:var(--text);}
+  .filter-btn.active{background:rgba(245,176,65,0.15);border-color:var(--accent);color:var(--accent);}
+  .section-title{font-size:20px;font-weight:700;margin-bottom:20px;}
+
+  /* Notification recipients */
+  .recipients-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+  .toggle-btn {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card2); color: var(--text2); cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; text-align: center; transition: all 0.2s;
+  }
+  .toggle-btn.active { background: rgba(245,176,65,0.15); border-color: var(--accent); color: var(--accent); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+</style>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span>Trexis</span>
+      <p>Admin Control Panel</p>
+    </div>
+    <div id="loginAlert"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="admin@trexis.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">
+      <i class="fa fa-sign-in-alt"></i> Sign In
+    </button>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen" style="display:none">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">T</div>
+      <div>
+        <div class="logo-text">Trexis</div>
+        <div style="font-size:11px;color:var(--text2);">Admin Panel</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)">
+        <i class="fa fa-chart-pie"></i> Dashboard
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Management</div>
+      <div class="nav-item" data-section="users" onclick="showSection('users',this)">
+        <i class="fa fa-users"></i> Users
+      </div>
+      <div class="nav-item" data-section="transactions" onclick="showSection('transactions',this)">
+        <i class="fa fa-exchange-alt"></i> Transactions
+        <span class="badge-count" id="pendingTxCount" style="display:none;margin-left:auto"></span>
+      </div>
+      <div class="nav-item" data-section="signals" onclick="showSection('signals',this)">
+        <i class="fa fa-bolt"></i> Signals
+      </div>
+      <div class="nav-item" data-section="referrals" onclick="showSection('referrals',this)">
+        <i class="fa fa-user-plus"></i> Referrals
+      </div>
+      <div class="nav-item" data-section="investments" onclick="showSection('investments',this)">
+        <i class="fa fa-chart-line"></i> Investments
+      </div>
+      <div class="nav-item" data-section="kyc" onclick="showSection('kyc',this)">
+        <i class="fa-solid fa-id-card"></i> KYC Verification
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Finance</div>
+      <div class="nav-item" data-section="deposits" onclick="showSection('deposits',this)">
+        <i class="fa fa-arrow-circle-down"></i> Deposits
+        <span class="badge-count" id="pendingDepCount" style="display:none;margin-left:auto"></span>
+      </div>
+      <div class="nav-item" data-section="withdrawals" onclick="showSection('withdrawals',this)">
+        <i class="fa fa-arrow-circle-up"></i> Withdrawals
+        <span class="badge-count" id="pendingWdCount" style="display:none;margin-left:auto"></span>
+      </div>
+      <div class="nav-item" data-section="penalties" onclick="showSection('penalties',this)">
+        <i class="fa fa-hand-holding-dollar"></i> Penalty History
+      </div>
+      <div class="nav-item" data-section="adjustments" onclick="showSection('adjustments',this)">
+        <i class="fa fa-sliders-h"></i> Balance Log
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Tools</div>
+      <div class="nav-item" data-section="otps" onclick="showSection('otps',this);loadOtps()">
+        <i class="fa fa-key"></i> Active OTPs
+      </div>
+      <div class="nav-item" data-section="notifications" onclick="showSection('notifications',this)">
+        <i class="fa fa-bell"></i> Notifications
+      </div>
+      <div class="nav-item" data-section="chat" onclick="showSection('chat',this);loadChatUsers();startChatRefresh()">
+        <i class="fa fa-comments"></i> Live Chat <span id="admin-chat-badge" style="display:none;background:#f84960;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:4px;"></span>
+      </div>
+      <div class="nav-item" data-section="settings" onclick="showSection('settings',this)">
+        <i class="fa fa-cog"></i> Settings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="admin-info">
+        <div class="admin-avatar" id="adminAvatar">A</div>
+        <div>
+          <div class="admin-name" id="adminName">Admin</div>
+          <div class="admin-role">Super Admin</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-full btn-sm" onclick="doLogout()">
+        <i class="fa fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button class="hamburger" onclick="openSidebar()" aria-label="Menu"><i class="fa fa-bars"></i></button>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <span style="font-size:12px;color:var(--text2)" id="topbarDate"></span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="section-dashboard">
+        <div class="stats-grid" id="statsGrid">
+          <div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="table-card">
+            <div class="table-header"><span class="table-title"><i class="fa fa-clock" style="color:var(--accent);margin-right:8px"></i>Pending Transactions</span></div>
+            <div id="dashPendingTx"><div class="loading-state"><div class="spinner"></div></div></div>
+          </div>
+          <div class="table-card">
+            <div class="table-header"><span class="table-title"><i class="fa fa-bolt" style="color:var(--accent);margin-right:8px"></i>Active Signals</span></div>
+            <div id="dashSignals"><div class="loading-state"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="section" id="section-users">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">All Users</span>
+            <div class="search-wrap">
+              <i class="fa fa-search"></i>
+              <input class="search-input" type="text" id="userSearch" placeholder="Search email, name..." oninput="debounceUserSearch()">
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadUsers(1)"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>User</th><th>Email</th><th>Balance</th><th>Status</th><th>Joined</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+          <div id="usersPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="section" id="section-transactions">
+        <div class="table-card">
+          <div class="tabs" id="txTabs">
+            <button class="tab-btn active" onclick="switchTxTab('PENDING',this)">Pending</button>
+            <button class="tab-btn" onclick="switchTxTab('COMPLETED',this)">Completed</button>
+            <button class="tab-btn" onclick="switchTxTab('FAILED',this)">Failed</button>
+          </div>
+          <div class="table-header">
+            <span class="table-title" id="txTabTitle">Pending Transactions</span>
+            <div style="display:flex;gap:8px">
+              <select id="txTypeFilter" onchange="loadTransactions(1)" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;">
+                <option value="">All Types</option>
+                <option value="DEPOSIT">Deposit</option>
+                <option value="WITHDRAWAL">Withdrawal</option>
+                <option value="PROFIT">Profit</option>
+                <option value="REFERRAL">Referral</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="loadTransactions(1)"><i class="fa fa-sync"></i></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="txBody"></tbody>
+            </table>
+          </div>
+          <div id="txPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- SIGNALS -->
+      <div class="section" id="section-signals">
+
+        <!-- Analytics Bar -->
+        <div id="signalAnalyticsBar" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:start;flex-wrap:wrap;">
+
+          <!-- Signal List -->
+          <div>
+            <div class="table-card">
+              <div class="table-header flex-between">
+                <span class="table-title"><i class="fa fa-bolt" style="color:var(--accent);margin-right:8px"></i>Signals</span>
+                <button class="btn btn-secondary btn-sm" onclick="loadSignals()"><i class="fa fa-sync"></i> Refresh</button>
+              </div>
+              <div id="signalsList" style="padding:16px">
+                <div class="loading-state"><div class="spinner"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Create Signal Form -->
+          <div class="table-card">
+            <div class="table-header"><span class="table-title"><i class="fa fa-plus-circle" style="color:var(--green);margin-right:8px"></i>Create Signal</span></div>
+            <div style="padding:20px">
+              <div id="signalFormAlert"></div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label>Trading Pair</label>
+                  <select id="sigPair">
+                    <option>BTC/USDT</option><option>ETH/USDT</option><option>BNB/USDT</option>
+                    <option>SOL/USDT</option><option>ADA/USDT</option><option>XRP/USDT</option>
+                    <option>DOGE/USDT</option><option>TON/USDT</option><option>AVAX/USDT</option>
+                    <option>MATIC/USDT</option><option>LTC/USDT</option><option>LINK/USDT</option>
+                    <option>TRX/USDT</option><option>DOT/USDT</option><option>ATOM/USDT</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Market Type</label>
+                  <select id="sigMarketType">
+                    <option value="FUTURES">Futures</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Direction</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <button type="button" id="dirCallBtn" onclick="selectSignalDir('CALL')"
+                    style="padding:12px;border-radius:8px;border:2px solid var(--up-color);background:var(--up-color);color:#fff;font-weight:700;cursor:pointer;font-size:13px;">
+                    <i class="fa fa-arrow-trend-up"></i> CALL (UP)
+                  </button>
+                  <button type="button" id="dirPutBtn" onclick="selectSignalDir('PUT')"
+                    style="padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text2);font-weight:700;cursor:pointer;font-size:13px;">
+                    <i class="fa fa-arrow-trend-down"></i> PUT (DOWN)
+                  </button>
+                </div>
+                <input type="hidden" id="sigDirection" value="CALL">
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label>Entry Time</label>
+                  <input type="datetime-local" id="sigEntryTime">
+                </div>
+                <div class="form-group">
+                  <label>Duration (seconds)</label>
+                  <input type="number" id="sigDuration" placeholder="e.g. 300" min="30" value="300">
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label>Multiplier</label>
+                  <input type="number" id="sigMultiplier" placeholder="e.g. 1.8" step="0.01" min="0.01" value="1.8">
+                </div>
+                <div class="form-group">
+                  <label>Reward %</label>
+                  <input type="number" id="sigReward" placeholder="e.g. 80" min="1" max="500" value="80">
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label>Suggested Amount ($)</label>
+                  <input type="number" id="sigSuggestedAmount" placeholder="e.g. 100" min="0" step="1">
+                </div>
+                <div class="form-group">
+                  <label>Growth Target (%)</label>
+                  <input type="number" id="sigGrowthTarget" placeholder="e.g. 5" min="0" step="0.1">
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group">
+                  <label>Risk Level</label>
+                  <select id="sigRiskLevel">
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="HIGH">High</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Visibility Tier</label>
+                  <select id="sigVisibilityTier">
+                    <option value="1">Tier 1 — $500+ (all)</option>
+                    <option value="2">Tier 2 — $1000+</option>
+                    <option value="3">Tier 3 — $1500+</option>
+                    <option value="4">Tier 4 — $2000+</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top:12px;padding:14px;background:rgba(243,186,47,0.07);border:1px dashed var(--accent);border-radius:10px;">
+                <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px;"><i class="fa fa-user-tag"></i> Target Specific User (Optional)</div>
+                <div class="form-group" style="margin-bottom:0">
+                  <input type="email" id="sigTargetEmail" placeholder="user@email.com — leave blank to send to all eligible users" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;box-sizing:border-box;">
+                  <div style="font-size:11px;color:var(--text2);margin-top:4px;">If filled, only this user receives the signal regardless of their balance tier.</div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-full" id="createSignalBtn" onclick="createSignal()" style="margin-top:12px;">
+                <i class="fa fa-bolt"></i> Create Signal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REFERRALS -->
+      <div class="section" id="section-referrals">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title">Referral Overview</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadReferrals()"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Referred User</th><th>Email</th><th>Referred By</th><th>Referrer Email</th><th>Joined</th></tr>
+              </thead>
+              <tbody id="referralsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTMENTS -->
+      <div class="section" id="section-investments">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title">All Investments</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadInvestments()"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>User</th><th>Signal / Plan</th><th>Amount</th><th>Profit</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody id="investmentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- KYC -->
+      <div id="section-kyc" class="section">
+        <h2 class="section-title">KYC Verification</h2>
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <button onclick="loadKyc('PENDING')" class="filter-btn active" id="kyc-filter-pending">Pending</button>
+          <button onclick="loadKyc('APPROVED')" class="filter-btn" id="kyc-filter-approved">Approved</button>
+          <button onclick="loadKyc('REJECTED')" class="filter-btn" id="kyc-filter-rejected">Rejected</button>
+          <button onclick="loadKyc('ALL')" class="filter-btn" id="kyc-filter-all">All</button>
+        </div>
+        <div id="kyc-list"></div>
+      </div>
+
+      <!-- OTPS -->
+      <div class="section" id="section-otps">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title"><i class="fa fa-key" style="color:var(--accent);margin-right:8px"></i>Generated OTPs</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadOtps()"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Email</th><th>OTP Code</th><th>Sent At</th></tr>
+              </thead>
+              <tbody id="otpsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="section" id="section-notifications">
+        <div style="max-width:640px">
+          <div class="table-card">
+            <div class="table-header"><span class="table-title"><i class="fa fa-paper-plane" style="color:var(--accent);margin-right:8px"></i>Send Notification</span></div>
+            <div style="padding:24px">
+              <div id="notifAlert"></div>
+              <div class="form-group">
+                <label>Recipients</label>
+                <div class="recipients-toggle">
+                  <button class="toggle-btn active" id="allUsersBtn" onclick="setNotifMode('all')">
+                    <i class="fa fa-globe"></i> All Users
+                  </button>
+                  <button class="toggle-btn" id="specificUsersBtn" onclick="setNotifMode('specific')">
+                    <i class="fa fa-user-check"></i> Specific Users
+                  </button>
+                </div>
+                <div id="specificEmailsWrap" style="display:none">
+                  <input type="text" id="notifEmails" placeholder="user1@example.com, user2@example.com" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;">
+                  <p style="font-size:11px;color:var(--text2);margin-top:6px">Comma-separated email addresses</p>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="notifTitle" placeholder="Notification title">
+              </div>
+              <div class="form-group">
+                <label>Message</label>
+                <textarea id="notifMessage" placeholder="Enter your message here..." style="min-height:120px"></textarea>
+              </div>
+              <button class="btn btn-primary btn-full" id="sendNotifBtn" onclick="sendNotification()">
+                <i class="fa fa-paper-plane"></i> Send Notification
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section" id="section-settings">
+        <div style="max-width:800px">
+          <div class="table-card">
+            <div class="table-header"><span class="table-title"><i class="fa fa-sliders-h" style="color:var(--accent);margin-right:8px"></i>Platform Settings</span></div>
+            <div style="padding:24px">
+              <div id="settingsAlert"></div>
+              <div id="settingsLoading" class="loading-state"><div class="spinner"></div></div>
+              <div id="settingsForm" style="display:none">
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label>Referral Percentage (%) <span style="font-size:11px;color:var(--text2);">— deposit commission</span></label>
+                    <input type="number" id="setting_referral_percentage" placeholder="e.g. 10" step="0.1" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>First Trade Commission (%) <span style="font-size:11px;color:var(--text2);">— 1× on referral's first trade</span></label>
+                    <input type="number" id="setting_trade_commission_pct" placeholder="e.g. 5" step="0.1" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Min Deposit ($)</label>
+                    <input type="number" id="setting_min_deposit" placeholder="e.g. 50" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Min Withdrawal ($)</label>
+                    <input type="number" id="setting_min_withdrawal" placeholder="e.g. 20" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Withdrawal Fee ($)</label>
+                    <input type="number" id="setting_withdrawal_fee" placeholder="e.g. 5" step="0.01" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Referral Min Deposit ($)</label>
+                    <input type="number" id="setting_referral_min_deposit" placeholder="e.g. 100" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Trade to Exchange Penalty (%)</label>
+                    <input type="number" id="setting_withdrawal_penalty_pct" placeholder="e.g. 20" step="0.1" min="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Trade to Exchange Lock Days</label>
+                    <input type="number" id="setting_withdrawal_lock_days" placeholder="e.g. 35" min="0">
+                  </div>
+                </div>
+                <hr class="divider">
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label style="display:flex;align-items:center;gap:8px;"><i class="fa fa-bullhorn" style="color:var(--accent);"></i> Ticker / News Text</label>
+                  <textarea id="setting_ticker_text" rows="3" placeholder="Enter scrolling news text shown on home screen..." style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+                  <div style="font-size:11px;color:var(--text2);margin-top:4px;">This text scrolls across the top of the home screen for all users.</div>
+                </div>
+                <hr class="divider">
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label style="display:flex;align-items:center;gap:8px;"><i class="fa fa-triangle-exclamation" style="color:var(--down-color);"></i> Trade to Exchange Warning Terms</label>
+                  <textarea id="setting_penalty_terms_text" rows="4" placeholder="Enter terms & conditions that users must accept when withdrawing from Trade to Exchange..." style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+                  <div style="font-size:11px;color:var(--text2);margin-top:4px;">This text is shown in the warning popup before users transfer balance from Trade to Exchange.</div>
+                </div>
+                <hr class="divider">
+                <div style="font-weight:700;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="fa fa-circle-info" style="color:var(--accent)"></i> About Us Page</div>
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label>App Name</label>
+                    <input type="text" id="setting_app_name" placeholder="e.g. Trexis">
+                  </div>
+                  <div class="form-group">
+                    <label>Version</label>
+                    <input type="text" id="setting_app_version" placeholder="e.g. 2.1.0">
+                  </div>
+                  <div class="form-group">
+                    <label>Website URL</label>
+                    <input type="text" id="setting_app_website_url" placeholder="https://...">
+                  </div>
+                  <div class="form-group">
+                    <label>Twitter URL</label>
+                    <input type="text" id="setting_app_twitter_url" placeholder="https://twitter.com/...">
+                  </div>
+                  <div class="form-group" style="grid-column:1/-1">
+                    <label>Telegram URL</label>
+                    <input type="text" id="setting_app_telegram_url" placeholder="https://t.me/...">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label>App Description</label>
+                  <textarea id="setting_app_description" rows="3" placeholder="Short description shown on About Us page..." style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+                </div>
+
+                <hr class="divider">
+                <div style="font-weight:700;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="fa fa-headset" style="color:var(--accent)"></i> Support Center</div>
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label>Support Email</label>
+                    <input type="text" id="setting_support_email" placeholder="support@example.com">
+                  </div>
+                  <div class="form-group">
+                    <label>Telegram Group Handle</label>
+                    <input type="text" id="setting_support_telegram" placeholder="@YourGroup">
+                  </div>
+                  <div class="form-group" style="grid-column:1/-1">
+                    <label>FAQ URL</label>
+                    <input type="text" id="setting_support_faq_url" placeholder="https://...">
+                  </div>
+                </div>
+
+                <button class="btn btn-primary" id="saveSettingsBtn" onclick="saveSettings()">
+                  <i class="fa fa-save"></i> Save Settings
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- SIGNAL TIERS CARD -->
+          <div class="table-card" style="margin-top:24px;">
+            <div class="table-header"><span class="table-title"><i class="fa fa-layer-group" style="color:var(--accent);margin-right:8px"></i>Signal Access Tiers</span></div>
+            <div style="padding:24px;">
+              <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Define the minimum total balance (Exchange + Trade + Perpetual) required for each signal tier. Users are auto-promoted when their balance hits the threshold.</div>
+              <div id="tiersAlert"></div>
+              <div id="tiersContainer" style="display:flex;flex-direction:column;gap:12px;">
+                <!-- tiers loaded dynamically -->
+              </div>
+              <button onclick="addTierRow()" class="btn btn-secondary" style="margin-top:16px;">
+                <i class="fa fa-plus"></i> Add Tier
+              </button>
+              <button onclick="saveTiers()" class="btn btn-primary" id="saveTiersBtn" style="margin-top:16px;margin-left:8px;">
+                <i class="fa fa-save"></i> Save Tiers
+              </button>
+            </div>
+          </div>
+          
+          <!-- BANNERS CARD -->
+          <div class="table-card" style="margin-top:24px;">
+            <div class="table-header"><span class="table-title"><i class="fa fa-image" style="color:var(--accent);margin-right:8px"></i>Banners Management</span></div>
+            <div style="padding: 24px;">
+              <div style="background: var(--bg2); padding: 16px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 24px;">
+                <h3 style="margin-top:0; font-size: 16px; color: var(--text1);"><i class="fa fa-info-circle"></i> Instructions (ہدایات)</h3>
+                <ul style="font-size: 13px; color: var(--text2); line-height: 1.6; padding-left: 20px; margin-bottom: 0;">
+                  <li><strong>Dimensions:</strong> Banners ki height <strong>140px</strong> honi chahiye aur width <strong>100%</strong> rahegi.</li>
+                  <li><strong>How to Add (کیسے لگائیں):</strong> Niche diye gaye <strong>"Choose Files"</strong> button par click karein aur apni images select karein. Aap ek waqt mein ek se zyada images bhi select kar sakte hain.</li>
+                  <li>Images automatically Base64 text mein convert ho kar niche textbox mein aa jayengi.</li>
+                  <li><strong>Save:</strong> Images add karne ke baad <strong>"Save Settings"</strong> uper dabayein (kyunki banners bhi settings ka hissa hain).</li>
+                </ul>
+              </div>
+    
+              <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Select Banner Images:</label>
+                <input type="file" id="bannerUpload" accept="image/*" multiple onchange="handleBannerUpload(event)" style="margin-bottom:16px; display: block; background: var(--bg2); color: var(--text1); padding: 10px; border-radius: 6px; border: 1px solid var(--border); width: 100%; box-sizing: border-box;">
+                
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Banners Data (JSON Format):</label>
+                <textarea id="setting_app_banners" rows="8" placeholder='["data:image/png;base64,..."]' style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- DEPOSITS -->
+      <div class="section" id="section-deposits">
+        <div class="table-card">
+          <div class="tabs" id="depTabs">
+            <button class="tab-btn active" onclick="switchDepTab('pending_approval',this)">Pending</button>
+            <button class="tab-btn" onclick="switchDepTab('confirmed',this)">Approved</button>
+            <button class="tab-btn" onclick="switchDepTab('rejected',this)">Rejected</button>
+          </div>
+          <div class="table-header">
+            <span class="table-title" id="depTabTitle">Pending Deposits</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadDeposits(depPage)"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>User</th><th>From Address</th><th>Amount</th><th>Sweep</th><th>Status</th><th>Detected</th><th>Actions</th></tr></thead>
+              <tbody id="depBody"></tbody>
+            </table>
+          </div>
+          <div id="depPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- WITHDRAWALS -->
+      <div class="section" id="section-withdrawals">
+        <div class="table-card">
+          <div class="tabs" id="wdTabs">
+            <button class="tab-btn active" onclick="switchWdTab('pending',this)">Pending</button>
+            <button class="tab-btn" onclick="switchWdTab('completed',this)">Completed</button>
+            <button class="tab-btn" onclick="switchWdTab('failed',this)">Failed</button>
+            <button class="tab-btn" onclick="switchWdTab('rejected',this)">Rejected</button>
+          </div>
+          <div class="table-header">
+            <span class="table-title" id="wdTabTitle">Pending Withdrawals</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadWithdrawals(wdPage)"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>User</th><th>To Address</th><th>Amount</th><th>Status</th><th>TX Hash</th><th>Requested</th><th>Actions</th></tr></thead>
+              <tbody id="wdBody"></tbody>
+            </table>
+          </div>
+          <div id="wdPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- PENALTIES -->
+      <div class="section" id="section-penalties">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title">Penalty History</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadPenalties(penaltyPage)"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User Email</th>
+                  <th>Amount Extracted</th>
+                  <th>Penalty Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="penaltiesBody"></tbody>
+            </table>
+          </div>
+          <div id="penaltyPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- BALANCE ADJUSTMENTS LOG -->
+      <div class="section" id="section-adjustments">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title"><i class="fa fa-sliders-h" style="color:var(--accent);margin-right:8px"></i>Balance Adjustment Log</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadAdjustments(1)"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>User</th><th>Type</th><th>Amount</th><th>Reason</th><th>Admin</th><th>Date</th></tr></thead>
+              <tbody id="adjBody"></tbody>
+            </table>
+          </div>
+          <div id="adjPagination" class="pagination"></div>
+        </div>
+      </div>
+
+      <!-- LIVE CHAT SECTION -->
+      <div class="section" id="section-chat">
+        <div style="display:flex;gap:16px;height:calc(100vh - 120px);">
+          <!-- User list -->
+          <div class="table-card" style="width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
+            <div class="table-header" style="justify-content:space-between;">
+              <span class="table-title"><i class="fa fa-comments" style="color:var(--accent);margin-right:8px"></i>Chats</span>
+              <button class="btn btn-secondary btn-sm" onclick="loadChatUsers()"><i class="fa fa-sync"></i></button>
+            </div>
+            <div id="chat-user-list" style="overflow-y:auto;flex:1;"></div>
+          </div>
+          <!-- Conversation panel -->
+          <div class="table-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;" id="chat-convo-panel">
+            <div class="table-header">
+              <span class="table-title" id="chat-convo-title"><i class="fa fa-comment-dots" style="color:var(--accent);margin-right:8px"></i>Select a user</span>
+            </div>
+            <div id="admin-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#0d1117;"></div>
+            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;" id="chat-reply-bar" style="display:none;">
+              <input type="text" id="admin-chat-input" placeholder="Type reply..." style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')adminSendReply()">
+              <button class="btn btn-primary" onclick="adminSendReply()" style="padding:8px 16px;"><i class="fa fa-paper-plane"></i> Send</button>
+              <button class="btn btn-secondary" onclick="resolveAdminChat()" style="padding:8px 14px;background:#1a3a1a;color:#4caf50;border:1px solid #4caf50;" title="Resolve & clear chat"><i class="fa fa-check-circle"></i> Resolve</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="userModal" style="display:none" onclick="closeModal('userModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="userModalTitle">User Profile</span>
+      <button class="modal-close" onclick="closeModal('userModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="userModalBody">
+      <div class="loading-state"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer" id="userModalFooter"></div>
+  </div>
+</div>
+
+<!-- EDIT BALANCE MODAL -->
+<div class="modal-overlay" id="balanceModal" style="display:none" onclick="closeModal('balanceModal',event)">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Edit Balance</span>
+      <button class="modal-close" onclick="closeModal('balanceModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="balanceAlert"></div>
+      <div class="form-group">
+        <label>Balance Field</label>
+        <select id="balanceField">
+          <option value="balance">Exchange Balance (Main)</option>
+          <option value="tradeBalance">Trade Balance</option>
+          <option value="perpetualBalance">Perpetual Balance</option>
+          <option value="profitBalance">Profit Balance</option>
+          <option value="referralBalance">Referral Balance</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Operation</label>
+        <select id="balanceType">
+          <option value="set">Set (Override)</option>
+          <option value="increment">Increment (Add / Subtract)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="number" id="balanceAmount" placeholder="e.g. 1000.00" step="0.01">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('balanceModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveBalanceBtn" onclick="saveBalance()"><i class="fa fa-save"></i> Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUSPEND MODAL -->
+<div class="modal-overlay" id="suspendModal" style="display:none" onclick="closeModal('suspendModal',event)">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Suspend User</span>
+      <button class="modal-close" onclick="closeModal('suspendModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="suspendAlert"></div>
+      <div class="form-group">
+        <label>Reason for Suspension</label>
+        <textarea id="suspendReason" placeholder="Provide a reason for suspension..." style="min-height:100px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('suspendModal')">Cancel</button>
+      <button class="btn btn-danger" id="confirmSuspendBtn" onclick="confirmSuspend()"><i class="fa fa-ban"></i> Suspend User</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-overlay" id="resetPwModal" style="display:none" onclick="closeModal('resetPwModal',event)">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Reset Password</span>
+      <button class="modal-close" onclick="closeModal('resetPwModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="resetPwAlert"></div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="newPassword" placeholder="Enter new password (min 8 chars)">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('resetPwModal')">Cancel</button>
+      <button class="btn btn-primary" id="confirmResetPwBtn" onclick="confirmResetPassword()"><i class="fa fa-key"></i> Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div class="modal-overlay" id="rejectModal" style="display:none" onclick="closeModal('rejectModal',event)">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Reject Transaction</span>
+      <button class="modal-close" onclick="closeModal('rejectModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="rejectAlert"></div>
+      <div class="form-group">
+        <label>Reason for Rejection</label>
+        <textarea id="rejectReason" placeholder="Provide a reason..." style="min-height:100px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('rejectModal')">Cancel</button>
+      <button class="btn btn-danger" id="confirmRejectBtn" onclick="confirmReject()"><i class="fa fa-times-circle"></i> Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREDIT / DEBIT BALANCE MODAL -->
+<div class="modal-overlay" id="adjustModal" style="display:none" onclick="closeModal('adjustModal',event)">
+  <div class="modal" style="max-width:440px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="adjustModalTitle">Credit Balance</span>
+      <button class="modal-close" onclick="closeModal('adjustModal')"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="adjustAlert"></div>
+      <div class="form-group">
+        <label>Amount (TRX)</label>
+        <input type="number" id="adjustAmount" placeholder="e.g. 50.00" step="0.01" min="0.01">
+      </div>
+      <div class="form-group">
+          <label>Wallet Destination</label>
+          <select id="adjustWalletDestination" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:4px;">
+            <option value="Exchange">Exchange</option>
+            <option value="Trade">Trade</option>
+            <option value="Perpetual">Perpetual</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Reason</label>
+          <textarea id="adjustReason" placeholder="Reason for adjustment..." style="min-height:80px"></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('adjustModal')">Cancel</button>
+      <button class="btn btn-success btn-sm" id="confirmAdjustBtn" onclick="confirmAdjust()"><i class="fa fa-plus"></i> Credit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== STATE ====================
+var authToken = null;
+var adminUser = null;
+var currentSection = 'dashboard';
+var usersPage = 1;
+var txPage = 1;
+var txStatus = 'PENDING';
+var userSearchTimer = null;
+var selectedUserId = null;
+var selectedTxId = null;
+var notifMode = 'all';
+var depStatus = 'pending_approval';
+var depPage = 1;
+var wdStatus = 'pending';
+var wdPage = 1;
+var adjPage = 1;
+var selectedDepId = null;
+var selectedWdId = null;
+var adjustType = 'credit';
+var rejectContext = 'tx';
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var token = localStorage.getItem('adminToken');
+  if (token) {
+    authToken = token;
+    verifyAndShowApp();
+  }
+  var now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('sigEntryTime').value = now.toISOString().slice(0,16);
+});
+
+// ==================== SIDEBAR MOBILE ====================
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ==================== AUTH ====================
+async function doLogin() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
+  var btn = document.getElementById('loginBtn');
+  var alertEl = document.getElementById('loginAlert');
+  if (!email || !password) { showAlert(alertEl, 'Please enter email and password.', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Signing In...';
+  alertEl.innerHTML = '';
+  try {
+    var res = await fetch('/api/auth/admin-login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email: email, password: password})
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Invalid credentials');
+    authToken = data.token;
+    adminUser = data.user;
+    localStorage.setItem('adminToken', authToken);
+    showApp();
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+
+async function verifyAndShowApp() {
+  try {
+    var res = await apiFetch('/api/admin/analytics');
+    if (res.ok) { showApp(); return; }
+  } catch(e) {}
+  authToken = null;
+  localStorage.removeItem('adminToken');
+}
+
+var _adminSocket = null;
+function initAdminSocket() {
+  if (_adminSocket) return;
+  try {
+    _adminSocket = io();
+    _adminSocket.on('admin_new_chat', function(msg) {
+      if (_adminChatUserId && msg.userId === _adminChatUserId) {
+        adminAppendBubble(msg);
+        document.getElementById('admin-chat-messages').scrollTop = 99999;
+      } else {
+        const badge = document.getElementById('admin-chat-badge');
+        if (badge) {
+          const n = (parseInt(badge.textContent) || 0) + 1;
+          badge.textContent = n; badge.style.display = 'inline';
+        }
+        if (document.getElementById('section-chat').style.display !== 'none') loadChatUsers();
+      }
+    });
+  } catch(e) {}
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  if (adminUser) {
+    var name = adminUser.name || adminUser.email || 'Admin';
+    document.getElementById('adminName').textContent = name;
+    document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+  }
+  initAdminSocket();
+  loadDashboard();
+}
+
+function doLogout() {
+  authToken = null;
+  adminUser = null;
+  localStorage.removeItem('adminToken');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginAlert').innerHTML = '';
+}
+
+// ==================== API ====================
+async function apiFetch(url, options) {
+  options = options || {};
+  var headers = {'Content-Type':'application/json','Authorization':'Bearer ' + authToken};
+  if (options.headers) Object.assign(headers, options.headers);
+  var res = await fetch(url, Object.assign({}, options, {headers: headers}));
+  if (res.status === 401) { doLogout(); throw new Error('Session expired. Please log in again.'); }
+  return res;
+}
+
+async function apiGet(url) {
+  var res = await apiFetch(url);
+  if (!res.ok) { var d = await res.json().catch(function(){return {};}); throw new Error((d && d.message) || ('Error ' + res.status)); }
+  return res.json();
+}
+
+async function apiPost(url, body) {
+  var res = await apiFetch(url, {method:'POST', body: JSON.stringify(body)});
+  if (!res.ok) { var d = await res.json().catch(function(){return {};}); throw new Error((d && d.message) || ('Error ' + res.status)); }
+  return res.json();
+}
+
+async function apiDelete(url) {
+  var res = await apiFetch(url, {method:'DELETE'});
+  if (!res.ok) { var d = await res.json().catch(function(){return {};}); throw new Error((d && d.message) || ('Error ' + res.status)); }
+  return res.json().catch(function(){return {};});
+}
+
+// ==================== UTILS ====================
+function showAlert(el, msg, type) {
+  var cls = type === 'error' ? 'alert-error' : type === 'success' ? 'alert-success' : 'alert-info';
+  el.innerHTML = '<div class="alert ' + cls + '">' + escHtml(msg) + '</div>';
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmt(n) {
+  if (n === null || n === undefined || n === '') return '0.00';
+  return Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtInt(n) {
+  if (n === null || n === undefined) return '0';
+  return Number(n).toLocaleString();
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+}
+function fmtDateTime(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('en-US', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function statusBadge(s) {
+  var map = {PENDING:'pending',COMPLETED:'completed',FAILED:'failed',ACTIVE:'active',SUSPENDED:'suspended',INACTIVE:'failed'};
+  var cls = map[s] || 'active';
+  return '<span class="badge badge-' + cls + '">' + (s || '—') + '</span>';
+}
+function dirBadge(d) {
+  if (d === 'CALL') return '<span class="badge badge-up"><i class="fa fa-arrow-trend-up"></i> CALL</span>';
+  if (d === 'PUT') return '<span class="badge badge-down"><i class="fa fa-arrow-trend-down"></i> PUT</span>';
+  if (d === 'UP') return '<span class="badge badge-up"><i class="fa fa-arrow-up"></i> CALL</span>';
+  if (d === 'DOWN') return '<span class="badge badge-down"><i class="fa fa-arrow-down"></i> PUT</span>';
+  return '<span class="badge">' + (d || '—') + '</span>';
+}
+function riskBadge(r) {
+  var map = { LOW: 'completed', MEDIUM: 'active', HIGH: 'failed' };
+  return '<span class="badge badge-' + (map[r] || 'active') + '">' + (r || 'MEDIUM') + '</span>';
+}
+function tierLabel(t) {
+  var labels = { 1: '$500+ (Tier 1)', 2: '$1000+ (Tier 2)', 3: '$1500+ (Tier 3)', 4: '$2000+ (Tier 4)' };
+  return labels[t] || 'Tier ' + t;
+}
+function emptyRow(cols, msg) {
+  msg = msg || 'No data available';
+  return '<tr><td colspan="' + cols + '"><div class="empty-state"><i class="fa fa-inbox"></i><p>' + msg + '</p></div></td></tr>';
+}
+function loadingRow(cols) {
+  return '<tr><td colspan="' + cols + '"><div class="loading-state"><div class="spinner"></div></div></td></tr>';
+}
+function setBtn(btn, loading, loadingText, originalHTML) {
+  if (loading) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> ' + loadingText;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+function fmtDuration(secs) {
+  if (!secs) return '—';
+  secs = Number(secs);
+  if (secs < 60) return secs + 's';
+  if (secs < 3600) return Math.floor(secs/60) + 'm ' + (secs%60) + 's';
+  return Math.floor(secs/3600) + 'h ' + Math.floor((secs%3600)/60) + 'm';
+}
+
+// ==================== MODALS ====================
+function closeModal(id, event) {
+  if (!event || event.target === document.getElementById(id)) {
+    document.getElementById(id).style.display = 'none';
+  }
+}
+
+// ==================== NAVIGATION ====================
+function showSection(name, el) {
+  closeSidebar();
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('section-' + name).classList.add('active');
+  var titles = {dashboard:'Dashboard',users:'Users',transactions:'Transactions',signals:'Signals',referrals:'Referrals',investments:'Investments',kyc:'KYC Verification',notifications:'Notifications',otps:'Active OTPs',settings:'Settings',deposits:'TRX Deposits',withdrawals:'TRX Withdrawals',adjustments:'Balance Adjustment Log',penalties:'Penalty History'};
+  document.getElementById('pageTitle').textContent = titles[name] || name;
+  if (el) el.classList.add('active');
+  currentSection = name;
+  if (name === 'dashboard') loadDashboard();
+  else if (name === 'users') loadUsers(1);
+  else if (name === 'transactions') { txStatus = 'PENDING'; txPage = 1; document.querySelectorAll('#txTabs .tab-btn').forEach(function(b,i){b.classList.toggle('active',i===0);}); document.getElementById('txTabTitle').textContent='Pending Transactions'; loadTransactions(1); }
+  else if (name === 'signals') { loadSignals(); loadSignalAnalytics(); }
+  else if (name === 'referrals') loadReferrals();
+  else if (name === 'investments') loadInvestments();
+  else if (name === 'settings') loadSettings();
+  else if (name === 'kyc') loadKyc('PENDING');
+  else if (name === 'deposits') { depStatus = 'pending_approval'; depPage = 1; loadDeposits(1); }
+  else if (name === 'withdrawals') { wdStatus = 'pending'; wdPage = 1; loadWithdrawals(1); }
+  else if (name === 'adjustments') loadAdjustments(1);
+  else if (name === 'penalties') loadPenalties(1);
+}
+
+// ==================== DASHBOARD ====================
+async function loadDashboard() {
+  document.getElementById('statsGrid').innerHTML = '<div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/analytics');
+    renderStats(data);
+    updatePendingBadge(data.pendingTxs);
+    updateDepBadge(data.pendingDeposits || 0);
+    updateWdBadge(data.pendingWithdrawals || 0);
+  } catch(e) {
+    document.getElementById('statsGrid').innerHTML = '<div class="alert alert-error" style="grid-column:1/-1">Failed to load analytics: ' + escHtml(e.message) + '</div>';
+  }
+  loadDashPendingTx();
+  loadDashSignals();
+}
+
+function renderStats(d) {
+  var stats = [
+    {label:'Total Users', value:fmtInt(d.totalUsers), icon:'fa-users', color:'accent', cardColor:'accent'},
+    {label:'Total Deposits', value:'$'+fmt(d.totalDeposits), icon:'fa-arrow-circle-down', color:'green', cardColor:'green'},
+    {label:'Total Withdrawals', value:'$'+fmt(d.totalWithdrawals), icon:'fa-arrow-circle-up', color:'red', cardColor:'red'},
+    {label:'Pending Transactions', value:fmtInt(d.pendingTxs), icon:'fa-clock', color:'accent', cardColor:'accent'},
+    {label:'Active Signals', value:fmtInt(d.activeSignals), icon:'fa-bolt', color:'blue', cardColor:'blue'},
+    {label:'Total Trades', value:fmtInt(d.totalTrades), icon:'fa-chart-bar', color:'teal', cardColor:'teal'},
+    {label:'Pending Deposits', value:fmtInt(d.pendingDeposits||0), icon:'fa-hourglass-half', color:'accent', cardColor:'accent'},
+    {label:'Pending Withdrawals', value:fmtInt(d.pendingWithdrawals||0), icon:'fa-paper-plane', color:'red', cardColor:'red'},
+    {label:'Pending KYC', value:fmtInt(d.pendingKycs||0), icon:'fa-id-card', color:'blue', cardColor:'blue'},
+    {label:'Master Balance', value:(d.masterBalance!=null ? fmt(d.masterBalance)+' TRX' : 'N/A'), icon:'fa-wallet', color:'green', cardColor:'green'}
+  ];
+  document.getElementById('statsGrid').innerHTML = stats.map(function(s) {
+    return '<div class="stat-card ' + s.cardColor + '"><div class="stat-icon ' + s.color + '"><i class="fa ' + s.icon + '"></i></div><div class="stat-value">' + s.value + '</div><div class="stat-label">' + s.label + '</div></div>';
+  }).join('');
+}
+
+function updatePendingBadge(n) {
+  var badge = document.getElementById('pendingTxCount');
+  if (n > 0) { badge.textContent = n; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+}
+function updateDepBadge(n) {
+  var badge = document.getElementById('pendingDepCount');
+  if (badge) { if (n > 0) { badge.textContent = n; badge.style.display = 'inline'; } else { badge.style.display = 'none'; } }
+}
+function updateWdBadge(n) {
+  var badge = document.getElementById('pendingWdCount');
+  if (badge) { if (n > 0) { badge.textContent = n; badge.style.display = 'inline'; } else { badge.style.display = 'none'; } }
+}
+
+async function loadDashPendingTx() {
+  var el = document.getElementById('dashPendingTx');
+  el.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    var data = await apiGet('/api/admin/transactions?status=PENDING&page=1');
+    var txs = (data.transactions || []).slice(0, 8);
+    if (!txs.length) { el.innerHTML = '<div class="empty-state"><i class="fa fa-inbox"></i><p>No pending transactions</p></div>'; return; }
+    el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody>' +
+      txs.map(function(t) {
+        return '<tr><td>' + escHtml(t.user && t.user.email ? t.user.email : (t.userId||'—')) + '</td><td>' + escHtml(t.type||'—') + '</td><td class="text-accent fw-600">$' + fmt(t.amount) + '</td><td class="text-muted">' + fmtDate(t.createdAt) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  } catch(e) {
+    el.innerHTML = '<div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+async function loadDashSignals() {
+  var el = document.getElementById('dashSignals');
+  el.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    var signals = await apiGet('/api/admin/signals');
+    var list = (Array.isArray(signals) ? signals : []).slice(0, 6);
+    if (!list.length) { el.innerHTML = '<div class="empty-state"><i class="fa fa-bolt"></i><p>No active signals</p></div>'; return; }
+    el.innerHTML = '<div style="padding:12px">' + list.map(function(s) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-bottom:1px solid var(--border)"><div><span class="fw-600">' + escHtml(s.pair||'—') + '</span><span style="margin-left:10px">' + dirBadge(s.direction) + '</span></div><div class="text-muted" style="font-size:12px">' + fmtDate(s.entryTime) + '</div></div>';
+    }).join('') + '</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+// ==================== USERS ====================
+function debounceUserSearch() {
+  clearTimeout(userSearchTimer);
+  userSearchTimer = setTimeout(function() { loadUsers(1); }, 400);
+}
+
+async function loadUsers(page) {
+  usersPage = page;
+  var search = document.getElementById('userSearch').value.trim();
+  var tbody = document.getElementById('usersBody');
+  tbody.innerHTML = loadingRow(7);
+  try {
+    var data = await apiGet('/api/admin/users?search=' + encodeURIComponent(search) + '&page=' + page);
+    var users = data.users || [];
+    var total = data.total || 0;
+    if (!users.length) { tbody.innerHTML = emptyRow(7, 'No users found'); renderUserPagination(0, page); return; }
+    tbody.innerHTML = users.map(function(u, i) {
+      var id = u.id || u._id;
+      var initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+      return '<tr class="clickable" onclick="openUserModal(\'' + id + '\')">' +
+        '<td class="text-muted">' + ((page-1)*20 + i + 1) + '</td>' +
+        '<td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#0b0e17;font-size:12px;flex-shrink:0">' + initials + '</div><div><div class="fw-600">' + escHtml(u.name||'—') + '</div><div class="text-muted" style="font-size:11px">' + escHtml(String(id||'')) + '</div></div></div></td>' +
+        '<td>' + escHtml(u.email||'—') + '</td>' +
+        '<td class="text-accent fw-600">$' + fmt(u.balance) + '</td>' +
+        '<td>' + statusBadge(u.status||'ACTIVE') + '</td>' +
+        '<td class="text-muted">' + fmtDate(u.createdAt) + '</td>' +
+        '<td><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openUserModal(\'' + id + '\')"><i class="fa fa-eye"></i> View</button></td>' +
+        '</tr>';
+    }).join('');
+    renderUserPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="alert alert-error" style="margin:16px">Failed to load users: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+function renderUserPagination(total, current) {
+  var perPage = 20;
+  var pages = Math.ceil(total / perPage) || 1;
+  var el = document.getElementById('usersPagination');
+  var html = '<span class="pagination-info">' + total + ' user' + (total !== 1 ? 's' : '') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadUsers(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) {
+      html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadUsers(' + p + ')">' + p + '</button>';
+    }
+    html += '<button class="page-btn" onclick="loadUsers(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+async function openUserModal(userId) {
+  selectedUserId = userId;
+  document.getElementById('userModal').style.display = 'flex';
+  document.getElementById('userModalBody').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  document.getElementById('userModalFooter').innerHTML = '';
+  try {
+    var user = await apiGet('/api/admin/users/' + userId);
+    document.getElementById('userModalTitle').textContent = user.name || user.email || 'User Profile';
+    renderUserModal(user);
+  } catch(e) {
+    document.getElementById('userModalBody').innerHTML = '<div class="alert alert-error">Failed to load user: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function renderUserModal(u) {
+  var id = u.id || u._id;
+  var isSuspended = u.status === 'SUSPENDED';
+  var transactions = u.transactions || u.recentTransactions || [];
+  var trades = u.trades || u.recentTrades || [];
+  var loginHistory = u.loginHistory || u.sessions || [];
+  var referrals = u.referrals || u.referred || [];
+  var initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+
+  var txRows = transactions.length
+    ? transactions.slice(0,8).map(function(t){ return '<tr><td>' + escHtml(t.type||'—') + '</td><td class="text-accent">$' + fmt(t.amount) + '</td><td>' + statusBadge(t.status) + '</td><td class="text-muted">' + fmtDate(t.createdAt) + '</td></tr>'; }).join('')
+    : '<tr><td colspan="4"><div class="empty-state" style="padding:20px"><p>No transactions</p></div></td></tr>';
+
+  var tradeRows = trades.length
+    ? trades.slice(0,8).map(function(t){ return '<tr><td class="fw-600">' + escHtml(t.pair||'—') + '</td><td>' + dirBadge(t.direction) + '</td><td>$' + fmt(t.amount) + '</td><td class="' + (t.result==='WIN'?'text-green':'text-red') + '">' + escHtml(t.result||'—') + '</td><td class="text-muted">' + fmtDate(t.createdAt) + '</td></tr>'; }).join('')
+    : '<tr><td colspan="5"><div class="empty-state" style="padding:20px"><p>No trades</p></div></td></tr>';
+
+  var loginRows = loginHistory.length
+    ? loginHistory.slice(0,6).map(function(l){ return '<tr><td>' + escHtml(l.ip||'—') + '</td><td>' + escHtml(l.userAgent||l.device||'—') + '</td><td class="text-muted">' + fmtDateTime(l.createdAt||l.date) + '</td></tr>'; }).join('')
+    : '<tr><td colspan="3"><div class="empty-state" style="padding:20px"><p>No login history</p></div></td></tr>';
+
+  var refRows = referrals.length
+    ? referrals.slice(0,6).map(function(r){ return '<tr><td>' + escHtml(r.name||'—') + '</td><td>' + escHtml(r.email||'—') + '</td><td class="text-muted">' + fmtDate(r.createdAt) + '</td></tr>'; }).join('')
+    : '<tr><td colspan="3"><div class="empty-state" style="padding:20px"><p>No referrals</p></div></td></tr>';
+
+  document.getElementById('userModalBody').innerHTML =
+    '<div class="profile-header">' +
+      '<div class="profile-avatar">' + initials + '</div>' +
+      '<div style="flex:1">' +
+        '<div class="profile-name">' + escHtml(u.name||'—') + '</div>' +
+        '<div class="profile-email">' + escHtml(u.email||'—') + '</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:monospace;display:flex;align-items:center;gap:6px">ID: ' + escHtml(id||'—') + '<i class="fa fa-copy" style="cursor:pointer;font-size:11px" onclick="navigator.clipboard.writeText(\'' + escHtml(id||'') + '\').then(function(){showToast(\'Copied!\')})"></i></div>' +
+        '<div class="profile-meta">' + statusBadge(u.status||'ACTIVE') +
+          '<span class="text-muted" style="font-size:12px"><i class="fa fa-calendar" style="margin-right:4px"></i>Joined ' + fmtDate(u.createdAt) + '</span>' +
+          (u.phone ? '<span class="text-muted" style="font-size:12px"><i class="fa fa-phone" style="margin-right:4px"></i>' + escHtml(u.phone) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="balance-grid" style="grid-template-columns:repeat(4,1fr)">' +
+      '<div class="balance-card"><div class="balance-amount text-accent">' + fmt(u.balance) + '</div><div class="balance-label">Exchange Balance</div></div>' +
+      '<div class="balance-card"><div class="balance-amount" style="color:#f3ba2f">' + fmt(u.tradeBalance) + '</div><div class="balance-label">Trade Balance</div></div>' +
+      '<div class="balance-card"><div class="balance-amount" style="color:#a855f7">' + fmt(u.perpetualBalance) + '</div><div class="balance-label">Perpetual Balance</div></div>' +
+      '<div class="balance-card"><div class="balance-amount text-green">' + fmt(u.profitBalance) + '</div><div class="balance-label">Profit Balance</div></div>' +
+      '<div class="balance-card"><div class="balance-amount" style="color:var(--blue)">' + fmt(u.referralBalance) + '</div><div class="balance-label">Referral Balance</div></div>' +
+      '<div class="balance-card"><div class="balance-amount" style="color:var(--red)">' + fmt(u.lockedBalance) + '</div><div class="balance-label">Locked Balance</div></div>' +
+    '</div>' +
+    (u.tronWallet ? '<div style="background:var(--card2);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12px;word-break:break-all"><i class="fa fa-wallet" style="color:var(--accent);margin-right:8px"></i>TRX Wallet: <span style="color:var(--accent);font-family:monospace">' + escHtml(u.tronWallet.tronAddress) + '</span></div>' : '') +
+    (u.boundAddress
+      ? '<div style="background:var(--card2);border:1px solid rgba(2,192,118,0.3);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12px;word-break:break-all"><i class="fa fa-link" style="color:#02c076;margin-right:8px"></i>Bound Withdrawal Address <span style="background:rgba(2,192,118,0.15);color:#02c076;font-size:11px;padding:2px 7px;border-radius:4px;margin-left:4px">' + escHtml(u.boundAddressChain || 'TRC20') + '</span><br><span style="color:#02c076;font-family:monospace;font-size:13px;margin-top:4px;display:block">' + escHtml(u.boundAddress) + '</span></div>'
+      : '<div style="background:var(--card2);border:1px solid rgba(248,73,96,0.25);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12px;color:var(--text-muted)"><i class="fa fa-link-slash" style="color:#f84960;margin-right:8px"></i>No withdrawal address bound</div>') +
+    (u.withdrawFreezeUntil && new Date() < new Date(u.withdrawFreezeUntil) ? '<div style="background:rgba(248,73,96,0.08);border:1px solid rgba(248,73,96,0.3);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:12px;color:#f84960"><i class="fa fa-clock" style="margin-right:6px"></i>Withdrawals frozen until ' + fmtDateTime(u.withdrawFreezeUntil) + '</div>' : '') +
+    (u.referredBy ? '<div style="background:var(--card2);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px"><i class="fa fa-user-plus" style="color:var(--accent);margin-right:8px"></i>Referred by: <strong>' + escHtml(u.referredBy) + '</strong></div>' : '') +
+    '<div class="section-label">Recent Transactions</div>' +
+    '<div class="mini-table-wrap"><table><thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>' + txRows + '</tbody></table></div>' +
+    '<div class="section-label">Recent Trades</div>' +
+    '<div class="mini-table-wrap"><table><thead><tr><th>Pair</th><th>Direction</th><th>Amount</th><th>Result</th><th>Date</th></tr></thead><tbody>' + tradeRows + '</tbody></table></div>' +
+    '<div class="section-label">Login History</div>' +
+    '<div class="mini-table-wrap"><table><thead><tr><th>IP Address</th><th>Device / Browser</th><th>Date</th></tr></thead><tbody>' + loginRows + '</tbody></table></div>' +
+    '<div class="section-label">Referrals</div>' +
+    '<div class="mini-table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead><tbody>' + refRows + '</tbody></table></div>';
+
+  document.getElementById('userModalFooter').innerHTML =
+    '<button class="btn btn-success btn-sm" onclick="openAdjustModal(\'credit\',\'' + id + '\')"><i class="fa fa-plus"></i> Credit</button>' +
+    '<button class="btn btn-danger btn-sm" onclick="openAdjustModal(\'debit\',\'' + id + '\')"><i class="fa fa-minus"></i> Debit</button>' +
+    '<button class="btn btn-info btn-sm" onclick="openBalanceModal(\'' + id + '\')"><i class="fa fa-wallet"></i> Edit Balance</button>' +
+    (isSuspended
+      ? '<button class="btn btn-success btn-sm" onclick="unsuspendUser(\'' + id + '\')"><i class="fa fa-check-circle"></i> Unsuspend</button>'
+      : '<button class="btn btn-danger btn-sm" onclick="openSuspendModal(\'' + id + '\')"><i class="fa fa-ban"></i> Suspend</button>') +
+    '<button class="btn btn-secondary btn-sm" onclick="openResetPwModal(\'' + id + '\')"><i class="fa fa-key"></i> Reset Password</button>';
+}
+
+// ==================== BALANCE MODAL ====================
+function openBalanceModal(userId) {
+  selectedUserId = userId;
+  document.getElementById('balanceAlert').innerHTML = '';
+  document.getElementById('balanceAmount').value = '';
+  document.getElementById('balanceModal').style.display = 'flex';
+}
+
+async function saveBalance() {
+  var field = document.getElementById('balanceField').value;
+  var type = document.getElementById('balanceType').value;
+  var amount = parseFloat(document.getElementById('balanceAmount').value);
+  var alertEl = document.getElementById('balanceAlert');
+  if (isNaN(amount)) { showAlert(alertEl, 'Please enter a valid amount.', 'error'); return; }
+  var btn = document.getElementById('saveBalanceBtn');
+  setBtn(btn, true, 'Saving...', '<i class="fa fa-save"></i> Apply');
+  try {
+    await apiPost('/api/admin/users/' + selectedUserId + '/balance', {amount: amount, type: type, field: field});
+    showAlert(alertEl, 'Balance updated successfully.', 'success');
+    setTimeout(function() { closeModal('balanceModal'); openUserModal(selectedUserId); }, 1200);
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-save"></i> Apply'); }
+}
+
+// ==================== SUSPEND MODAL ====================
+function openSuspendModal(userId) {
+  selectedUserId = userId;
+  document.getElementById('suspendAlert').innerHTML = '';
+  document.getElementById('suspendReason').value = '';
+  document.getElementById('suspendModal').style.display = 'flex';
+}
+
+async function confirmSuspend() {
+  var reason = document.getElementById('suspendReason').value.trim();
+  var alertEl = document.getElementById('suspendAlert');
+  if (!reason) { showAlert(alertEl, 'Please provide a reason.', 'error'); return; }
+  var btn = document.getElementById('confirmSuspendBtn');
+  setBtn(btn, true, 'Suspending...', '<i class="fa fa-ban"></i> Suspend User');
+  try {
+    await apiPost('/api/admin/users/' + selectedUserId + '/suspend', {reason: reason});
+    closeModal('suspendModal');
+    openUserModal(selectedUserId);
+    if (currentSection === 'users') loadUsers(usersPage);
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-ban"></i> Suspend User'); }
+}
+
+async function unsuspendUser(userId) {
+  try {
+    await apiPost('/api/admin/users/' + userId + '/unsuspend', {});
+    openUserModal(userId);
+    if (currentSection === 'users') loadUsers(usersPage);
+  } catch(e) { alert('Failed to unsuspend: ' + e.message); }
+}
+
+// ==================== RESET PASSWORD MODAL ====================
+function openResetPwModal(userId) {
+  selectedUserId = userId;
+  document.getElementById('resetPwAlert').innerHTML = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+  document.getElementById('resetPwModal').style.display = 'flex';
+}
+
+async function confirmResetPassword() {
+  var newPw = document.getElementById('newPassword').value;
+  var confirmPw = document.getElementById('confirmPassword').value;
+  var alertEl = document.getElementById('resetPwAlert');
+  if (!newPw || newPw.length < 8) { showAlert(alertEl, 'Password must be at least 8 characters.', 'error'); return; }
+  if (newPw !== confirmPw) { showAlert(alertEl, 'Passwords do not match.', 'error'); return; }
+  var btn = document.getElementById('confirmResetPwBtn');
+  setBtn(btn, true, 'Resetting...', '<i class="fa fa-key"></i> Reset Password');
+  try {
+    await apiPost('/api/admin/users/' + selectedUserId + '/reset-password', {newPassword: newPw});
+    showAlert(alertEl, 'Password reset successfully.', 'success');
+    setTimeout(function() { closeModal('resetPwModal'); }, 1500);
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-key"></i> Reset Password'); }
+}
+
+// ==================== TRANSACTIONS ====================
+function switchTxTab(status, el) {
+  txStatus = status;
+  txPage = 1;
+  document.querySelectorAll('#txTabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  var titles = {PENDING:'Pending Transactions',COMPLETED:'Completed Transactions',FAILED:'Failed Transactions'};
+  document.getElementById('txTabTitle').textContent = titles[status] || status;
+  loadTransactions(1);
+}
+
+async function loadTransactions(page) {
+  txPage = page;
+  var type = document.getElementById('txTypeFilter').value;
+  var tbody = document.getElementById('txBody');
+  tbody.innerHTML = loadingRow(7);
+  try {
+    var url = '/api/admin/transactions?status=' + txStatus + '&page=' + page + (type ? '&type=' + type : '');
+    var data = await apiGet(url);
+    var txs = data.transactions || [];
+    var total = data.total || 0;
+    if (!txs.length) { tbody.innerHTML = emptyRow(7, 'No transactions found'); renderTxPagination(0, page); return; }
+    tbody.innerHTML = txs.map(function(t, i) {
+      var id = t.id || t._id;
+      var isPending = t.status === 'PENDING';
+      var userLabel = t.user && t.user.name ? escHtml(t.user.name) : (t.user && t.user.email ? escHtml(t.user.email) : escHtml(t.userId||'—'));
+      var userSub = t.user && t.user.name && t.user.email ? '<div class="text-muted" style="font-size:11px">' + escHtml(t.user.email) + '</div>' : '';
+      return '<tr>' +
+        '<td class="text-muted">' + ((page-1)*20 + i + 1) + '</td>' +
+        '<td><div class="fw-600">' + userLabel + '</div>' + userSub + '</td>' +
+        '<td>' + escHtml(t.type||'—') + '</td>' +
+        '<td class="text-accent fw-600">$' + fmt(t.amount) + '</td>' +
+        '<td>' + statusBadge(t.status) + '</td>' +
+        '<td class="text-muted">' + fmtDateTime(t.createdAt) + '</td>' +
+        '<td>' + (isPending
+          ? '<div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveTransaction(\'' + id + '\',this)"><i class="fa fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + id + '\')"><i class="fa fa-times"></i> Reject</button></div>'
+          : '<span class="text-muted" style="font-size:12px">—</span>') + '</td>' +
+        '</tr>';
+    }).join('');
+    renderTxPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+function renderTxPagination(total, current) {
+  var perPage = 20;
+  var pages = Math.ceil(total / perPage) || 1;
+  var el = document.getElementById('txPagination');
+  var html = '<span class="pagination-info">' + total + ' record' + (total !== 1 ? 's' : '') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadTransactions(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) {
+      html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadTransactions(' + p + ')">' + p + '</button>';
+    }
+    html += '<button class="page-btn" onclick="loadTransactions(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+async function approveTransaction(txId, btn) {
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, 'Approving...', origHTML);
+  try {
+    await apiPost('/api/admin/transactions/' + txId + '/approve', {});
+    loadTransactions(txPage);
+  } catch(e) {
+    alert('Failed to approve: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+function openRejectModal(id, context) {
+  rejectContext = context || 'tx';
+  if (context === 'deposit') { selectedDepId = id; }
+  else if (context === 'withdrawal') { selectedWdId = id; }
+  else { selectedTxId = id; }
+  document.getElementById('rejectAlert').innerHTML = '';
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectModal').style.display = 'flex';
+}
+
+async function confirmReject() {
+  var reason = document.getElementById('rejectReason').value.trim();
+  var alertEl = document.getElementById('rejectAlert');
+  if (!reason) { showAlert(alertEl, 'Please provide a reason.', 'error'); return; }
+  var btn = document.getElementById('confirmRejectBtn');
+  setBtn(btn, true, 'Rejecting...', '<i class="fa fa-times-circle"></i> Reject');
+  try {
+    if (rejectContext === 'deposit') {
+      await apiPost('/api/admin/deposits/' + selectedDepId + '/reject', {reason: reason});
+      closeModal('rejectModal');
+      loadDeposits(depPage);
+    } else if (rejectContext === 'withdrawal') {
+      await apiPost('/api/admin/withdrawals/' + selectedWdId + '/reject', {reason: reason});
+      closeModal('rejectModal');
+      loadWithdrawals(wdPage);
+    } else {
+      await apiPost('/api/admin/transactions/' + selectedTxId + '/reject', {reason: reason});
+      closeModal('rejectModal');
+      loadTransactions(txPage);
+    }
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-times-circle"></i> Reject'); }
+}
+
+// ==================== SIGNALS ====================
+function selectSignalDir(dir) {
+  document.getElementById('sigDirection').value = dir;
+  var callBtn = document.getElementById('dirCallBtn');
+  var putBtn = document.getElementById('dirPutBtn');
+  if (dir === 'CALL') {
+    callBtn.style.background = 'var(--green)';
+    callBtn.style.borderColor = 'var(--green)';
+    callBtn.style.color = '#fff';
+    putBtn.style.background = 'var(--bg)';
+    putBtn.style.borderColor = 'var(--border)';
+    putBtn.style.color = 'var(--text2)';
+  } else {
+    putBtn.style.background = 'var(--red)';
+    putBtn.style.borderColor = 'var(--red)';
+    putBtn.style.color = '#fff';
+    callBtn.style.background = 'var(--bg)';
+    callBtn.style.borderColor = 'var(--border)';
+    callBtn.style.color = 'var(--text2)';
+  }
+}
+
+async function loadSignalAnalytics() {
+  var bar = document.getElementById('signalAnalyticsBar');
+  if (!bar) return;
+  try {
+    var d = await apiGet('/api/admin/signals/analytics');
+    bar.innerHTML = [
+      { label: 'Total Signals', val: d.totalSignals || 0, icon: 'fa-bolt', color: 'var(--accent)' },
+      { label: 'Active Now', val: d.activeSignals || 0, icon: 'fa-circle-dot', color: 'var(--green)' },
+      { label: 'Total Trades', val: d.totalTrades || 0, icon: 'fa-chart-line', color: 'var(--blue)' },
+      { label: 'Wins', val: d.wins || 0, icon: 'fa-trophy', color: 'var(--green)' },
+      { label: 'Losses', val: d.losses || 0, icon: 'fa-times-circle', color: 'var(--red)' },
+      { label: 'Win Rate', val: (d.winRate || 0) + '%', icon: 'fa-percent', color: 'var(--accent)' },
+      { label: 'Eligible Users', val: d.eligibleUsers || 0, icon: 'fa-users', color: 'var(--blue)' }
+    ].map(function(item) {
+      return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">' +
+        '<div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">' +
+          '<i class="fa ' + item.icon + '" style="color:' + item.color + ';margin-right:5px;"></i>' + item.label +
+        '</div>' +
+        '<div style="font-size:22px;font-weight:700;color:' + item.color + ';">' + item.val + '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    bar.innerHTML = '';
+  }
+}
+
+async function loadSignals() {
+  var el = document.getElementById('signalsList');
+  el.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    var signals = await apiGet('/api/admin/signals');
+    var list = Array.isArray(signals) ? signals : [];
+    if (!list.length) { el.innerHTML = '<div class="empty-state"><i class="fa fa-bolt"></i><p>No signals found</p></div>'; return; }
+    el.innerHTML = list.map(function(s) {
+      var id = s.id || s._id;
+      var statusColor = s.status === 'ACTIVE' ? 'var(--green)' : s.status === 'COMPLETED' ? 'var(--text2)' : 'var(--accent)';
+      var tierLabel = { 1: '$500+', 2: '$1000+', 3: '$1500+', 4: '$2000+' }[s.visibilityTier] || ('T' + s.visibilityTier);
+      var overrideRow = (s.status === 'ACTIVE' || s.status === 'PENDING')
+        ? '<div style="display:flex;gap:6px;margin-top:8px;">' +
+            '<button class="btn btn-success btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'WIN\',this)"><i class="fa fa-check"></i> Set WIN</button>' +
+            '<button class="btn btn-danger btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'LOSS\',this)"><i class="fa fa-times"></i> Set LOSS</button>' +
+          '</div>'
+        : (s.result ? '<div style="margin-top:6px;font-size:11px;color:var(--text2);">Result: <b style="color:' + (s.result==='WIN'?'var(--green)':'var(--red)') + '">' + s.result + '</b></div>' : '');
+      return '<div class="signal-card" style="margin-bottom:12px;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="signal-pair" style="font-weight:700;font-size:15px;">' + escHtml(s.pair||'—') + '</span>' +
+            dirBadge(s.direction) +
+            '<span class="badge badge-' + (s.marketType==='PERPETUAL'?'active':'completed') + '" style="font-size:10px;">' + (s.marketType||'FUTURES') + '</span>' +
+          '</div>' +
+          '<span style="font-size:11px;font-weight:600;color:' + statusColor + ';">' + (s.status||'—') + '</span>' +
+        '</div>' +
+        '<div class="signal-info" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px;">' +
+          '<div class="signal-meta">Entry <span>' + fmtDateTime(s.entryTime) + '</span></div>' +
+          '<div class="signal-meta">Duration <span>' + fmtDuration(s.duration) + '</span></div>' +
+          '<div class="signal-meta">Multiplier <span>' + (s.multiplier||'—') + 'x</span></div>' +
+          '<div class="signal-meta">Reward <span>' + (s.rewardPercentage||'—') + '%</span></div>' +
+          '<div class="signal-meta">Suggested <span>' + (s.suggestedAmount ? '$'+s.suggestedAmount : 'Flexible') + '</span></div>' +
+          '<div class="signal-meta">Tier <span>' + tierLabel + '</span></div>' +
+          '<div class="signal-meta">Risk <span>' + riskBadge(s.riskLevel||'MEDIUM') + '</span></div>' +
+          '<div class="signal-meta">Trades <span>' + (s._count ? s._count.trades : (s.trades ? s.trades.length : 0)) + '</span></div>' +
+        '</div>' +
+        overrideRow +
+        '<div style="display:flex;gap:6px;margin-top:8px;">' +
+          '<button class="btn btn-danger btn-sm" style="flex:1" onclick="deleteSignal(\'' + id + '\',this)"><i class="fa fa-trash"></i> Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="alert alert-error">Failed: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+async function setSignalResult(id, result, btn) {
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, '', '<i class="fa fa-spinner fa-spin"></i>');
+  try {
+    await apiFetch('/api/admin/signals/' + id + '/result', { method: 'PATCH', body: JSON.stringify({ result: result }) });
+    loadSignals();
+    loadSignalAnalytics();
+  } catch(e) {
+    alert('Failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+async function createSignal() {
+  var alertEl = document.getElementById('signalFormAlert');
+  alertEl.innerHTML = '';
+  var pair = document.getElementById('sigPair').value;
+  var direction = document.getElementById('sigDirection').value;
+  var marketType = document.getElementById('sigMarketType').value;
+  var entryTime = new Date(document.getElementById('sigEntryTime').value).toISOString();
+  var duration = parseInt(document.getElementById('sigDuration').value);
+  var multiplier = parseFloat(document.getElementById('sigMultiplier').value);
+  var rewardPercentage = parseFloat(document.getElementById('sigReward').value);
+  var suggestedAmount = document.getElementById('sigSuggestedAmount').value;
+  var growthTarget = document.getElementById('sigGrowthTarget').value;
+  var riskLevel = document.getElementById('sigRiskLevel').value;
+  var visibilityTier = parseInt(document.getElementById('sigVisibilityTier').value);
+  var targetEmail = (document.getElementById('sigTargetEmail').value || '').trim();
+  if (!pair || !direction || !entryTime || isNaN(duration) || isNaN(multiplier) || isNaN(rewardPercentage)) {
+    showAlert(alertEl, 'Pair, direction, entry time, duration, multiplier and reward are required.', 'error'); return;
+  }
+  var btn = document.getElementById('createSignalBtn');
+  setBtn(btn, true, 'Creating...', '<i class="fa fa-bolt"></i> Create Signal');
+  try {
+    var payload = {
+      pair: pair, direction: direction, marketType: marketType,
+      entryTime: entryTime, duration: duration,
+      multiplier: multiplier, rewardPercentage: rewardPercentage,
+      riskLevel: riskLevel, visibilityTier: visibilityTier
+    };
+    if (suggestedAmount) payload.suggestedAmount = parseFloat(suggestedAmount);
+    if (growthTarget) payload.growthTarget = parseFloat(growthTarget);
+    if (targetEmail) payload.targetEmail = targetEmail;
+    await apiPost('/api/admin/signals', payload);
+    var successMsg = targetEmail ? 'Signal sent to ' + targetEmail + '!' : 'Signal created successfully!';
+    showAlert(alertEl, successMsg, 'success');
+    document.getElementById('sigEntryTime').value = '';
+    document.getElementById('sigSuggestedAmount').value = '';
+    document.getElementById('sigGrowthTarget').value = '';
+    document.getElementById('sigTargetEmail').value = '';
+    loadSignals();
+    loadSignalAnalytics();
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-bolt"></i> Create Signal'); }
+}
+
+async function deleteSignal(id, btn) {
+  if (!confirm('Delete this signal? This cannot be undone.')) return;
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, '', '<i class="fa fa-spinner fa-spin"></i>');
+  try {
+    await apiDelete('/api/admin/signals/' + id);
+    loadSignals();
+    loadSignalAnalytics();
+  } catch(e) {
+    alert('Failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+// ==================== REFERRALS ====================
+async function loadReferrals() {
+  var tbody = document.getElementById('referralsBody');
+  tbody.innerHTML = loadingRow(6);
+  try {
+    var referrals = await apiGet('/api/admin/referrals');
+    var list = Array.isArray(referrals) ? referrals : [];
+    if (!list.length) { tbody.innerHTML = emptyRow(6, 'No referral data found'); return; }
+    tbody.innerHTML = list.map(function(r, i) {
+      return '<tr>' +
+        '<td class="text-muted">' + (i+1) + '</td>' +
+        '<td class="fw-600">' + escHtml(r.name||r.userName||'—') + '</td>' +
+        '<td>' + escHtml(r.email||r.userEmail||'—') + '</td>' +
+        '<td>' + escHtml(r.referredByName||r.referrerName||'—') + '</td>' +
+        '<td>' + escHtml((typeof r.referredBy === 'object' && r.referredBy) ? (r.referredBy.email || r.referredBy.name || '') : (r.referredBy || r.referrerEmail || '-')) + '</td>' +
+        '<td class="text-muted">' + fmtDate(r.createdAt) + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+// ==================== INVESTMENTS ====================
+async function loadInvestments() {
+  var tbody = document.getElementById('investmentsBody');
+  tbody.innerHTML = loadingRow(7);
+  try {
+    var investments = await apiGet('/api/admin/investments');
+    var list = Array.isArray(investments) ? investments : [];
+    if (!list.length) { tbody.innerHTML = emptyRow(7, 'No investments found'); return; }
+    tbody.innerHTML = list.map(function(inv, i) {
+      var profit = inv.profit !== undefined ? inv.profit : null;
+      var profitClass = profit >= 0 ? 'text-green' : 'text-red';
+      return '<tr>' +
+        '<td class="text-muted">' + (i+1) + '</td>' +
+        '<td><div class="fw-600">' + escHtml(inv.user&&inv.user.name ? inv.user.name : (inv.userName||'—')) + '</div><div class="text-muted" style="font-size:11px">' + escHtml(inv.user&&inv.user.email ? inv.user.email : (inv.userEmail||'')) + '</div></td>' +
+        '<td>' + escHtml(inv.pair||inv.signal||inv.plan||'—') + '</td>' +
+        '<td class="text-accent fw-600">$' + fmt(inv.amount) + '</td>' +
+        '<td class="' + profitClass + ' fw-600">$' + fmt(profit) + '</td>' +
+        '<td>' + statusBadge(inv.status||'ACTIVE') + '</td>' +
+        '<td class="text-muted">' + fmtDate(inv.createdAt) + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+// ==================== OTPS ====================
+async function loadOtps() {
+  var tbody = document.getElementById('otpsBody');
+  tbody.innerHTML = loadingRow(4);
+  try {
+    var otps = await apiGet('/api/auth/admin/otps');
+    var list = Array.isArray(otps) ? otps : [];
+    if (!list.length) { tbody.innerHTML = emptyRow(4, 'No active OTPs found'); return; }
+    tbody.innerHTML = list.map(function(otp, i) {
+      return '<tr>' +
+        '<td class="text-muted">' + (i+1) + '</td>' +
+        '<td class="fw-600">' + escHtml(otp.email) + '</td>' +
+        '<td style="font-size:18px;font-weight:bold;letter-spacing:2px;color:var(--accent);">' + escHtml(otp.code) + '</td>' +
+        '<td class="text-muted">' + fmtDateTime(new Date(otp.expiry)) + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = emptyRow(4, 'Failed to load OTPs');
+  }
+}
+
+// ==================== NOTIFICATIONS ====================
+function setNotifMode(mode) {
+  notifMode = mode;
+  document.getElementById('allUsersBtn').classList.toggle('active', mode === 'all');
+  document.getElementById('specificUsersBtn').classList.toggle('active', mode === 'specific');
+  document.getElementById('specificEmailsWrap').style.display = mode === 'specific' ? 'block' : 'none';
+}
+
+async function sendNotification() {
+  var alertEl = document.getElementById('notifAlert');
+  var title = document.getElementById('notifTitle').value.trim();
+  var message = document.getElementById('notifMessage').value.trim();
+  alertEl.innerHTML = '';
+  if (!title || !message) { showAlert(alertEl, 'Title and message are required.', 'error'); return; }
+  var userIds = 'all';
+  if (notifMode === 'specific') {
+    var emails = document.getElementById('notifEmails').value.split(',').map(function(e){ return e.trim(); }).filter(Boolean);
+    if (!emails.length) { showAlert(alertEl, 'Please enter at least one email.', 'error'); return; }
+    userIds = emails;
+  }
+  var btn = document.getElementById('sendNotifBtn');
+  setBtn(btn, true, 'Sending...', '<i class="fa fa-paper-plane"></i> Send Notification');
+  try {
+    await apiPost('/api/admin/notify', {userIds: userIds, title: title, message: message});
+    showAlert(alertEl, 'Notification sent successfully!', 'success');
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifMessage').value = '';
+    document.getElementById('notifEmails').value = '';
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-paper-plane"></i> Send Notification'); }
+}
+
+// ==================== KYC ====================
+async function loadKyc(status) {
+  status = status || 'PENDING';
+  ['pending','approved','rejected','all'].forEach(function(s) {
+    var btn = document.getElementById('kyc-filter-' + s);
+    if (btn) btn.classList.toggle('active', s === status.toLowerCase());
+  });
+  var container = document.getElementById('kyc-list');
+  if (!container) return;
+  container.innerHTML = '<p style="color:#888;">Loading...</p>';
+  try {
+    var res = await apiFetch('/api/admin/kyc?status=' + status);
+    var kycs = await res.json();
+    if (!kycs.length) { container.innerHTML = '<p style="color:#888;padding:20px 0;">No KYC applications found.</p>'; return; }
+    container.innerHTML = kycs.map(function(k) {
+      var statusColor = k.status==='APPROVED' ? '#02c076' : k.status==='REJECTED' ? '#f84960' : '#f3ba2f';
+      var statusBg = k.status==='APPROVED' ? 'rgba(2,192,118,.15)' : k.status==='REJECTED' ? 'rgba(248,73,96,.15)' : 'rgba(243,186,47,.15)';
+      var selfieLink = k.selfieUrl ? '<a href="' + k.selfieUrl + '" target="_blank" style="background:#2a3347;color:#f3ba2f;padding:6px 12px;border-radius:6px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-camera"></i> Selfie</a>' : '';
+      var idFrontLink = k.idFrontUrl ? '<a href="' + k.idFrontUrl + '" target="_blank" style="background:#2a3347;color:#4db8ff;padding:6px 12px;border-radius:6px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-id-card"></i> ID Front</a>' : '';
+      var idBackLink = k.idBackUrl ? '<a href="' + k.idBackUrl + '" target="_blank" style="background:#2a3347;color:#4db8ff;padding:6px 12px;border-radius:6px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-id-card"></i> ID Back</a>' : '';
+      var actions = '';
+      if (k.status === 'PENDING') {
+        actions = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+          '<button onclick="approveKyc(\'' + k.id + '\')" style="background:rgba(2,192,118,.15);border:1px solid #02c076;color:#02c076;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;"><i class="fa-solid fa-check"></i> Approve</button>' +
+          '<div style="display:flex;gap:6px;flex:1;">' +
+            '<input type="text" id="reject-reason-' + k.id + '" placeholder="Rejection reason..." style="flex:1;background:#131a22;border:1px solid #2a3347;color:#fff;padding:8px 10px;border-radius:6px;font-size:12px;outline:none;">' +
+            '<button onclick="rejectKyc(\'' + k.id + '\')" style="background:rgba(248,73,96,.15);border:1px solid #f84960;color:#f84960;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+          '</div>' +
+          '</div>';
+      } else if (k.status === 'REJECTED') {
+        actions = '<div style="font-size:12px;color:#f84960;">Reason: ' + escHtml(k.rejectReason || 'N/A') + '</div>';
+      }
+      return '<div style="background:#1e2530;border-radius:10px;padding:18px;margin-bottom:14px;border:1px solid #2a3347;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
+          '<div><div style="font-weight:700;font-size:15px;">' + escHtml(k.user && k.user.email ? k.user.email : 'Unknown') + '</div>' +
+          '<div style="font-size:12px;color:#888;margin-top:3px;">' + fmtDateTime(k.createdAt) + '</div></div>' +
+          '<span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:' + statusBg + ';color:' + statusColor + ';">' + k.status + '</span>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:13px;">' +
+          '<div><span style="color:#888;">Name:</span> ' + escHtml(k.fullName || '—') + '</div>' +
+          '<div><span style="color:#888;">ID No:</span> ' + escHtml(k.idNumber || '—') + '</div>' +
+          '<div><span style="color:#888;">Country:</span> ' + escHtml(k.country || '—') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' + selfieLink + idFrontLink + idBackLink + '</div>' +
+        actions +
+        '</div>';
+    }).join('');
+  } catch(e) { container.innerHTML = '<p style="color:#f84960;">Error loading KYC data</p>'; }
+}
+
+async function approveKyc(id) {
+  try {
+    var res = await apiFetch('/api/admin/kyc/' + id + '/approve', {method:'POST'});
+    var data = await res.json();
+    if (data.success) { alert('KYC approved successfully!'); loadKyc('PENDING'); }
+    else { alert('Error: ' + (data.error || 'Unknown error')); }
+  } catch(e) { alert('Error approving KYC: ' + e.message); }
+}
+
+async function rejectKyc(id) {
+  var reasonEl = document.getElementById('reject-reason-' + id);
+  var reason = reasonEl ? reasonEl.value.trim() : '';
+  if (!reason) reason = 'Documents not clear';
+  try {
+    var res = await apiFetch('/api/admin/kyc/' + id + '/reject', {method:'POST', body: JSON.stringify({reason: reason})});
+    var data = await res.json();
+    if (data.success) { alert('KYC rejected.'); loadKyc('PENDING'); }
+    else { alert('Error: ' + (data.error || 'Unknown error')); }
+  } catch(e) { alert('Error rejecting KYC: ' + e.message); }
+}
+
+// ==================== SETTINGS ====================
+async function loadSettings() {
+  document.getElementById('settingsLoading').style.display = 'block';
+  document.getElementById('settingsForm').style.display = 'none';
+  document.getElementById('settingsAlert').innerHTML = '';
+  try {
+    var data = await apiGet('/api/admin/settings');
+    var keys = ['referral_percentage','trade_commission_pct','min_deposit','min_withdrawal','withdrawal_fee','referral_min_deposit','withdrawal_penalty_pct','withdrawal_lock_days'];
+    keys.forEach(function(k) {
+      var el = document.getElementById('setting_' + k);
+      if (el && data[k] !== undefined && data[k] !== null) el.value = data[k];
+    });
+    var textKeys = ['ticker_text','penalty_terms_text','app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners'];
+    textKeys.forEach(function(k) {
+      var el = document.getElementById('setting_' + k);
+      if (el && data[k] !== undefined) el.value = data[k];
+    });
+    
+    // Also load tiers
+    loadTiers(data);
+    
+    document.getElementById('settingsLoading').style.display = 'none';
+    document.getElementById('settingsForm').style.display = 'block';
+  } catch(e) {
+    document.getElementById('settingsLoading').style.display = 'none';
+    document.getElementById('settingsForm').style.display = 'block';
+    showAlert(document.getElementById('settingsAlert'), 'Failed to load settings: ' + e.message, 'error');
+  }
+}
+
+// ==================== DEPOSIT STATUS BADGE ====================
+function statusBadge2(s) {
+  var map = {pending_approval:'pending',confirmed:'completed',rejected:'failed',pending:'pending',completed:'completed',failed:'failed',processing:'active'};
+  var labels = {pending_approval:'Pending',confirmed:'Confirmed',rejected:'Rejected',pending:'Pending',completed:'Completed',failed:'Failed',processing:'Processing'};
+  return '<span class="badge badge-' + (map[s]||'active') + '">' + (labels[s]||s||'—') + '</span>';
+}
+
+// ==================== DEPOSITS ====================
+function switchDepTab(status, el) {
+  depStatus = status;
+  depPage = 1;
+  document.querySelectorAll('#depTabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  var titles = {pending_approval:'Pending Deposits',confirmed:'Approved Deposits',rejected:'Rejected Deposits'};
+  document.getElementById('depTabTitle').textContent = titles[status] || 'Deposits';
+  loadDeposits(1);
+}
+
+async function loadDeposits(page) {
+  depPage = page;
+  var tbody = document.getElementById('depBody');
+  tbody.innerHTML = loadingRow(8);
+  try {
+    var data = await apiGet('/api/admin/deposits?status=' + depStatus + '&page=' + page);
+    var deps = data.deposits || [];
+    var total = data.total || 0;
+    if (!deps.length) { tbody.innerHTML = emptyRow(8, 'No deposits found'); renderDepPagination(0, page); return; }
+    tbody.innerHTML = deps.map(function(d, i) {
+      var id = d.id;
+      var isPending = d.status === 'pending_approval';
+      var sweepBadge = d.sweepStatus === 'completed' ? '<span class="badge badge-completed">swept</span>' : d.sweepStatus === 'failed' ? '<span class="badge badge-failed">sweep err</span>' : '<span class="badge badge-pending">pending</span>';
+      return '<tr>' +
+        '<td class="text-muted">' + ((page-1)*20+i+1) + '</td>' +
+        '<td>' + escHtml(d.user ? d.user.email : d.userId) + '</td>' +
+        '<td class="text-muted" style="font-size:11px;font-family:monospace">' + escHtml((d.fromAddress||'').substring(0,18)+'…') + '</td>' +
+        '<td class="text-accent fw-600">' + fmt(d.amount) + ' TRX</td>' +
+        '<td>' + sweepBadge + '</td>' +
+        '<td>' + statusBadge2(d.status) + '</td>' +
+        '<td class="text-muted">' + fmtDateTime(d.detectedAt) + '</td>' +
+        '<td>' + (isPending
+          ? '<div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveDeposit(\'' + id + '\',this)"><i class="fa fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + id + '\',\'deposit\')"><i class="fa fa-times"></i> Reject</button></div>'
+          : '<div style="display:flex;gap:6px;align-items:center"><span class="text-muted" style="font-size:11px;font-family:monospace">' + (d.sweepTxHash ? escHtml(d.sweepTxHash.substring(0,14)+'…') : '—') + '</span>' + (d.sweepStatus !== 'completed' ? '<button class="btn btn-warning btn-sm" onclick="retrySweep(\'' + id + '\',this)" title="Retry Sweep"><i class="fa fa-redo"></i></button>' : '') + '</div>') + '</td>' +
+        '</tr>';
+    }).join('');
+    renderDepPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+function renderDepPagination(total, current) {
+  var pages = Math.ceil(total / 20) || 1;
+  var el = document.getElementById('depPagination');
+  var html = '<span class="pagination-info">' + total + ' record' + (total!==1?'s':'') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadDeposits(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadDeposits(' + p + ')">' + p + '</button>';
+    html += '<button class="page-btn" onclick="loadDeposits(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+async function approveDeposit(id, btn) {
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, 'Approving...', origHTML);
+  try {
+    await apiPost('/api/admin/deposits/' + id + '/approve', {});
+    loadDeposits(depPage);
+    loadDashboard();
+  } catch(e) {
+    alert('Failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+async function retrySweep(id, btn) {
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, '...', origHTML);
+  try {
+    await apiPost('/api/admin/deposits/' + id + '/retry-sweep', {});
+    alert('Sweep retry started! Check back in 30 seconds.');
+    loadDeposits(depPage);
+  } catch(e) {
+    alert('Failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+// ==================== WITHDRAWALS ====================
+function switchWdTab(status, el) {
+  wdStatus = status;
+  wdPage = 1;
+  document.querySelectorAll('#wdTabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  var titles = {pending:'Pending Withdrawals',completed:'Completed Withdrawals',failed:'Failed Withdrawals',rejected:'Rejected Withdrawals'};
+  document.getElementById('wdTabTitle').textContent = titles[status] || 'Withdrawals';
+  loadWithdrawals(1);
+}
+
+async function loadWithdrawals(page) {
+  wdPage = page;
+  var tbody = document.getElementById('wdBody');
+  tbody.innerHTML = loadingRow(8);
+  try {
+    var data = await apiGet('/api/admin/withdrawals?status=' + wdStatus + '&page=' + page);
+    var wds = data.withdrawals || [];
+    var total = data.total || 0;
+    if (!wds.length) { tbody.innerHTML = emptyRow(8, 'No withdrawals found'); renderWdPagination(0, page); return; }
+    tbody.innerHTML = wds.map(function(w, i) {
+      var id = w.id;
+      var isPending = w.status === 'pending';
+      return '<tr>' +
+        '<td class="text-muted">' + ((page-1)*20+i+1) + '</td>' +
+        '<td>' + escHtml(w.user ? w.user.email : w.userId) + '</td>' +
+        '<td class="text-muted" style="font-size:11px;font-family:monospace" title="' + escHtml(w.toAddress||'') + '">' + escHtml((w.toAddress||'').substring(0,20)+'…') + '</td>' +
+        '<td class="text-accent fw-600">' + fmt(w.amount) + ' USDT</td>' +
+        '<td>' + statusBadge2(w.status) + '</td>' +
+        '<td class="text-muted" style="font-size:11px;font-family:monospace">' + (w.txHash ? escHtml(w.txHash.substring(0,14)+'…') : '—') + '</td>' +
+        '<td class="text-muted">' + fmtDateTime(w.requestedAt) + '</td>' +
+        '<td>' + (isPending
+          ? '<div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveWithdrawal(\'' + id + '\',this)"><i class="fa fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + id + '\',\'withdrawal\')"><i class="fa fa-times"></i> Reject</button></div>'
+          : (w.errorMessage ? '<span class="text-red" style="font-size:11px">' + escHtml(w.errorMessage.substring(0,40)) + '</span>' : '<span class="text-muted" style="font-size:12px">—</span>')) + '</td>' +
+        '</tr>';
+    }).join('');
+    renderWdPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+function renderWdPagination(total, current) {
+  var pages = Math.ceil(total / 20) || 1;
+  var el = document.getElementById('wdPagination');
+  var html = '<span class="pagination-info">' + total + ' record' + (total!==1?'s':'') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadWithdrawals(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadWithdrawals(' + p + ')">' + p + '</button>';
+    html += '<button class="page-btn" onclick="loadWithdrawals(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+async function approveWithdrawal(id, btn) {
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, 'Broadcasting...', origHTML);
+  try {
+    var result = await apiPost('/api/admin/withdrawals/' + id + '/approve', {});
+    alert('Withdrawal approved!\nTX: ' + (result.txid || 'N/A'));
+    loadWithdrawals(wdPage);
+    loadDashboard();
+  } catch(e) {
+    alert('Broadcast failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+// ==================== PENALTIES ====================
+let penaltyPage = 1;
+async function loadPenalties(page) {
+  penaltyPage = page;
+  var tbody = document.getElementById('penaltiesBody');
+  tbody.innerHTML = loadingRow(5);
+  try {
+    var data = await apiGet('/api/admin/penalties?page=' + page);
+    var items = data.data || [];
+    var total = data.total || 0;
+    if (!items.length) { tbody.innerHTML = emptyRow(5, 'No penalty history found'); renderPenaltyPagination(0, page); return; }
+    tbody.innerHTML = items.map(function(p, i) {
+      return '<tr>' +
+        '<td class="text-muted">' + ((page-1)*20+i+1) + '</td>' +
+        '<td class="fw-600">' + escHtml(p.user.email) + '</td>' +
+        '<td>' + p.principalAmount.toFixed(2) + ' USDT</td>' +
+        '<td style="color:var(--down-color)">' + p.penaltyAmount.toFixed(2) + ' USDT</td>' +
+        '<td class="text-muted">' + fmtDate(p.createdAt) + '</td>' +
+        '</tr>';
+    }).join('');
+    renderPenaltyPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+function renderPenaltyPagination(total, current) {
+  var pages = Math.ceil(total / 20) || 1;
+  var el = document.getElementById('penaltyPagination');
+  var html = '<span class="pagination-info">' + total + ' record' + (total!==1?'s':'') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadPenalties(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadPenalties(' + p + ')">' + p + '</button>';
+    html += '<button class="page-btn" onclick="loadPenalties(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+// ==================== BALANCE ADJUSTMENTS LOG ====================
+async function loadAdjustments(page) {
+  adjPage = page;
+  var tbody = document.getElementById('adjBody');
+  tbody.innerHTML = loadingRow(7);
+  try {
+    var data = await apiGet('/api/admin/balance/adjustments?page=' + page);
+    var items = data.items || [];
+    var total = data.total || 0;
+    if (!items.length) { tbody.innerHTML = emptyRow(7, 'No adjustments found'); renderAdjPagination(0, page); return; }
+    tbody.innerHTML = items.map(function(a, i) {
+      return '<tr>' +
+        '<td class="text-muted">' + ((page-1)*50+i+1) + '</td>' +
+        '<td>' + escHtml(a.user ? a.user.email : a.userId) + '</td>' +
+        '<td><span class="badge ' + (a.type==='credit'?'badge-completed':'badge-failed') + '">' + escHtml(a.type) + '</span></td>' +
+        '<td class="' + (a.type==='credit'?'text-green':'text-red') + ' fw-600">' + (a.type==='credit'?'+':'-') + fmt(a.amount) + ' TRX</td>' +
+        '<td>' + escHtml(a.reason||'—') + '</td>' +
+        '<td class="text-muted" style="font-size:11px">' + escHtml(a.adminId||'—') + '</td>' +
+        '<td class="text-muted">' + fmtDateTime(a.createdAt) + '</td>' +
+        '</tr>';
+    }).join('');
+    renderAdjPagination(total, page);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+  }
+}
+
+function renderAdjPagination(total, current) {
+  var pages = Math.ceil(total / 50) || 1;
+  var el = document.getElementById('adjPagination');
+  var html = '<span class="pagination-info">' + total + ' record' + (total!==1?'s':'') + '</span>';
+  if (pages > 1) {
+    html += '<button class="page-btn" onclick="loadAdjustments(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '><i class="fa fa-chevron-left"></i></button>';
+    for (var p = Math.max(1,current-2); p <= Math.min(pages,current+2); p++) html += '<button class="page-btn ' + (p===current?'active':'') + '" onclick="loadAdjustments(' + p + ')">' + p + '</button>';
+    html += '<button class="page-btn" onclick="loadAdjustments(' + (current+1) + ')" ' + (current>=pages?'disabled':'') + '><i class="fa fa-chevron-right"></i></button>';
+  }
+  el.innerHTML = html;
+}
+
+// ==================== CREDIT / DEBIT BALANCE ====================
+function openAdjustModal(type, userId) {
+  adjustType = type;
+  selectedUserId = userId;
+  document.getElementById('adjustModalTitle').textContent = type === 'credit' ? 'Credit Balance' : 'Debit Balance';
+  var btn = document.getElementById('confirmAdjustBtn');
+  btn.className = 'btn btn-sm ' + (type === 'credit' ? 'btn-success' : 'btn-danger');
+  btn.innerHTML = type === 'credit' ? '<i class="fa fa-plus"></i> Credit' : '<i class="fa fa-minus"></i> Debit';
+  document.getElementById('adjustAlert').innerHTML = '';
+  document.getElementById('adjustAmount').value = '';
+  document.getElementById('adjustReason').value = '';
+  document.getElementById('adjustModal').style.display = 'flex';
+}
+
+async function confirmAdjust() {
+  var alertEl = document.getElementById('adjustAlert');
+  var amount = parseFloat(document.getElementById('adjustAmount').value);
+  var reason = document.getElementById('adjustReason').value.trim();
+  if (isNaN(amount) || amount <= 0) { showAlert(alertEl, 'Enter a valid amount.', 'error'); return; }
+  if (!reason) { showAlert(alertEl, 'Reason is required.', 'error'); return; }
+  var btn = document.getElementById('confirmAdjustBtn');
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, 'Applying...', origHTML);
+  try {
+    var dest = document.getElementById('adjustWalletDestination').value;
+      await apiPost('/api/admin/balance/adjust', {user_id: selectedUserId, amount: amount, type: adjustType, reason: reason, walletDestination: dest});
+    showAlert(alertEl, 'Balance adjusted successfully!', 'success');
+    setTimeout(function() { closeModal('adjustModal'); openUserModal(selectedUserId); }, 1200);
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', origHTML); }
+}
+
+function loadTiers(data) {
+  var container = document.getElementById('tiersContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  var tierCount = 0;
+  Object.keys(data).forEach(function(k) {
+    if (k.startsWith('tier') && k.endsWith('_min')) {
+      var tnum = parseInt(k.replace('tier', '').replace('_min', ''));
+      if (tnum > tierCount) tierCount = tnum;
+    }
+  });
+  if (tierCount === 0) tierCount = 3;
+  for (var i = 1; i <= tierCount; i++) {
+    var val = data['tier' + i + '_min'] || '';
+    addTierRow(i, val);
+  }
+}
+
+function addTierRow(tierNum, val) {
+  var container = document.getElementById('tiersContainer');
+  if (!tierNum) {
+    tierNum = container.children.length + 1;
+  }
+  val = val || '';
+  var div = document.createElement('div');
+  div.className = 'tier-row';
+  div.style.cssText = 'display:flex;gap:12px;align-items:center;background:var(--bg3);padding:12px;border-radius:8px;border:1px solid var(--border);';
+  div.innerHTML = 
+    '<div style="font-weight:bold;color:var(--text1);width:60px;">Tier ' + tierNum + '</div>' +
+    '<div style="flex:1;"><input type="number" class="tier-val-input" data-tier="' + tierNum + '" placeholder="Min Balance (e.g. 500)" value="' + val + '" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text1);padding:8px;"></div>' +
+    '<button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" title="Remove Tier"><i class="fa fa-trash"></i></button>';
+  container.appendChild(div);
+}
+
+async function saveTiers() {
+  var btn = document.getElementById('saveTiersBtn');
+  var alertEl = document.getElementById('tiersAlert');
+  alertEl.innerHTML = '';
+  setBtn(btn, true, 'Saving...', '<i class="fa fa-save"></i> Save Tiers');
+  try {
+    var payload = {};
+    var rows = document.querySelectorAll('.tier-val-input');
+    rows.forEach(function(input, idx) {
+      var tnum = idx + 1;
+      var val = input.value.trim();
+      if (val) payload['tier' + tnum + '_min'] = val;
+    });
+    
+    await apiPost('/api/admin/settings', payload);
+    alertEl.innerHTML = '<div class="alert alert-success"><i class="fa fa-check"></i> Tiers updated successfully. Reloading...</div>';
+    setTimeout(function() { loadSettings(); alertEl.innerHTML = ''; }, 2000);
+  } catch (e) {
+    alertEl.innerHTML = '<div class="alert alert-error"><i class="fa fa-times"></i> ' + e.message + '</div>';
+  }
+  setBtn(btn, false, '', '<i class="fa fa-save"></i> Save Tiers');
+}
+
+// ── Banners ──────────────────────────────────────────────
+async function handleBannerUpload(e) {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+  
+  const base64Promises = Array.from(files).map(file => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+    });
+  });
+
+  try {
+    const base64Strings = await Promise.all(base64Promises);
+    const textarea = document.getElementById('setting_app_banners');
+    
+    let currentBanners = [];
+    if (textarea.value.trim()) {
+      try {
+        currentBanners = JSON.parse(textarea.value);
+      } catch (err) {
+        console.error("Invalid existing JSON in banners", err);
+      }
+    }
+    
+    if (!Array.isArray(currentBanners)) currentBanners = [];
+    currentBanners = currentBanners.concat(base64Strings);
+    
+    textarea.value = JSON.stringify(currentBanners, null, 2);
+    alert("Images converted successfully! Please press 'Save Settings' to save.");
+  } catch (err) {
+    alert("Error reading images: " + err.message);
+  }
+}
+
+async function saveSettings() {
+  var alertEl = document.getElementById('settingsAlert');
+  alertEl.innerHTML = '';
+  var keys = ['referral_percentage','trade_commission_pct','min_deposit','min_withdrawal','withdrawal_fee','referral_min_deposit','withdrawal_penalty_pct','withdrawal_lock_days'];
+  var payload = {};
+  keys.forEach(function(k) {
+    var el = document.getElementById('setting_' + k);
+    if (el && el.value !== '') payload[k] = parseFloat(el.value);
+  });
+  var textKeys = ['ticker_text','penalty_terms_text','app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners'];
+  textKeys.forEach(function(k) {
+    var el = document.getElementById('setting_' + k);
+    if (el) payload[k] = el.value.trim();
+  });
+  var btn = document.getElementById('saveSettingsBtn');
+  setBtn(btn, true, 'Saving...', '<i class="fa fa-save"></i> Save Settings');
+  try {
+    await apiPost('/api/admin/settings', payload);
+    showAlert(alertEl, 'Settings saved successfully!', 'success');
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally { setBtn(btn, false, '', '<i class="fa fa-save"></i> Save Settings'); }
+}
+
+// ── LIVE CHAT ──
+var _adminChatUserId = null;
+var _chatRefreshTimer = null;
+
+function startChatRefresh() {
+  if (_chatRefreshTimer) return;
+  _chatRefreshTimer = setInterval(function() {
+    var sec = document.getElementById('section-chat');
+    if (sec && sec.style.display !== 'none') loadChatUsers();
+    else stopChatRefresh();
+  }, 5000);
+}
+
+function stopChatRefresh() {
+  if (_chatRefreshTimer) { clearInterval(_chatRefreshTimer); _chatRefreshTimer = null; }
+}
+
+async function loadChatUsers() {
+  try {
+    const users = await apiGet('/api/admin/chat/users');
+    const list = document.getElementById('chat-user-list');
+    if (!list) return;
+    let totalUnread = 0;
+    if (!users.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#666;font-size:13px;">No conversations yet</div>';
+    } else {
+      list.innerHTML = users.map(u => {
+        totalUnread += u.unread || 0;
+        const lastText = u.lastMessage ? (u.lastMessage.content ? u.lastMessage.content.slice(0,30) : '📷 Photo') : '';
+        return `<div onclick="openAdminChat('${u.id}','${u.email}')" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;" class="chat-user-row" id="chat-user-${u.id}">
+          <div style="width:38px;height:38px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;flex-shrink:0;">${(u.email||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.email}</div>
+            <div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${lastText}</div>
+          </div>
+          ${u.unread ? `<span style="background:#f84960;color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:18px;height:18px;text-align:center;line-height:18px;flex-shrink:0;">${u.unread}</span>` : ''}
+        </div>`;
+      }).join('');
+    }
+    const badge = document.getElementById('admin-chat-badge');
+    if (badge) { badge.textContent = totalUnread || ''; badge.style.display = totalUnread ? 'inline' : 'none'; }
+  } catch(e) { console.error('loadChatUsers', e); }
+}
+
+async function openAdminChat(userId, email) {
+  _adminChatUserId = userId;
+  document.getElementById('chat-convo-title').innerHTML = `<i class="fa fa-user" style="color:var(--accent);margin-right:8px"></i>${email}`;
+  document.getElementById('chat-reply-bar').style.display = 'flex';
+  const area = document.getElementById('admin-chat-messages');
+  area.innerHTML = '<div style="text-align:center;color:#666;font-size:12px;">Loading...</div>';
+  // Highlight selected user
+  document.querySelectorAll('.chat-user-row').forEach(r => r.style.background = '');
+  const row = document.getElementById('chat-user-' + userId);
+  if (row) row.style.background = 'rgba(245,176,65,0.1)';
+  try {
+    const msgs = await apiGet('/api/admin/chat/messages/' + userId);
+    area.innerHTML = '';
+    msgs.forEach(m => adminAppendBubble(m));
+    area.scrollTop = area.scrollHeight;
+    // Remove unread indicator
+    const badge = row ? row.querySelector('span[style*="f84960"]') : null;
+    if (badge) badge.remove();
+  } catch(e) { area.innerHTML = '<div style="color:#f84960;padding:20px;">Failed to load messages</div>'; }
+}
+
+function adminAppendBubble(msg) {
+  const area = document.getElementById('admin-chat-messages');
+  if (!area) return;
+  const isAdmin = msg.sender === 'ADMIN';
+  const div = document.createElement('div');
+  const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+  div.style.cssText = 'display:flex;flex-direction:column;max-width:70%;' + (isAdmin ? 'align-self:flex-end;align-items:flex-end;' : 'align-self:flex-start;');
+  let inner = '';
+  if (msg.imageUrl) {
+    inner = `<img src="${msg.imageUrl}" style="max-width:200px;max-height:180px;border-radius:10px;object-fit:cover;cursor:pointer;" onclick="window.open('${msg.imageUrl}','_blank')">`;
+  } else {
+    inner = `<div style="background:${isAdmin ? 'var(--accent)' : 'var(--card2)'};color:${isAdmin ? '#000' : 'var(--text)'};padding:10px 14px;border-radius:14px;font-size:13px;word-break:break-word;">${msg.content||''}</div>`;
+  }
+  inner += `<div style="font-size:10px;color:#666;margin-top:2px;">${isAdmin ? 'Admin · ' : ''}${timeStr}</div>`;
+  div.innerHTML = inner;
+  area.appendChild(div);
+}
+
+async function adminSendReply() {
+  if (!_adminChatUserId) return;
+  const input = document.getElementById('admin-chat-input');
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  input.value = '';
+  try {
+    const msg = await apiPost('/api/admin/chat/reply/' + _adminChatUserId, { content: text });
+    adminAppendBubble(msg);
+    document.getElementById('admin-chat-messages').scrollTop = 99999;
+  } catch(e) { alert('Failed to send: ' + e.message); }
+}
+
+async function resolveAdminChat() {
+  if (!_adminChatUserId) return;
+  if (!confirm('Resolve this conversation? All messages will be deleted.')) return;
+  try {
+    await apiFetch('/api/admin/chat/resolve/' + _adminChatUserId, { method: 'DELETE' });
+    _adminChatUserId = null;
+    document.getElementById('admin-chat-messages').innerHTML = '';
+    document.getElementById('chat-convo-title').innerHTML = '<i class="fa fa-comment-dots" style="color:var(--accent);margin-right:8px"></i>Select a user';
+    document.getElementById('chat-reply-bar').style.display = 'none';
+    loadChatUsers();
+  } catch(e) { alert('Failed: ' + e.message); }
+}
+
+// Socket initialized in initAdminSocket() called from showApp()
+</script>
+</body>
+</html>
