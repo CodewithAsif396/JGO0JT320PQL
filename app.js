@@ -3538,7 +3538,7 @@ async function loadBanners() {
     
     if (!bannerContainer || !dotContainer) return;
 
-    let banners = ['banner_1.jpg', 'banner_2.png']; // Fallback local banners
+    let banners = ['banner_1.png', 'banner_2.png']; // Fallback local banners
     if (s && s.app_banners) {
         try {
             const parsed = JSON.parse(s.app_banners);
