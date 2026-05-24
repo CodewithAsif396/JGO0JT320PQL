@@ -13,6 +13,7 @@
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
+    "@capacitor/splash-screen": "^8.0.1",
     "@prisma/client": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "bip39": "^3.1.0",
@@ -36,6 +37,7 @@
     "ws": "^8.20.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "nodemon": "^3.0.1"
   }
 }
