@@ -3538,7 +3538,7 @@ async function loadBanners() {
     
     if (!bannerContainer || !dotContainer) return;
 
-    let banners = ['banner_1.png', 'banner_2.png']; // Forced local banners
+    let banners = ['home_slider_1.png', 'home_slider_2.png']; // Forced local banners
 
     let slidesHtml = '';
     let dotsHtml = '';
