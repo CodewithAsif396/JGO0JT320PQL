@@ -3538,17 +3538,7 @@ async function loadBanners() {
     
     if (!bannerContainer || !dotContainer) return;
 
-    let banners = ['banner_1.png', 'banner_2.png']; // Fallback local banners
-    if (s && s.app_banners) {
-        try {
-            const parsed = JSON.parse(s.app_banners);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                banners = parsed;
-            }
-        } catch(e) {
-            console.error('Failed to parse app_banners', e);
-        }
-    }
+    let banners = ['banner_1.png', 'banner_2.png']; // Forced local banners
 
     let slidesHtml = '';
     let dotsHtml = '';
