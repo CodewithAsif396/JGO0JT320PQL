@@ -1,4 +1,4 @@
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -77,7 +77,7 @@ body {
     }
 }
 
-/* ── ANIMATIONS ── */
+/* â”€â”€ ANIMATIONS â”€â”€ */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -122,7 +122,7 @@ body {
     }
 }
 
-/* ── SCREENS ── */
+/* â”€â”€ SCREENS â”€â”€ */
 .screen {
     display: none;
     padding-bottom: calc(var(--nav-height) + 40px);
@@ -148,7 +148,7 @@ body {
     margin: 0 auto;
 }
 
-/* ── SIDEBAR ── */
+/* â”€â”€ SIDEBAR â”€â”€ */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -370,7 +370,7 @@ body {
     color: var(--text-primary);
 }
 
-/* ── BANNER ── */
+/* â”€â”€ BANNER â”€â”€ */
 .banner {
     position: relative;
     background: linear-gradient(135deg, #0d1e36, #050b14);
@@ -466,7 +466,7 @@ body {
     border-radius: 3px;
 }
 
-/* ── MARQUEE ── */
+/* â”€â”€ MARQUEE â”€â”€ */
 .marquee-bar {
     background: var(--bg-card);
     padding: 9px 14px;
@@ -488,7 +488,7 @@ body {
     overflow: hidden;
 }
 
-/* ── MINI TICKERS ── */
+/* â”€â”€ MINI TICKERS â”€â”€ */
 .mini-tickers {
     display: flex;
     overflow-x: auto;
@@ -555,7 +555,7 @@ body {
     width: 100%;
 }
 
-/* ── QUICK ACTIONS ── */
+/* â”€â”€ QUICK ACTIONS â”€â”€ */
 .quick-actions {
     display: flex;
     justify-content: space-around;
@@ -594,7 +594,7 @@ body {
     color: var(--text-secondary);
 }
 
-/* ── QUICK BUY BANNER ── */
+/* â”€â”€ QUICK BUY BANNER â”€â”€ */
 .quick-buy-banner {
     margin: 0;
     background: linear-gradient(100deg, #1fc07c, #0ebd73);
@@ -620,7 +620,7 @@ body {
 
 .qb-arrow { color: #fff !important; width: 28px !important; height: 28px !important; border-radius: 50% !important; background: rgba(255, 255, 255, 0.2) !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 12px !important; font-weight: normal !important; text-shadow: none !important; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06) !important; }
 
-/* ── MARKET LIST ── */
+/* â”€â”€ MARKET LIST â”€â”€ */
 .market-list {
     background: var(--bg-dark);
 }
@@ -733,7 +733,7 @@ body {
     background: var(--down-color);
 }
 
-/* ── COLOR UTILS ── */
+/* â”€â”€ COLOR UTILS â”€â”€ */
 .up {
     color: var(--up-color);
 }
@@ -752,7 +752,7 @@ body {
     flex-shrink: 0;
 }
 
-/* ── HEADERS ── */
+/* â”€â”€ HEADERS â”€â”€ */
 .screen-header-plain {
     display: flex;
     justify-content: space-between;
@@ -791,7 +791,7 @@ body {
     width: 24px;
 }
 
-/* ── MARKETS SCREEN ── */
+/* â”€â”€ MARKETS SCREEN â”€â”€ */
 .search-bar-wrap {
     padding: 10px 14px;
 }
@@ -848,7 +848,7 @@ body {
     border-color: var(--up-color);
 }
 
-/* ── FUTURES SCREEN ── */
+/* â”€â”€ FUTURES SCREEN â”€â”€ */
 .futures-header {
     display: flex;
     justify-content: space-between;
@@ -1155,7 +1155,7 @@ body {
     font-size: 14px;
 }
 
-/* ── TRADING BUTTONS ── */
+/* â”€â”€ TRADING BUTTONS â”€â”€ */
 .trading-buttons {
     display: flex;
     position: fixed;
@@ -1196,7 +1196,7 @@ body {
     opacity: .85;
 }
 
-/* ── ORDER PANEL ── */
+/* â”€â”€ ORDER PANEL â”€â”€ */
 .order-panel-overlay {
     position: fixed;
     inset: 0;
@@ -1324,7 +1324,7 @@ body {
     cursor: pointer;
 }
 
-/* ── PERPETUAL SCREEN ── */
+/* â”€â”€ PERPETUAL SCREEN â”€â”€ */
 .perp-price-row {
     padding: 10px 18px;
     display: flex;
@@ -1482,7 +1482,7 @@ body {
     cursor: pointer;
 }
 
-/* ── ASSETS SCREEN ── */
+/* â”€â”€ ASSETS SCREEN â”€â”€ */
 .assets-top-card {
     margin: 14px;
     background: linear-gradient(135deg, #066b40, #02c076);
@@ -1612,7 +1612,7 @@ body {
     font-weight: 700;
 }
 
-/* ── EXCHANGE / ASSET LIST ── */
+/* â”€â”€ EXCHANGE / ASSET LIST â”€â”€ */
 .assets-list {
     padding: 0 14px 20px;
 }
@@ -1659,7 +1659,7 @@ body {
     font-weight: 500;
 }
 
-/* ── DEPOSIT SCREEN ── */
+/* â”€â”€ DEPOSIT SCREEN â”€â”€ */
 .deposit-coin-row {
     display: flex;
     align-items: center;
@@ -1753,7 +1753,7 @@ body {
     color: var(--text-secondary);
 }
 
-/* ── FORM ELEMENTS ── */
+/* â”€â”€ FORM ELEMENTS â”€â”€ */
 .form-container {
     padding: 0 18px;
 }
@@ -1830,7 +1830,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* ── BUTTONS ── */
+/* â”€â”€ BUTTONS â”€â”€ */
 .btn-green-full {
     width: 100%;
     background: var(--up-color);
@@ -1869,7 +1869,7 @@ body {
     margin-top: 16px;
 }
 
-/* ── RECORD/DETAIL SCREENS ── */
+/* â”€â”€ RECORD/DETAIL SCREENS â”€â”€ */
 .record-list {
     padding: 0 14px;
 }
@@ -1957,7 +1957,7 @@ body {
     text-align: right;
 }
 
-/* ── FUND TRANSFER ── */
+/* â”€â”€ FUND TRANSFER â”€â”€ */
 .select-dropdown {
     display: flex;
     justify-content: space-between;
@@ -1993,7 +1993,7 @@ body {
     border: none;
 }
 
-/* ── TIPS MODAL ── */
+/* â”€â”€ TIPS MODAL â”€â”€ */
 .tips-overlay {
     position: fixed;
     inset: 0;
@@ -2057,7 +2057,7 @@ body {
     cursor: pointer;
 }
 
-/* ── CONVERT MODAL ── */
+/* â”€â”€ CONVERT MODAL â”€â”€ */
 .modal {
     display: none;
     position: fixed;
@@ -2143,7 +2143,7 @@ body {
     font-weight: 700 !important;
 }
 
-/* ── LOGIN / REGISTER ── */
+/* â”€â”€ LOGIN / REGISTER â”€â”€ */
 .login-type-tabs {
     display: flex;
     gap: 28px;
@@ -2244,7 +2244,7 @@ body {
     z-index: 1000;
 }
 
-/* ── WRONG PASSWORD ── */
+/* â”€â”€ WRONG PASSWORD â”€â”€ */
 .wrong-pass-modal {
     background: #1a2233;
     border-radius: 14px;
@@ -2263,7 +2263,7 @@ body {
     margin: 0 auto;
 }
 
-/* ── SUPPORT ── */
+/* â”€â”€ SUPPORT â”€â”€ */
 .support-card {
     display: flex;
     align-items: center;
@@ -2276,7 +2276,7 @@ body {
     border: 1px solid var(--border-color);
 }
 
-/* ── TOAST ── */
+/* â”€â”€ TOAST â”€â”€ */
 .toast {
     position: fixed;
     bottom: calc(var(--nav-height)+20px);
@@ -2299,7 +2299,7 @@ body {
     animation: toastShow 2.5s ease forwards;
 }
 
-/* ── BOTTOM NAV ── */
+/* â”€â”€ BOTTOM NAV â”€â”€ */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -2342,7 +2342,7 @@ body {
     color: var(--tab-active);
 }
 
-/* ── RESPONSIVE ── */
+/* â”€â”€ RESPONSIVE â”€â”€ */
 @media(min-width:480px) {
     #app {
         margin: 0 auto;
@@ -2647,7 +2647,7 @@ body {
     border: 2px solid #000;
 }
 
-/* ── KYC UPLOAD GRID ── */
+/* â”€â”€ KYC UPLOAD GRID â”€â”€ */
 .kyc-upload-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -2676,7 +2676,7 @@ body {
     padding: 10px;
 }
 
-/* ── MOBILE RESPONSIVE FIXES ── */
+/* â”€â”€ MOBILE RESPONSIVE FIXES â”€â”€ */
 @media(max-width:480px) {
     .perp-leverage-row {
         flex-wrap: wrap;
@@ -2745,7 +2745,7 @@ body {
     }
 }
 
-/* ── AUTH LINKS FIX ── */
+/* â”€â”€ AUTH LINKS FIX â”€â”€ */
 .auth-links {
     display: flex;
     justify-content: space-between;
@@ -2761,7 +2761,7 @@ body {
     white-space: nowrap;
 }
 
-/* ── CHANGE BADGE FIX ── */
+/* â”€â”€ CHANGE BADGE FIX â”€â”€ */
 .change-btn {
     padding: 5px 10px;
     border-radius: 5px;
@@ -2774,7 +2774,7 @@ body {
     display: inline-block;
 }
 
-/* ── MODAL OVERLAY ── */
+/* â”€â”€ MODAL OVERLAY â”€â”€ */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -2810,9 +2810,9 @@ body {
     font-size: 14px;
 }
 
-/* ══════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PROFESSIONAL EXCHANGE UPGRADES
-══════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Coin icon */
 .coin-icon-wrap {
@@ -2988,7 +2988,7 @@ body {
     height: 240px;
 }
 
-/* Market items — coin icon */
+/* Market items â€” coin icon */
 .market-item .coin-icon-wrap {
     width: 34px;
     height: 34px;
@@ -3268,7 +3268,7 @@ body {
     position: relative;
 }
 
-/* ── LIVE CHAT ── */
+/* â”€â”€ LIVE CHAT â”€â”€ */
 .chat-messages-area {
     flex: 1;
     overflow-y: auto;
@@ -3554,15 +3554,15 @@ body {
 
 .qb-arrow { color: #fff !important; width: 26px !important; height: 26px !important; border-radius: 50% !important; background: rgba(255, 255, 255, 0.2) !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 12px !important; font-weight: normal !important; text-shadow: none !important; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06) !important; }
 
-/* ══════════════════════════════════════════════════════
-   LIGHT MODE — COMPREHENSIVE OVERRIDES
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LIGHT MODE â€” COMPREHENSIVE OVERRIDES
    Fixes all hardcoded dark colors that don't use CSS vars
-══════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Prevent FOUC flash on page load */
 html.light-preload body { background: #f0f4f8 !important; }
 
-/* Market list rows — clean neutral light mode */
+/* Market list rows â€” clean neutral light mode */
 /* Dynamic gradients applied via market-item-up / down classes instead of zebra striping */
 body.light-mode .market-item {
     border-bottom: none !important;
@@ -3640,7 +3640,7 @@ body.light-mode .login-input-group input { color: var(--text-primary); }
 body.light-mode .perp-input-row input { color: var(--text-primary); }
 body.light-mode .chat-text-field { color: var(--text-primary); background: var(--bg-card2); }
 
-/* Input borders (rgba white → proper border color) */
+/* Input borders (rgba white â†’ proper border color) */
 body.light-mode .login-input-group { border-bottom-color: rgba(0,0,0,.15); }
 body.light-mode .card-header-row { border-bottom-color: var(--border-color); }
 body.light-mode .detail-row { border-bottom-color: var(--border-color); }
@@ -3682,8 +3682,13 @@ body.light-mode .tab.active { color: #02c076; }
 
 
 
-/ *   c a c h e - b u s t   v 2 6   * /  
- / *   d e p l o y - 2 0 2 6 0 5 2 3 1 7 0 5 3 4   * /  
- 
+/* cache-bust v26 */
+
+/* deploy-20260523170534 */
+
+
 .hidden-search { display: none !important; }
 
+video::-webkit-media-controls, video::-webkit-media-controls-start-playback-button { display: none !important; opacity: 0 !important; }
+
+video::-webkit-media-controls, video::-webkit-media-controls-start-playback-button, video::-webkit-media-controls-overlay-play-button { display: none !important; opacity: 0 !important; -webkit-appearance: none; }
