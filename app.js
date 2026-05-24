@@ -3448,7 +3448,53 @@ function updateHeaderCountdown() {
     if (elTimePeriod) elTimePeriod.textContent = startH + ':' + startM + '~' + endH + ':' + endM;
 }
 
-document.addEventListener('DOMContentLoaded', startHeaderCountdown);
+document.addEventListener('DOMContentLoaded', () => {
+    startHeaderCountdown();
+    loadBanners();
+});
+
+let bannerSlideIndex = 0;
+let bannerInterval = null;
+
+window.currentSlide = function(n) {
+    showBannerSlide(n);
+};
+
+function showBannerSlide(n) {
+    const slides = document.querySelectorAll('#banner-slides-container .slide');
+    const dots = document.querySelectorAll('#banner-dots-container .dot');
+    if (!slides.length) return;
+
+    if (n >= slides.length) { bannerSlideIndex = 0; }
+    else if (n < 0) { bannerSlideIndex = slides.length - 1; }
+    else { bannerSlideIndex = n; }
+
+    slides.forEach((slide, index) => {
+        if (index === bannerSlideIndex) {
+            slide.style.opacity = '1';
+            slide.style.zIndex = '1';
+            slide.classList.add('active');
+        } else {
+            slide.style.opacity = '0';
+            slide.style.zIndex = '0';
+            slide.classList.remove('active');
+        }
+    });
+
+    dots.forEach((dot, index) => {
+        if (index === bannerSlideIndex) {
+            dot.classList.add('active');
+            dot.style.backgroundColor = 'rgba(255,255,255,1)';
+        } else {
+            dot.classList.remove('active');
+            dot.style.backgroundColor = 'rgba(255,255,255,0.5)';
+        }
+    });
+
+    // Reset interval on manual slide
+    if (bannerInterval) clearInterval(bannerInterval);
+    bannerInterval = setInterval(() => { showBannerSlide(bannerSlideIndex + 1); }, 3000);
+}
 
 
 // PWA Installation Logic
@@ -3487,31 +3533,37 @@ if ('serviceWorker' in navigator) {
 // ==================== DYNAMIC BANNERS ====================
 async function loadBanners() {
     const s = await _fetchAppSettings();
-    const bannerContainer = document.querySelector('#bannerSlider .slides');
-    const dotContainer = document.querySelector('#bannerSlider .slider-nav');
+    const bannerContainer = document.getElementById('banner-slides-container');
+    const dotContainer = document.getElementById('banner-dots-container');
     
     if (!bannerContainer || !dotContainer) return;
 
+    let banners = ['banner_1.jpg', 'banner_2.png']; // Fallback local banners
     if (s && s.app_banners) {
         try {
-            const banners = JSON.parse(s.app_banners);
-            if (Array.isArray(banners) && banners.length > 0) {
-                let slidesHtml = '';
-                let dotsHtml = '';
-                banners.forEach((url, i) => {
-                    const isActive = i === 0 ? 'active' : '';
-                    slidesHtml += `<div class="slide ${isActive}">
-                        <img src="${url}" alt="Banner ${i+1}" style="width:100%; height:140px; display:block; object-fit:cover;">
-                    </div>`;
-                    dotsHtml += `<span class="dot ${isActive}" onclick="currentSlide(${i})"></span>`;
-                });
-                bannerContainer.innerHTML = slidesHtml;
-                dotContainer.innerHTML = dotsHtml;
+            const parsed = JSON.parse(s.app_banners);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                banners = parsed;
             }
         } catch(e) {
             console.error('Failed to parse app_banners', e);
         }
     }
+
+    let slidesHtml = '';
+    let dotsHtml = '';
+    banners.forEach((url, i) => {
+        const isActive = i === 0 ? 'active' : '';
+        slidesHtml += `<div class="slide ${isActive}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: ${i === 0 ? 1 : 0}; transition: opacity 0.5s ease-in-out;">
+            <img src="${url}" alt="Banner ${i+1}" style="width:100%; height:140px; display:block; object-fit:cover; border-radius: 8px;">
+        </div>`;
+        dotsHtml += `<span class="dot ${isActive}" onclick="currentSlide(${i})" style="cursor: pointer; height: 6px; width: 6px; margin: 0 4px; background-color: rgba(255,255,255,0.5); border-radius: 50%; display: inline-block; transition: background-color 0.3s ease;"></span>`;
+    });
+    bannerContainer.innerHTML = slidesHtml;
+    dotContainer.innerHTML = dotsHtml;
+    
+    // Initialize the slider loop
+    showBannerSlide(0);
 }
 
 

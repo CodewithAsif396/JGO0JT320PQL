@@ -130,19 +130,11 @@
 ════════════════════════════════════════════════════════ -->
         <div id="home-screen" class="screen active">
             <div class="banner" id="bannerSlider" style="margin: 0; width: 100%; position: relative; height: 140px;">
-                <div class="slides">
-                    <div class="slide active">
-                        <img src="banner_1.jpg" alt="Banner"
-                            style="width:100%; height:140px; display:block; object-fit:cover;">
-                    </div>
-                    <div class="slide">
-                        <img src="banner_2.png" alt="Banner 2"
-                            style="width:100%; height:140px; display:block; object-fit:cover;">
-                    </div>
+                <div class="slides" id="banner-slides-container">
+                    <!-- Banners loaded dynamically -->
                 </div>
-                <div class="slider-dots">
-                    <span class="dot active" onclick="currentSlide(0)"></span>
-                    <span class="dot" onclick="currentSlide(1)"></span>
+                <div class="slider-dots" id="banner-dots-container" style="position: absolute; bottom: 10px; width: 100%; text-align: center; z-index: 2;">
+                    <!-- Dots loaded dynamically -->
                 </div>
                 <div class="banner-avatar" id="banner-avatar-img" onclick="openSidebar()">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;border-radius:50%;overflow:hidden;">
