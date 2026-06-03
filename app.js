@@ -573,7 +573,7 @@ async function renderActivePositions() {
             var dir = (t.signal && t.signal.direction) ? t.signal.direction : (t.direction || '--');
             var dirClass = dir === 'CALL' ? 'up' : 'down';
             var dirIcon = dir === 'CALL' ? '▲' : '▼';
-            var date = new Date(t.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+            var date = new Date(t.createdAt).toLocaleTimeString();
             var entryTime = (t.signal && t.signal.entryTime) ? new Date(t.signal.entryTime).getTime() : new Date(t.createdAt).getTime();
             var duration = (t.signal && t.signal.duration) ? t.signal.duration : (t.duration || 600);
             var endTime = entryTime + duration * 1000;
@@ -618,7 +618,7 @@ async function renderActivePositions() {
 function addLocalPosition(sym, dir, amount) {
     var entry = apexChartData.length ? apexChartData[apexChartData.length - 1].y[3] : 0;
     var durationMs = (selectedOrderMinutes || 1) * 60000;
-    var pos = { id: Date.now(), sym: sym, dir: dir, amount: amount, entry: entry, time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC', status: 'active', durationMs: durationMs };
+    var pos = { id: Date.now(), sym: sym, dir: dir, amount: amount, entry: entry, time: new Date().toLocaleTimeString(), status: 'active', durationMs: durationMs };
     localPositions.push(pos);
     // Switch to position tab to show the user their trade
     var posTabBtn = document.querySelector('#futures-pos-tabs button[onclick*="position"]');
@@ -1384,7 +1384,7 @@ function initSocket() {
         fetchSignals();
         showToast('New Signal: ' + signal.pair + ' ' + signal.direction);
         const tickerEl = document.getElementById('home-ticker-text');
-        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : '';
+        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const durMins = signal.duration ? Math.round(signal.duration / 60) + 'min' : '';
         if (tickerEl) tickerEl.textContent = 'HOT SIGNAL ALERT: ' + signal.pair + ' ' + signal.direction + (sigTime ? ' @ ' + sigTime : '') + (durMins ? ' | Duration: ' + durMins : '') + ' - GET READY TO TRADE!';
         // Show bell badge immediately
@@ -1398,7 +1398,7 @@ function initSocket() {
         renderSignalCards();
         showToast('Signal ACTIVE: ' + signal.pair + ' — Follow Now!');
         const tickerEl = document.getElementById('home-ticker-text');
-        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : '';
+        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const durMins = signal.duration ? Math.round(signal.duration / 60) + 'min' : '';
         if (tickerEl) tickerEl.textContent = '🔴 SIGNAL ACTIVE: ' + signal.pair + ' ' + signal.direction + (sigTime ? ' @ ' + sigTime : '') + (durMins ? ' | ' + durMins : '') + ' - TRADE NOW!';
         // Show bell badge immediately
@@ -1808,7 +1808,7 @@ async function loadTradeHistory() {
             if (!isPending && !isCancelled) { totalTurnover += t.amount; totalProfit += profit; }
             const pair = t.signal?.pair || t.pair || 'UNKNOWN';
             const dir = t.signal?.direction || t.direction || '--';
-            const date = new Date(t.createdAt).toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC';
+            const date = new Date(t.createdAt).toLocaleString();
             const profitStr = isPending
                 ? '<span style="color:var(--text-muted)">Pending...</span>'
                 : (isCancelled ? '<span style="color:var(--text-muted)">0.00 USDT</span>' : `<span class="${profit >= 0 ? 'up' : 'down'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)} USDT</span>`);
