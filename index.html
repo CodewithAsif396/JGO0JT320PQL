@@ -920,10 +920,7 @@
                     <i class="fa-regular fa-copy" id="dep-copy-btn" onclick="copyDepositAddress()"
                         style="cursor:pointer;color:var(--text-secondary);"></i>
                 </div>
-                <div class="dep-notice-row">
-                    <i class="fa-solid fa-circle-exclamation" style="color:#f3ba2f;"></i>
-                    <span>Minimum deposit: <b>10 USDT</b></span>
-                </div>
+
             </div>
             <div class="important-notice" style="background:transparent; padding:0 20px;">
                 <h3 style="color:var(--text-primary); font-size:16px; margin-bottom:12px; font-weight:700;">Important Notice</h3>
@@ -1467,6 +1464,17 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- My Referrals in Share Screen -->
+                <div style="background:var(--bg-card);border-radius:14px;padding:16px;text-align:left;margin-top:16px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                        <span style="font-weight:700;font-size:15px;">My Referrals</span>
+                        <i class="fa-solid fa-users" style="color:var(--text-secondary);font-size:13px;"></i>
+                    </div>
+                    <div id="share-ref-list-container">
+                        <div class="no-data-block"><p>No referrals yet</p></div>
+                    </div>
                 </div>
             </div>
         </div>

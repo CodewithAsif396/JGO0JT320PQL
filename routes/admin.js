@@ -488,46 +488,20 @@ router.post('/withdrawals/:id/approve', authMiddleware, adminMiddleware, async (
     if (!withdrawal) return res.status(404).json({ error: 'Withdrawal not found' });
     if (withdrawal.status !== 'pending') return res.status(400).json({ error: 'Withdrawal already processed' });
 
-    // Mark as processing to prevent double-approval
-    await prisma.withdrawal.update({
-      where: { id: withdrawal.id },
-      data: { status: 'processing', processedBy: req.user.userId }
-    });
+    // Admin has manually sent funds. We just deduct the locked balance.
+    await prisma.$transaction([
+      prisma.withdrawal.update({
+        where: { id: withdrawal.id },
+        data: { status: 'completed', txHash: 'Manual-Transfer', processedAt: new Date(), processedBy: req.user.userId }
+      }),
+      prisma.user.update({
+        where: { id: withdrawal.userId },
+        data: { lockedBalance: { decrement: withdrawal.amount } }
+      })
+    ]);
 
-    try {
-      const txid = await tronWallet.sendFromMaster(withdrawal.toAddress, withdrawal.amount);
-
-      await prisma.$transaction([
-        prisma.withdrawal.update({
-          where: { id: withdrawal.id },
-          data: { status: 'completed', txHash: txid, processedAt: new Date() }
-        }),
-        prisma.user.update({
-          where: { id: withdrawal.userId },
-          data: { lockedBalance: { decrement: withdrawal.amount } }
-        })
-      ]);
-
-      if (global.ns) await global.ns.send(withdrawal.userId, 'Withdrawal Completed', `Your withdrawal of ${withdrawal.amount} TRX has been sent. TX: ${txid}`, 'WITHDRAWAL');
-      res.json({ success: true, txid });
-    } catch (broadcastErr) {
-      // Broadcast failed — release the lock, mark failed
-      await prisma.$transaction([
-        prisma.withdrawal.update({
-          where: { id: withdrawal.id },
-          data: { status: 'failed', errorMessage: broadcastErr.message, processedAt: new Date() }
-        }),
-        prisma.user.update({
-          where: { id: withdrawal.userId },
-          data: {
-            balance: { increment: withdrawal.amount },
-            lockedBalance: { decrement: withdrawal.amount }
-          }
-        })
-      ]);
-      if (global.ns) await global.ns.send(withdrawal.userId, 'Withdrawal Failed', 'Your withdrawal could not be processed. Funds have been returned to your balance.', 'WITHDRAWAL');
-      res.status(500).json({ error: `Broadcast failed: ${broadcastErr.message}` });
-    }
+    if (global.ns) await global.ns.send(withdrawal.userId, 'Withdrawal Completed', `Your withdrawal of ${withdrawal.amount} USDT has been manually approved and sent.`, 'WITHDRAWAL');
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -575,10 +549,56 @@ router.get('/signals', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+router.get('/bulk-signals/users', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const rows = await prisma.platformSettings.findMany({
+      where: { key: { in: ['tier1_min', 'tier2_min', 'tier3_min', 'tier4_min'] } }
+    });
+    const map = {};
+    rows.forEach(r => { map[r.key] = parseFloat(r.value); });
+    const t1 = map['tier1_min'] ?? 500;
+    const t2 = map['tier2_min'] ?? 1000;
+    const t3 = map['tier3_min'] ?? 1500;
+    const t4 = map['tier4_min'] ?? 2000;
+
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, balance: true, tradeBalance: true, perpetualBalance: true }
+    });
+    
+    const tiers = { t1: [], t2: [], t3: [], t4: [], t0: [] };
+    users.forEach(u => {
+      const tot = (u.balance||0) + (u.tradeBalance||0) + (u.perpetualBalance||0);
+      if (tot >= t4) tiers.t4.push(u);
+      else if (tot >= t3) tiers.t3.push(u);
+      else if (tot >= t2) tiers.t2.push(u);
+      else if (tot >= t1) tiers.t1.push(u);
+      else tiers.t0.push(u);
+    });
+
+    res.json({ tiers, thresholds: { t1, t2, t3, t4 } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/signals', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     if (!global.ss) return res.status(500).json({ error: 'Signal service not ready' });
     const body = { ...req.body };
+    
+    if (body.targetUserIds && Array.isArray(body.targetUserIds) && body.targetUserIds.length > 0) {
+      const userIds = body.targetUserIds;
+      delete body.targetUserIds;
+      delete body.targetEmail;
+      const createdSignals = [];
+      for (const uid of userIds) {
+        const sigBody = { ...body, targetUserId: uid };
+        const signal = await global.ss.createSignal(sigBody);
+        createdSignals.push(signal);
+      }
+      return res.json({ success: true, count: createdSignals.length, signals: createdSignals });
+    }
+
     if (body.targetEmail) {
       const target = await prisma.user.findUnique({ where: { email: body.targetEmail.trim() } });
       if (!target) return res.status(404).json({ error: `No user found with email: ${body.targetEmail}` });
@@ -695,11 +715,12 @@ router.get('/dashboard', authMiddleware, adminMiddleware, async (req, res) => {
       pendingWithdrawals,
       pendingKycs,
       recentTransactions,
-      activeSignalsList
+      activeSignalsList,
+      activeUsers
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.transaction.aggregate({ where: { type: 'DEPOSIT', status: 'COMPLETED' }, _sum: { amount: true } }),
-      prisma.transaction.aggregate({ where: { type: 'WITHDRAWAL', status: 'COMPLETED' }, _sum: { amount: true } }),
+      prisma.deposit.aggregate({ where: { status: 'confirmed' }, _sum: { amount: true } }),
+      prisma.withdrawal.aggregate({ where: { status: 'completed' }, _sum: { amount: true } }),
       prisma.transaction.count({ where: { status: 'PENDING' } }),
       prisma.signal.count({ where: { status: { in: ['ACTIVE', 'PENDING'] } } }),
       prisma.trade.count(),
@@ -708,11 +729,16 @@ router.get('/dashboard', authMiddleware, adminMiddleware, async (req, res) => {
       prisma.withdrawal.count({ where: { status: 'pending' } }),
       prisma.kYC.count({ where: { status: 'PENDING' } }),
       prisma.transaction.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { user: { select: { email: true } } } }),
-      prisma.signal.findMany({ where: { status: { in: ['ACTIVE', 'PENDING'] } }, orderBy: { createdAt: 'desc' }, take: 5 })
+      prisma.signal.findMany({ where: { status: { in: ['ACTIVE', 'PENDING'] } }, orderBy: { createdAt: 'desc' }, take: 5 }),
+      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { tradeBalance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
     ]);
+
+    const inactiveUsers = totalUsers - activeUsers;
 
     res.json({
       totalUsers,
+      activeUsers,
+      inactiveUsers,
       totalDeposits: totalDeposits._sum.amount || 0,
       totalWithdrawals: totalWithdrawals._sum.amount || 0,
       pendingTxs,
@@ -723,7 +749,7 @@ router.get('/dashboard', authMiddleware, adminMiddleware, async (req, res) => {
       pendingWithdrawals,
       pendingKycs,
       recentTransactions,
-      activeSignals: activeSignalsList
+      activeSignalsList
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -743,30 +769,36 @@ router.get('/analytics', authMiddleware, adminMiddleware, async (req, res) => {
       recentUsers,
       pendingDeposits,
       pendingWithdrawals,
-      pendingKycs
+      pendingKycs,
+      activeUsers
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.transaction.aggregate({ where: { type: 'DEPOSIT', status: 'COMPLETED' }, _sum: { amount: true } }),
-      prisma.transaction.aggregate({ where: { type: 'WITHDRAWAL', status: 'COMPLETED' }, _sum: { amount: true } }),
+      prisma.deposit.aggregate({ where: { status: 'confirmed' }, _sum: { amount: true } }),
+      prisma.withdrawal.aggregate({ where: { status: 'completed' }, _sum: { amount: true } }),
       prisma.transaction.count({ where: { status: 'PENDING' } }),
       prisma.signal.count({ where: { status: { in: ['ACTIVE', 'PENDING'] } } }),
       prisma.trade.count(),
       prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 7, select: { createdAt: true } }),
       prisma.deposit.count({ where: { status: 'pending_approval' } }),
       prisma.withdrawal.count({ where: { status: 'pending' } }),
-      prisma.kYC.count({ where: { status: 'PENDING' } })
+      prisma.kYC.count({ where: { status: 'PENDING' } }),
+      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { tradeBalance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
     ]);
+
+    const inactiveUsers = totalUsers - activeUsers;
 
     let masterBalance = null;
     try {
       masterBalance = await Promise.race([
         tronWallet.getMasterBalance(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
       ]);
     } catch {}
 
     res.json({
       totalUsers,
+      activeUsers,
+      inactiveUsers,
       totalDeposits: totalDeposits._sum.amount || 0,
       totalWithdrawals: totalWithdrawals._sum.amount || 0,
       pendingTxs,

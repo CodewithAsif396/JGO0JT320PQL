@@ -125,6 +125,12 @@ router.post('/trade', authMiddleware, async (req, res) => {
     if (user.tradeBalance === 0) return res.status(400).json({ error: 'Please transfer funds to Trade wallet before trading.' });
     if (user.tradeBalance < amt) return res.status(400).json({ error: 'Insufficient Trade wallet balance' });
 
+    // Enforce 1% limit for signal trades
+    const maxAllowed = user.tradeBalance * 0.01;
+    if (amt > maxAllowed) {
+      return res.status(400).json({ error: 'You are crossing terms and conditions.' });
+    }
+
     // Server-side balance tier validation — cannot be bypassed from frontend
     const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
     const { t1: tierMin } = await getTierThresholds();

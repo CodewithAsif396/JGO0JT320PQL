@@ -771,13 +771,23 @@ function toggleAssetsVisibility() {
         ? `${b.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`
         : '****** <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>';
         
+    const pVal = userData?.profitBalance ?? 0;
+    const pStr = pVal > 0 ? `+${pVal.toFixed(2)}` : pVal.toFixed(2);
+    const pColor = pVal > 0 ? 'var(--up-color)' : (pVal < 0 ? 'var(--down-color)' : '#fff');
+    
     const pnlEls = ['assets-pnl-val', 'exchange-pnl-val', 'trade-pnl-val'];
     pnlEls.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.textContent = assetsVisible ? p.toFixed(2) : '****';
+        if (el) {
+            el.textContent = assetsVisible ? pStr : '****';
+            el.style.color = assetsVisible ? (id === 'assets-pnl-val' ? '#fff' : pColor) : '#fff';
+        }
     });
 }
-function refreshPnl() { showToast('PnL refreshed!'); }
+async function refreshPnl() { 
+    await refreshUserData(); 
+    showToast('PnL refreshed!'); 
+}
 
 // ── DEPOSIT ──
 function setNetworkTab(btn, network) {
@@ -1609,18 +1619,22 @@ function updateUIWithUserData() {
     const trAvail = document.getElementById('trade-usdt-avail');
     if (trAvail) trAvail.textContent = trBalVal.toFixed(2);
     const trFreeze = document.getElementById('trade-usdt-freeze');
-    if (trFreeze) trFreeze.textContent = exFreeze.toFixed(2);
+    if (trFreeze) trFreeze.textContent = (userData.lockedBalance || 0).toFixed(2);
     const trVal = document.getElementById('trade-usdt-val');
     if (trVal) trVal.textContent = `≈ ${trBalVal.toFixed(2)}`;
 
     // PnL
-    const p = (userData.profitBalance || 0).toFixed(2);
-    const pnlEl = document.getElementById('assets-pnl-val');
-    if (pnlEl) pnlEl.textContent = assetsVisible ? p : '****';
-    const exchPnlEl = document.getElementById('exchange-pnl-val');
-    if (exchPnlEl) exchPnlEl.textContent = assetsVisible ? p : '****';
-    const trdPnlEl = document.getElementById('trade-pnl-val');
-    if (trdPnlEl) trdPnlEl.textContent = assetsVisible ? p : '****';
+    const pVal = userData.profitBalance || 0;
+    const pStr = pVal > 0 ? `+${pVal.toFixed(2)}` : pVal.toFixed(2);
+    const pColor = pVal > 0 ? 'var(--up-color)' : (pVal < 0 ? 'var(--down-color)' : '#fff');
+    const pnlEls = ['assets-pnl-val', 'exchange-pnl-val', 'trade-pnl-val'];
+    pnlEls.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = assetsVisible ? pStr : '****';
+            el.style.color = assetsVisible ? (id === 'assets-pnl-val' ? '#fff' : pColor) : '#fff';
+        }
+    });
 
     // Referral link
     const refLinkEl = document.getElementById('ref-link-text');
@@ -1633,24 +1647,28 @@ function updateUIWithUserData() {
     const refEarnedEl = document.getElementById('ref-earned');
     if (refEarnedEl) refEarnedEl.textContent = (userData.referralBalance || 0).toFixed(2);
 
-    // Referral list
-    const refList = document.getElementById('ref-list-container');
-    if (refList) {
-        const refs = userData.referrals || [];
-        if (!refs.length) {
-            refList.innerHTML = '<div class="no-data-block"><p>No referrals yet</p></div>';
-        } else {
-            refList.innerHTML = refs.map(r => {
-                const commission = ((r.investments || 0) * 0.05).toFixed(2);
-                return `
-                    <div class="ref-item">
-                        <div class="ref-user"><b>${r.email}</b></div>
-                        <div class="ref-date">${new Date(r.createdAt).toLocaleDateString()}</div>
-                        <div class="ref-income">+${commission} USDT</div>
-                    </div>`;
-            }).join('');
-        }
+    // Referral list (update both referrals-screen and share-screen containers)
+    const refContainers = [document.getElementById('ref-list-container'), document.getElementById('share-ref-list-container')];
+    const refs = userData.referrals || [];
+    let htmlContent = '<div class="no-data-block"><p>No referrals yet</p></div>';
+    
+    if (refs.length > 0) {
+        htmlContent = refs.map(r => {
+            const commission = ((r.investments || 0) * 0.05).toFixed(2);
+            return `
+                <div class="ref-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <div>
+                        <div class="ref-user" style="font-weight:600;font-size:14px;color:var(--text-primary);">${r.email}</div>
+                        <div class="ref-date" style="font-size:12px;color:var(--text-secondary);">${new Date(r.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div class="ref-income" style="font-weight:600;color:var(--up-color);">+${commission} USDT</div>
+                </div>`;
+        }).join('');
     }
+
+    refContainers.forEach(container => {
+        if (container) container.innerHTML = htmlContent;
+    });
 
     // Share screen invite code
     const shareCodeEl = document.getElementById('share-invite-code');
@@ -2119,7 +2137,7 @@ async function placeOrder() {
             });
             const data = await res.json();
             if (actionBtn) { actionBtn.disabled = false; actionBtn.textContent = currentOrderDir; }
-            if (data.error) { showToast('Trade failed: ' + data.error); return; }
+            if (data.error) { showToast(data.error); return; }
             closeOrderPanel();
             showToast(currentOrderDir + ' trade placed! ' + amount + ' USDT on ' + activeSignal.pair);
             refreshUserData();
@@ -2339,24 +2357,34 @@ async function loadWithdrawalRecords() {
     if (!container || !authToken) return;
     container.innerHTML = '<div class="no-data-block" style="padding-top:40px;"><p>Loading...</p></div>';
     try {
-        const res = await fetch('/api/wallet/transactions?type=WITHDRAWAL', { headers: { 'Authorization': `Bearer ${authToken}` } });
+        const res = await fetch('/api/wallet/withdrawals', { headers: { 'Authorization': `Bearer ${authToken}` } });
         if (!res.ok) return;
         const txs = await res.json();
         if (!txs.length) {
             container.innerHTML = '<div class="no-data-block" style="padding-top:60px;"><i class="fa-solid fa-receipt" style="font-size:40px;color:var(--text-muted);margin-bottom:12px;"></i><p>No withdrawal records</p></div>';
             return;
         }
-        const statusClass = { PENDING: 'pending-status', COMPLETED: 'paid-status', FAILED: 'fail-status' };
-        const statusLabel = { PENDING: 'Under Audit', COMPLETED: 'Paid', FAILED: 'Failed' };
+        const statusClass = { 
+            pending: 'pending-status', PENDING: 'pending-status', 
+            completed: 'paid-status', COMPLETED: 'paid-status', 
+            failed: 'fail-status', FAILED: 'fail-status',
+            rejected: 'fail-status', REJECTED: 'fail-status'
+        };
+        const statusLabel = { 
+            pending: 'Under Audit', PENDING: 'Under Audit', 
+            completed: 'Paid', COMPLETED: 'Paid', 
+            failed: 'Failed', FAILED: 'Failed',
+            rejected: 'Rejected', REJECTED: 'Rejected'
+        };
         container.innerHTML = txs.map(tx => `
             <div class="record-item">
                 <div class="record-left">
                     <div class="record-title">Withdrawal</div>
-                    <div class="record-time">${new Date(tx.createdAt).toLocaleString()}</div>
+                    <div class="record-time">${new Date(tx.requestedAt || tx.createdAt).toLocaleString()}</div>
                 </div>
                 <div class="record-right">
                     <div class="record-coin">${tx.amount.toFixed(2)} USDT</div>
-                    <div class="record-status ${statusClass[tx.status] || 'pending-status'}">${statusLabel[tx.status] || tx.status}</div>
+                    <div class="record-status ${statusClass[tx.status] || 'pending-status'}">${statusLabel[tx.status] || tx.status.toUpperCase()}</div>
                 </div>
             </div>
         `).join('');

@@ -465,6 +465,9 @@
       <div class="nav-item" data-section="signals" onclick="showSection('signals',this)">
         <i class="fa fa-bolt"></i> Signals
       </div>
+      <div class="nav-item" data-section="bulksignals" onclick="showSection('bulksignals',this)">
+        <i class="fa fa-bullseye"></i> Targeted Signals
+      </div>
       <div class="nav-item" data-section="referrals" onclick="showSection('referrals',this)">
         <i class="fa fa-user-plus"></i> Referrals
       </div>
@@ -734,6 +737,74 @@
               <button class="btn btn-primary btn-full" id="createSignalBtn" onclick="createSignal()" style="margin-top:12px;">
                 <i class="fa fa-bolt"></i> Create Signal
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- BULK SIGNALS -->
+      <div class="section" id="section-bulksignals">
+        <div class="table-card">
+          <div class="table-header flex-between">
+            <span class="table-title"><i class="fa fa-bullseye" style="color:var(--accent);margin-right:8px"></i>Targeted Signals by Plan</span>
+            <button class="btn btn-secondary btn-sm" onclick="loadBulkSignals()"><i class="fa fa-sync"></i> Refresh</button>
+          </div>
+          <div style="padding:16px;">
+            <div class="tabs" id="bulkTabs">
+              <button class="tab-btn active" id="bulkTab1" onclick="switchBulkTab('t1', this)">Plan 1</button>
+              <button class="tab-btn" id="bulkTab2" onclick="switchBulkTab('t2', this)">Plan 2</button>
+              <button class="tab-btn" id="bulkTab3" onclick="switchBulkTab('t3', this)">Plan 3</button>
+              <button class="tab-btn" id="bulkTab4" onclick="switchBulkTab('t4', this)">Plan 4</button>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 420px;gap:24px;margin-top:20px;align-items:start;">
+              <!-- User List -->
+              <div class="table-wrap" style="border:1px solid var(--border);border-radius:10px;">
+                <div style="padding:12px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+                  <div>
+                    <input type="checkbox" id="bulkSelectAll" onchange="toggleBulkSelectAll(this)">
+                    <label for="bulkSelectAll" style="font-size:13px;font-weight:bold;margin-left:8px;">Select All in Plan</label>
+                  </div>
+                  <span id="bulkCountBadge" class="badge-count" style="background:var(--accent);color:#000;">0 Selected</span>
+                </div>
+                <div id="bulkUsersList" style="max-height:500px;overflow-y:auto;padding:8px;">
+                  <div class="loading-state"><div class="spinner"></div></div>
+                </div>
+              </div>
+
+              <!-- Signal Form -->
+              <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:20px;">
+                <h3 style="margin-top:0;margin-bottom:16px;font-size:16px;"><i class="fa fa-paper-plane"></i> Send to Selected</h3>
+                <div id="bulkSignalAlert"></div>
+                <div class="form-group">
+                  <label>Trading Pair</label>
+                  <select id="bulkSigPair">
+                    <option>BTC/USDT</option><option>ETH/USDT</option><option>BNB/USDT</option>
+                    <option>SOL/USDT</option><option>ADA/USDT</option><option>XRP/USDT</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Direction</label>
+                  <select id="bulkSigDir" style="font-weight:bold;color:var(--up-color);">
+                    <option value="CALL">CALL (UP)</option>
+                    <option value="PUT">PUT (DOWN)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Entry Time</label>
+                  <input type="datetime-local" id="bulkSigTime">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="form-group"><label>Duration (s)</label><input type="number" id="bulkSigDur" value="300"></div>
+                  <div class="form-group"><label>Multiplier</label><input type="number" id="bulkSigMult" value="1.8" step="0.1"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="form-group"><label>Suggested $</label><input type="number" id="bulkSigAmt" placeholder="100"></div>
+                  <div class="form-group"><label>Growth %</label><input type="number" id="bulkSigGrowth" placeholder="5"></div>
+                </div>
+                <button class="btn btn-primary btn-full" id="sendBulkBtn" onclick="sendBulkSignals()">
+                  <i class="fa fa-bolt"></i> Send Targeted Signal
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1389,6 +1460,26 @@ function showApp() {
   }
   initAdminSocket();
   loadDashboard();
+  apiGet('/api/admin/settings').then(function(res) {
+    globalSettings = res || {};
+    updateGlobalTiers();
+  }).catch(function(e) {});
+}
+
+let globalSettings = {};
+
+function updateGlobalTiers() {
+  var t1 = globalSettings.tier1_min || 500;
+  var t2 = globalSettings.tier2_min || 1000;
+  var t3 = globalSettings.tier3_min || 1500;
+  var t4 = globalSettings.tier4_min || 2000;
+  var sel = document.getElementById('sigVisibilityTier');
+  if (sel && sel.options.length >= 4) {
+    sel.options[0].text = 'Tier 1 - $' + t1 + '+ (all)';
+    sel.options[1].text = 'Tier 2 - $' + t2 + '+';
+    sel.options[2].text = 'Tier 3 - $' + t3 + '+';
+    sel.options[3].text = 'Tier 4 - $' + t4 + '+';
+  }
 }
 
 function doLogout() {
@@ -1511,7 +1602,7 @@ function showSection(name, el) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
   document.getElementById('section-' + name).classList.add('active');
-  var titles = {dashboard:'Dashboard',users:'Users',transactions:'Transactions',signals:'Signals',referrals:'Referrals',investments:'Investments',kyc:'KYC Verification',notifications:'Notifications',otps:'Active OTPs',settings:'Settings',deposits:'TRX Deposits',withdrawals:'TRX Withdrawals',adjustments:'Balance Adjustment Log',penalties:'Penalty History'};
+  var titles = {dashboard:'Dashboard',users:'Users',transactions:'Transactions',signals:'Signals',bulksignals:'Targeted Signals',referrals:'Referrals',investments:'Investments',kyc:'KYC Verification',notifications:'Notifications',otps:'Active OTPs',settings:'Settings',deposits:'TRX Deposits',withdrawals:'TRX Withdrawals',adjustments:'Balance Adjustment Log',penalties:'Penalty History'};
   document.getElementById('pageTitle').textContent = titles[name] || name;
   if (el) el.classList.add('active');
   currentSection = name;
@@ -1519,6 +1610,7 @@ function showSection(name, el) {
   else if (name === 'users') loadUsers(1);
   else if (name === 'transactions') { txStatus = 'PENDING'; txPage = 1; document.querySelectorAll('#txTabs .tab-btn').forEach(function(b,i){b.classList.toggle('active',i===0);}); document.getElementById('txTabTitle').textContent='Pending Transactions'; loadTransactions(1); }
   else if (name === 'signals') { loadSignals(); loadSignalAnalytics(); }
+  else if (name === 'bulksignals') loadBulkSignals();
   else if (name === 'referrals') loadReferrals();
   else if (name === 'investments') loadInvestments();
   else if (name === 'settings') loadSettings();
@@ -1548,6 +1640,8 @@ async function loadDashboard() {
 function renderStats(d) {
   var stats = [
     {label:'Total Users', value:fmtInt(d.totalUsers), icon:'fa-users', color:'accent', cardColor:'accent'},
+    {label:'Active Users', value:fmtInt(d.activeUsers || 0), icon:'fa-user-check', color:'green', cardColor:'green'},
+    {label:'Inactive Users', value:fmtInt(d.inactiveUsers || 0), icon:'fa-user-minus', color:'red', cardColor:'red'},
     {label:'Total Deposits', value:'$'+fmt(d.totalDeposits), icon:'fa-arrow-circle-down', color:'green', cardColor:'green'},
     {label:'Total Withdrawals', value:'$'+fmt(d.totalWithdrawals), icon:'fa-arrow-circle-up', color:'red', cardColor:'red'},
     {label:'Pending Transactions', value:fmtInt(d.pendingTxs), icon:'fa-clock', color:'accent', cardColor:'accent'},
@@ -1991,7 +2085,12 @@ async function loadSignals() {
     el.innerHTML = list.map(function(s) {
       var id = s.id || s._id;
       var statusColor = s.status === 'ACTIVE' ? 'var(--green)' : s.status === 'COMPLETED' ? 'var(--text2)' : 'var(--accent)';
-      var tierLabel = { 1: '$500+', 2: '$1000+', 3: '$1500+', 4: '$2000+' }[s.visibilityTier] || ('T' + s.visibilityTier);
+      
+      var t1 = globalSettings.tier1_min || 500;
+      var t2 = globalSettings.tier2_min || 1000;
+      var t3 = globalSettings.tier3_min || 1500;
+      var t4 = globalSettings.tier4_min || 2000;
+      var tierLabel = { 1: '$'+t1+'+', 2: '$'+t2+'+', 3: '$'+t3+'+', 4: '$'+t4+'+' }[s.visibilityTier] || ('T' + s.visibilityTier);
       var overrideRow = (s.status === 'ACTIVE' || s.status === 'PENDING')
         ? '<div style="display:flex;gap:6px;margin-top:8px;">' +
             '<button class="btn btn-success btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'WIN\',this)"><i class="fa fa-check"></i> Set WIN</button>' +
@@ -2839,6 +2938,109 @@ async function resolveAdminChat() {
 }
 
 // Socket initialized in initAdminSocket() called from showApp()
+// ==================== BULK SIGNALS ====================
+let bulkData = { tiers: {}, thresholds: {} };
+let currentBulkTab = 't1';
+
+async function loadBulkSignals() {
+  document.getElementById('bulkUsersList').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    const data = await apiGet('/api/admin/bulk-signals/users');
+    bulkData = data;
+    if (data.thresholds) {
+      const th = data.thresholds;
+      document.getElementById('bulkTab1').innerText = 'Plan 1 ($' + th.t1 + '+)';
+      document.getElementById('bulkTab2').innerText = 'Plan 2 ($' + th.t2 + '+)';
+      document.getElementById('bulkTab3').innerText = 'Plan 3 ($' + th.t3 + '+)';
+      document.getElementById('bulkTab4').innerText = 'Plan 4 ($' + th.t4 + '+)';
+    }
+    renderBulkUsers();
+  } catch (e) {
+    document.getElementById('bulkUsersList').innerHTML = '<div class="alert alert-error">Failed to load users: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function switchBulkTab(tabId, btn) {
+  document.querySelectorAll('#bulkTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  currentBulkTab = tabId;
+  document.getElementById('bulkSelectAll').checked = false;
+  renderBulkUsers();
+}
+
+function renderBulkUsers() {
+  const users = bulkData.tiers[currentBulkTab] || [];
+  const el = document.getElementById('bulkUsersList');
+  if (users.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:24px;text-align:center;"><p>No users in this plan</p></div>';
+    updateBulkCount();
+    return;
+  }
+  
+  el.innerHTML = users.map(u => {
+    const tot = (u.balance||0) + (u.tradeBalance||0) + (u.perpetualBalance||0);
+    return `<div style="display:flex;align-items:center;padding:10px;border-bottom:1px solid var(--border);">
+      <input type="checkbox" class="bulk-user-cb" value="${u.id}" onchange="updateBulkCount()">
+      <div style="margin-left:12px;flex:1;">
+        <div style="font-weight:bold;font-size:14px;">${escHtml(u.email)}</div>
+        <div style="font-size:12px;color:var(--text2);">Balance: $${tot.toFixed(2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  updateBulkCount();
+}
+
+function toggleBulkSelectAll(cb) {
+  document.querySelectorAll('.bulk-user-cb').forEach(c => c.checked = cb.checked);
+  updateBulkCount();
+}
+
+function updateBulkCount() {
+  const count = document.querySelectorAll('.bulk-user-cb:checked').length;
+  document.getElementById('bulkCountBadge').textContent = count + ' Selected';
+}
+
+async function sendBulkSignals() {
+  const selected = Array.from(document.querySelectorAll('.bulk-user-cb:checked')).map(c => c.value);
+  const alertEl = document.getElementById('bulkSignalAlert');
+  if (selected.length === 0) {
+    return showAlert(alertEl, 'Please select at least one user.', 'error');
+  }
+
+  const payload = {
+    pair: document.getElementById('bulkSigPair').value,
+    direction: document.getElementById('bulkSigDir').value,
+    marketType: 'FUTURES',
+    entryTime: document.getElementById('bulkSigTime').value || null,
+    duration: parseInt(document.getElementById('bulkSigDur').value || '300'),
+    multiplier: parseFloat(document.getElementById('bulkSigMult').value || '1.8'),
+    rewardPercentage: 80,
+    suggestedAmount: parseFloat(document.getElementById('bulkSigAmt').value) || null,
+    riskLevel: 'MEDIUM',
+    visibilityTier: 1, // Doesn't matter, targeted
+    growthTarget: parseFloat(document.getElementById('bulkSigGrowth').value) || null,
+    targetUserIds: selected
+  };
+
+  if (!payload.pair || !payload.direction) return showAlert(alertEl, 'Missing pair or direction', 'error');
+
+  const btn = document.getElementById('sendBulkBtn');
+  const origHTML = btn.innerHTML;
+  setBtn(btn, true);
+
+  try {
+    const res = await apiPost('/api/admin/signals', payload);
+    showAlert(alertEl, 'Signals successfully sent to ' + res.count + ' users!', 'success');
+    document.getElementById('bulkSigTime').value = '';
+    document.querySelectorAll('.bulk-user-cb').forEach(c => c.checked = false);
+    document.getElementById('bulkSelectAll').checked = false;
+    updateBulkCount();
+  } catch(e) {
+    showAlert(alertEl, e.message, 'error');
+  } finally {
+    setBtn(btn, false, '', origHTML);
+  }
+}
 </script>
 </body>
 </html>
