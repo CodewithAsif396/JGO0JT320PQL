@@ -103,7 +103,7 @@ class SignalService {
 
   async _notifyEligibleUsers(signal) {
     const arrow = signal.direction === 'CALL' ? '↑' : '↓';
-    const entryTime = new Date(signal.entryTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Karachi' });
+    const entryTime = new Date(signal.entryTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
     const title = `New Signal: ${signal.pair} ${arrow} ${signal.direction} @ ${entryTime}`;
     const body = `Entry: ${entryTime} · Risk: ${signal.riskLevel} · Reward: ${signal.rewardPercentage}%`;
 
