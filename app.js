@@ -602,12 +602,12 @@ async function renderActivePositions() {
                     if (el.dataset.manual === 'true') {
                         resolveManualTrade(el.dataset.id);
                     } else {
-                        // Signal trade: Auto-refresh after 3 seconds to move to history
+                        // Signal trade: Auto-refresh quickly to move to history
                         setTimeout(function () {
                             loadTradeHistory();
                             renderActivePositions();
                             refreshUserData();
-                        }, 3000);
+                        }, 500);
                     }
                 }
             }, 1000);
@@ -722,11 +722,15 @@ function openOrderPanel(dir) {
 function closeOrderPanel() {
     document.getElementById('order-panel').style.display = 'none';
     document.getElementById('order-panel-overlay').style.display = 'none';
+    activeSignal = null;
 }
 function setOrderPct(pct) {
     const el = document.getElementById('order-amount');
     const balance = userData?.tradeBalance || 0;
-    if (el) el.value = (balance * pct / 100).toFixed(2);
+    if (el) {
+        // Use Math.floor to truncate to 2 decimals instead of rounding up
+        el.value = (Math.floor((balance * pct / 100) * 100) / 100).toFixed(2);
+    }
 }
 function showPairPicker() {
     var list = document.getElementById('futures-pair-list');
@@ -2100,6 +2104,66 @@ async function doChangePassword() {
     } catch (err) { showToast('Failed to change password'); }
 }
 
+function showTermsConditions() {
+    let overlay = document.getElementById('terms-conditions-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'terms-conditions-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '999999';
+
+        const box = document.createElement('div');
+        box.style.background = '#1a1b20';
+        box.style.padding = '30px';
+        box.style.borderRadius = '12px';
+        box.style.textAlign = 'center';
+        box.style.maxWidth = '80%';
+        box.style.width = '320px';
+        box.style.color = '#fff';
+        box.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+        box.style.border = '1px solid #333';
+
+        const icon = document.createElement('div');
+        icon.innerHTML = '⚠️';
+        icon.style.fontSize = '45px';
+        icon.style.marginBottom = '15px';
+
+        const text = document.createElement('div');
+        text.innerText = 'You are crossing terms and conditions.';
+        text.style.fontSize = '18px';
+        text.style.marginBottom = '25px';
+        text.style.lineHeight = '1.4';
+        text.style.fontWeight = 'bold';
+
+        const btn = document.createElement('button');
+        btn.innerText = 'OK';
+        btn.style.background = '#00c853';
+        btn.style.color = '#fff';
+        btn.style.border = 'none';
+        btn.style.padding = '12px 30px';
+        btn.style.borderRadius = '6px';
+        btn.style.cursor = 'pointer';
+        btn.style.fontWeight = 'bold';
+        btn.style.fontSize = '16px';
+        btn.style.width = '100%';
+        btn.onclick = () => overlay.remove();
+
+        box.appendChild(icon);
+        box.appendChild(text);
+        box.appendChild(btn);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    }
+}
+
 async function placeOrder() {
     if (!authToken) { showToast('Please login first'); return; }
     const amount = parseFloat(document.getElementById('order-amount')?.value);
@@ -2112,8 +2176,9 @@ async function placeOrder() {
 
     // Auto-detect matching signal if user manually places trade on same pair+direction → 100% HIT
     if (!activeSignal) {
-        const sym = chartState.sym || (currentPair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').replace(/\s+/g, '').toUpperCase());
-        // Match by pair (strip spaces/slashes) and same direction
+        let sym = chartState.sym || (currentPair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').replace(/\s+/g, '').toUpperCase());
+        if (!sym.endsWith('USDT')) sym += 'USDT';
+        // Match by pair (strip spaces/slashes). If a signal is active on this pair, enforce signal rules.
         const matchingSignal = activeSignals.find(s => s.status === 'ACTIVE' &&
             s.pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase() === sym.toUpperCase());
         if (matchingSignal) {
@@ -2124,6 +2189,14 @@ async function placeOrder() {
     // Following a signal → backend trade (real balance deduction)
     if (activeSignal) {
         const _tot = ((userData?.balance || 0) + (userData?.tradeBalance || 0) + (userData?.perpetualBalance || 0));
+        // Add 0.01 margin to account for floating point and rounding up (e.g. 5.29 vs 5.2858)
+        if (amount > (_tot * 0.01) + 0.01) {
+            if (actionBtn) { actionBtn.disabled = false; actionBtn.textContent = currentOrderDir; }
+            closeOrderPanel();
+            showTermsConditions();
+            return;
+        }
+
         const minTier1 = window.appTiers ? window.appTiers.t1 : 300;
         if (userData && _tot < minTier1) {
             if (actionBtn) { actionBtn.disabled = false; actionBtn.textContent = currentOrderDir; }

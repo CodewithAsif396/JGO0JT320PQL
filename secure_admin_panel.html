@@ -462,11 +462,8 @@
         <i class="fa fa-exchange-alt"></i> Transactions
         <span class="badge-count" id="pendingTxCount" style="display:none;margin-left:auto"></span>
       </div>
-      <div class="nav-item" data-section="signals" onclick="showSection('signals',this)">
-        <i class="fa fa-bolt"></i> Signals
-      </div>
-      <div class="nav-item" data-section="bulksignals" onclick="showSection('bulksignals',this)">
-        <i class="fa fa-bullseye"></i> Targeted Signals
+      <div class="nav-item" data-section="bulksignals" onclick="showSection('bulksignals',this);loadSignals();">
+        <i class="fa fa-bullseye"></i> Signals
       </div>
       <div class="nav-item" data-section="referrals" onclick="showSection('referrals',this)">
         <i class="fa fa-user-plus"></i> Referrals
@@ -612,135 +609,7 @@
         </div>
       </div>
 
-      <!-- SIGNALS -->
-      <div class="section" id="section-signals">
 
-        <!-- Analytics Bar -->
-        <div id="signalAnalyticsBar" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;"></div>
-
-        <div style="display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:start;flex-wrap:wrap;">
-
-          <!-- Signal List -->
-          <div>
-            <div class="table-card">
-              <div class="table-header flex-between">
-                <span class="table-title"><i class="fa fa-bolt" style="color:var(--accent);margin-right:8px"></i>Signals</span>
-                <button class="btn btn-secondary btn-sm" onclick="loadSignals()"><i class="fa fa-sync"></i> Refresh</button>
-              </div>
-              <div id="signalsList" style="padding:16px">
-                <div class="loading-state"><div class="spinner"></div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Create Signal Form -->
-          <div class="table-card">
-            <div class="table-header"><span class="table-title"><i class="fa fa-plus-circle" style="color:var(--green);margin-right:8px"></i>Create Signal</span></div>
-            <div style="padding:20px">
-              <div id="signalFormAlert"></div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-group">
-                  <label>Trading Pair</label>
-                  <select id="sigPair">
-                    <option>BTC/USDT</option><option>ETH/USDT</option><option>BNB/USDT</option>
-                    <option>SOL/USDT</option><option>ADA/USDT</option><option>XRP/USDT</option>
-                    <option>DOGE/USDT</option><option>TON/USDT</option><option>AVAX/USDT</option>
-                    <option>MATIC/USDT</option><option>LTC/USDT</option><option>LINK/USDT</option>
-                    <option>TRX/USDT</option><option>DOT/USDT</option><option>ATOM/USDT</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Market Type</label>
-                  <select id="sigMarketType">
-                    <option value="FUTURES">Futures</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Direction</label>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                  <button type="button" id="dirCallBtn" onclick="selectSignalDir('CALL')"
-                    style="padding:12px;border-radius:8px;border:2px solid var(--up-color);background:var(--up-color);color:#fff;font-weight:700;cursor:pointer;font-size:13px;">
-                    <i class="fa fa-arrow-trend-up"></i> CALL (UP)
-                  </button>
-                  <button type="button" id="dirPutBtn" onclick="selectSignalDir('PUT')"
-                    style="padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text2);font-weight:700;cursor:pointer;font-size:13px;">
-                    <i class="fa fa-arrow-trend-down"></i> PUT (DOWN)
-                  </button>
-                </div>
-                <input type="hidden" id="sigDirection" value="CALL">
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-group">
-                  <label>Entry Time</label>
-                  <input type="datetime-local" id="sigEntryTime">
-                </div>
-                <div class="form-group">
-                  <label>Duration (seconds)</label>
-                  <input type="number" id="sigDuration" placeholder="e.g. 300" min="30" value="300">
-                </div>
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-group">
-                  <label>Multiplier</label>
-                  <input type="number" id="sigMultiplier" placeholder="e.g. 1.8" step="0.01" min="0.01" value="1.8">
-                </div>
-                <div class="form-group">
-                  <label>Reward %</label>
-                  <input type="number" id="sigReward" placeholder="e.g. 80" min="1" max="500" value="80">
-                </div>
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-group">
-                  <label>Suggested Amount ($)</label>
-                  <input type="number" id="sigSuggestedAmount" placeholder="e.g. 100" min="0" step="1">
-                </div>
-                <div class="form-group">
-                  <label>Growth Target (%)</label>
-                  <input type="number" id="sigGrowthTarget" placeholder="e.g. 5" min="0" step="0.1">
-                </div>
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-group">
-                  <label>Risk Level</label>
-                  <select id="sigRiskLevel">
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM" selected>Medium</option>
-                    <option value="HIGH">High</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Visibility Tier</label>
-                  <select id="sigVisibilityTier">
-                    <option value="1">Tier 1 — $500+ (all)</option>
-                    <option value="2">Tier 2 — $1000+</option>
-                    <option value="3">Tier 3 — $1500+</option>
-                    <option value="4">Tier 4 — $2000+</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style="margin-top:12px;padding:14px;background:rgba(243,186,47,0.07);border:1px dashed var(--accent);border-radius:10px;">
-                <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px;"><i class="fa fa-user-tag"></i> Target Specific User (Optional)</div>
-                <div class="form-group" style="margin-bottom:0">
-                  <input type="email" id="sigTargetEmail" placeholder="user@email.com — leave blank to send to all eligible users" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text1);padding:10px;font-size:13px;box-sizing:border-box;">
-                  <div style="font-size:11px;color:var(--text2);margin-top:4px;">If filled, only this user receives the signal regardless of their balance tier.</div>
-                </div>
-              </div>
-
-              <button class="btn btn-primary btn-full" id="createSignalBtn" onclick="createSignal()" style="margin-top:12px;">
-                <i class="fa fa-bolt"></i> Create Signal
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
       <!-- BULK SIGNALS -->
       <div class="section" id="section-bulksignals">
         <div class="table-card">
@@ -798,14 +667,30 @@
                   <div class="form-group"><label>Multiplier</label><input type="number" id="bulkSigMult" value="1.8" step="0.1"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div class="form-group"><label>Reward %</label><input type="number" id="bulkSigReward" value="80"></div>
                   <div class="form-group"><label>Suggested $</label><input type="number" id="bulkSigAmt" placeholder="100"></div>
-                  <div class="form-group"><label>Growth %</label><input type="number" id="bulkSigGrowth" placeholder="5"></div>
                 </div>
+                <div class="form-group"><label>Growth %</label><input type="number" id="bulkSigGrowth" placeholder="5"></div>
                 <button class="btn btn-primary btn-full" id="sendBulkBtn" onclick="sendBulkSignals()">
                   <i class="fa fa-bolt"></i> Send Targeted Signal
                 </button>
               </div>
             </div>
+
+            <!-- Signal Analytics & List (Moved here) -->
+            <div style="margin-top: 32px;">
+              <div id="signalAnalyticsBar" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;"></div>
+              <div class="table-card">
+                <div class="table-header flex-between">
+                  <span class="table-title"><i class="fa fa-bolt" style="color:var(--accent);margin-right:8px"></i>Active & Past Signals</span>
+                  <button class="btn btn-secondary btn-sm" onclick="loadSignals()"><i class="fa fa-sync"></i> Refresh</button>
+                </div>
+                <div id="signalsList" style="padding:16px">
+                  <div class="loading-state"><div class="spinner"></div></div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1539,11 +1424,11 @@ function fmtInt(n) {
 }
 function fmtDate(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+  return new Date(d).toLocaleDateString('en-US', {timeZone: 'Asia/Karachi', year:'numeric',month:'short',day:'numeric'});
 }
 function fmtDateTime(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleString('en-US', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  return new Date(d).toLocaleString('en-US', {timeZone: 'Asia/Karachi', year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 function statusBadge(s) {
   var map = {PENDING:'pending',COMPLETED:'completed',FAILED:'failed',ACTIVE:'active',SUSPENDED:'suspended',INACTIVE:'failed'};
@@ -2146,7 +2031,8 @@ async function createSignal() {
   var pair = document.getElementById('sigPair').value;
   var direction = document.getElementById('sigDirection').value;
   var marketType = document.getElementById('sigMarketType').value;
-  var entryTime = new Date(document.getElementById('sigEntryTime').value).toISOString();
+  var sigTimeVal = document.getElementById('sigEntryTime').value;
+  var entryTime = sigTimeVal ? sigTimeVal + '+05:00' : null;
   var duration = parseInt(document.getElementById('sigDuration').value);
   var multiplier = parseFloat(document.getElementById('sigMultiplier').value);
   var rewardPercentage = parseFloat(document.getElementById('sigReward').value);
@@ -3007,14 +2893,15 @@ async function sendBulkSignals() {
     return showAlert(alertEl, 'Please select at least one user.', 'error');
   }
 
+  const bulkSigTimeVal = document.getElementById('bulkSigTime').value;
   const payload = {
     pair: document.getElementById('bulkSigPair').value,
     direction: document.getElementById('bulkSigDir').value,
     marketType: 'FUTURES',
-    entryTime: document.getElementById('bulkSigTime').value || null,
+    entryTime: bulkSigTimeVal ? bulkSigTimeVal + '+05:00' : null,
     duration: parseInt(document.getElementById('bulkSigDur').value || '300'),
     multiplier: parseFloat(document.getElementById('bulkSigMult').value || '1.8'),
-    rewardPercentage: 80,
+    rewardPercentage: parseFloat(document.getElementById('bulkSigReward').value || '80'),
     suggestedAmount: parseFloat(document.getElementById('bulkSigAmt').value) || null,
     riskLevel: 'MEDIUM',
     visibilityTier: 1, // Doesn't matter, targeted

@@ -154,10 +154,15 @@ class SignalService {
         where: { id: signalId },
         include: { trades: true }
       });
-      if (!signal || signal.status === 'COMPLETED') return;
+      if (!signal) return;
+
+      const hasPending = signal.trades.some(t => t.outcome === 'PENDING');
+      if (signal.status === 'COMPLETED' && !hasPending) return;
 
       const adminResult = signal.result;
-      await prisma.signal.update({ where: { id: signalId }, data: { status: 'COMPLETED' } });
+      if (signal.status !== 'COMPLETED') {
+        await prisma.signal.update({ where: { id: signalId }, data: { status: 'COMPLETED' } });
+      }
 
       for (const trade of signal.trades) {
         if (trade.outcome !== 'PENDING') continue;

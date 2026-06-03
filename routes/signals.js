@@ -90,7 +90,7 @@ router.get('/my-trades', authMiddleware, async (req, res) => {
       include: {
         signal: {
           select: {
-            pair: true, direction: true, marketType: true,
+            id: true, pair: true, direction: true, marketType: true,
             entryTime: true, duration: true, multiplier: true, status: true,
             result: true, rewardPercentage: true
           }
@@ -99,6 +99,44 @@ router.get('/my-trades', authMiddleware, async (req, res) => {
       orderBy: { createdAt: 'desc' },
       take: 50
     });
+
+    let autoHealed = false;
+    for (const trade of trades) {
+      if (trade.outcome === 'PENDING' && trade.signal) {
+        const signal = trade.signal;
+        const entryTime = new Date(signal.entryTime).getTime();
+        const endTime = entryTime + (signal.duration * 1000);
+        // 2-second buffer to handle slight client/server clock desync
+        const hasExpired = Date.now() >= (endTime - 2000);
+
+        if (signal.status === 'COMPLETED' || (signal.status === 'ACTIVE' && hasExpired)) {
+          if (global.ss) {
+            await global.ss.completeSignal(signal.id);
+            autoHealed = true;
+          }
+        }
+      }
+    }
+
+    if (autoHealed) {
+      // Refetch after healing
+      const healedTrades = await prisma.trade.findMany({
+        where: { userId: req.user.userId },
+        include: {
+          signal: {
+            select: {
+              id: true, pair: true, direction: true, marketType: true,
+              entryTime: true, duration: true, multiplier: true, status: true,
+              result: true, rewardPercentage: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50
+      });
+      return res.json(healedTrades);
+    }
+
     res.json(trades);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -125,9 +163,9 @@ router.post('/trade', authMiddleware, async (req, res) => {
     if (user.tradeBalance === 0) return res.status(400).json({ error: 'Please transfer funds to Trade wallet before trading.' });
     if (user.tradeBalance < amt) return res.status(400).json({ error: 'Insufficient Trade wallet balance' });
 
-    // Enforce 1% limit for signal trades
-    const maxAllowed = user.tradeBalance * 0.01;
-    if (amt > maxAllowed) {
+    // 1. Enforce 1% limit based on total balance for ALL signals (allow tiny precision margin)
+    const totalBalance = (user.balance || 0) + (user.tradeBalance || 0) + (user.perpetualBalance || 0);
+    if (amt > (totalBalance * 0.01) + 0.01) {
       return res.status(400).json({ error: 'You are crossing terms and conditions.' });
     }
 
@@ -248,7 +286,7 @@ router.post('/manual-cancel', authMiddleware, async (req, res) => {
   try {
     const { tradeId } = req.body;
     const trade = await prisma.trade.findUnique({ where: { id: tradeId } });
-    
+
     if (!trade || trade.userId !== req.user.userId || trade.outcome !== 'PENDING') {
       return res.status(400).json({ error: 'Trade not found or already closed' });
     }
@@ -282,7 +320,7 @@ router.post('/manual-resolve', authMiddleware, async (req, res) => {
   try {
     const { tradeId } = req.body;
     const trade = await prisma.trade.findUnique({ where: { id: tradeId } });
-    
+
     if (!trade || trade.userId !== req.user.userId || trade.outcome !== 'PENDING') {
       return res.status(400).json({ error: 'Trade not found or already closed' });
     }
@@ -290,13 +328,13 @@ router.post('/manual-resolve', authMiddleware, async (req, res) => {
     // Generate a close price that forces a loss based on direction
     let closePrice = null;
     if (trade.entryPrice) {
-       // Random change between 0.1% and 0.5%
-       const changePct = 0.001 + Math.random() * 0.004;
-       if (trade.direction === 'CALL') {
-         closePrice = trade.entryPrice * (1 - changePct); // Goes down, loss for CALL
-       } else {
-         closePrice = trade.entryPrice * (1 + changePct); // Goes up, loss for PUT
-       }
+      // Random change between 0.1% and 0.5%
+      const changePct = 0.001 + Math.random() * 0.004;
+      if (trade.direction === 'CALL') {
+        closePrice = trade.entryPrice * (1 - changePct); // Goes down, loss for CALL
+      } else {
+        closePrice = trade.entryPrice * (1 + changePct); // Goes up, loss for PUT
+      }
     }
 
     await prisma.$transaction([

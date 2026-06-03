@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trexis - Professional Crypto Trading</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <link rel="stylesheet" href="style.css?v=25">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,23 +23,27 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #0b0e17; /* Matches app dark background */
+            background: #0b0e17;
+            /* Matches app dark background */
             z-index: 999999;
             display: flex;
             justify-content: center;
             align-items: center;
             transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
         }
+
         #app-preloader.hidden {
             opacity: 0;
             visibility: hidden;
         }
+
         #app-preloader img {
             width: 100%;
             max-width: 480px;
             height: 100%;
             object-fit: cover;
         }
+
         body.light-preload #app-preloader {
             background: #f5f6fa;
         }
@@ -57,70 +62,107 @@
             <div class="sidebar-header" style="padding-bottom:15px; border-bottom:none;">
                 <div class="user-top-row" style="margin-bottom:10px;">
                     <div class="user-badge" style="gap:8px;">
-                        <div class="avatar-circle" id="sidebar-avatar" style="width:36px;height:36px;overflow:hidden; border:none; background:rgba(0,0,0,0.05); border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                            <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff" style="width:100%; height:100%;" />
+                        <div class="avatar-circle" id="sidebar-avatar"
+                            style="width:36px;height:36px;overflow:hidden; border:none; background:rgba(0,0,0,0.05); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                            <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff"
+                                style="width:100%; height:100%;" />
                         </div>
                         <div class="vip-badge" style="background:transparent; padding:0; border-radius:0; gap:0;">
-                            <span style="font-weight:900; font-size:22px; font-style:italic; color:#cda357; margin-right:-8px; z-index:2; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">V</span>
-                            <div style="background: linear-gradient(90deg, #ba8f46, #d7b275); color:#fff; font-size:10px; font-weight:700; padding:2px 8px 2px 10px; border-radius:0 10px 10px 0; z-index:1; height: 16px; display:flex; align-items:center;">VIP0</div>
+                            <span
+                                style="font-weight:900; font-size:22px; font-style:italic; color:#cda357; margin-right:-8px; z-index:2; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">V</span>
+                            <div
+                                style="background: linear-gradient(90deg, #ba8f46, #d7b275); color:#fff; font-size:10px; font-weight:700; padding:2px 8px 2px 10px; border-radius:0 10px 10px 0; z-index:1; height: 16px; display:flex; align-items:center;">
+                                VIP0</div>
                         </div>
                     </div>
                     <div class="theme-toggle" onclick="toggleTheme()">
-                        <div class="toggle-track" id="theme-track" style="background: #e0e0e0; width: 50px; height: 26px; border-radius: 13px; position: relative;">
-                            <div class="toggle-thumb" id="theme-thumb" style="background: transparent; width: 22px; height: 22px; top: 2px; right: 2px; box-shadow: none;">
+                        <div class="toggle-track" id="theme-track"
+                            style="background: #e0e0e0; width: 50px; height: 26px; border-radius: 13px; position: relative;">
+                            <div class="toggle-thumb" id="theme-thumb"
+                                style="background: transparent; width: 22px; height: 22px; top: 2px; right: 2px; box-shadow: none;">
                                 <i class="fa-solid fa-sun" id="theme-icon" style="color: #f7b731; font-size: 13px;"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="user-email" id="sidebar-email" style="font-size:16px; color:var(--text-primary); font-weight:400; margin-bottom:12px;">eslkey55@rulersonline.com</div>
-                <div class="user-id" id="sidebar-uid" style="font-size:13px; color:#999; font-weight:400; display:flex; align-items:center; gap:6px;">ID: CD3U3PMQ9800 <i class="fa-regular fa-copy" style="cursor:pointer; font-size:14px;"></i></div>
+                <div class="user-email" id="sidebar-email"
+                    style="font-size:16px; color:var(--text-primary); font-weight:400; margin-bottom:12px;">
+                    eslkey55@rulersonline.com</div>
+                <div class="user-id" id="sidebar-uid"
+                    style="font-size:13px; color:#999; font-weight:400; display:flex; align-items:center; gap:6px;">ID:
+                    CD3U3PMQ9800 <i class="fa-regular fa-copy" style="cursor:pointer; font-size:14px;"></i></div>
             </div>
 
             <div class="verification-cards" style="padding:0 20px; gap:10px;">
-                <div class="v-card basic" onclick="navTo('basic-verification-screen'); closeSidebar();" style="background:#43add0; border-radius:2px; border:none; padding:15px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                <div class="v-card basic" onclick="navTo('basic-verification-screen'); closeSidebar();"
+                    style="background:#43add0; border-radius:2px; border:none; padding:15px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
                     <div class="v-info">
-                        <h4 style="font-size:14px; font-weight:500; margin-bottom:5px; color:#fff;">Basic Verification</h4>
-                        <p id="basic-kyc-status" style="color:#ffdf80; font-size:12px; font-weight:500;">Not certified</p>
+                        <h4 style="font-size:14px; font-weight:500; margin-bottom:5px; color:#fff;">Basic Verification
+                        </h4>
+                        <p id="basic-kyc-status" style="color:#ffdf80; font-size:12px; font-weight:500;">Not certified
+                        </p>
                     </div>
-                    <div class="v-icon-circle" style="width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; background:transparent;"><i class="fa-solid fa-user-check" style="color:rgba(255,255,255,0.7); font-size:20px;"></i></div>
+                    <div class="v-icon-circle"
+                        style="width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; background:transparent;">
+                        <i class="fa-solid fa-user-check" style="color:rgba(255,255,255,0.7); font-size:20px;"></i>
+                    </div>
                 </div>
-                <div class="v-card advanced" onclick="checkAdvancedKyc();" style="background:#1ac184; border-radius:2px; border:none; padding:15px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                <div class="v-card advanced" onclick="checkAdvancedKyc();"
+                    style="background:#1ac184; border-radius:2px; border:none; padding:15px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
                     <div class="v-info">
-                        <h4 style="font-size:14px; font-weight:500; margin-bottom:5px; color:#fff;">Advanced Verification</h4>
-                        <p id="advanced-kyc-status" style="color:#95f2cb; font-size:12px; font-weight:500;">Not certified</p>
+                        <h4 style="font-size:14px; font-weight:500; margin-bottom:5px; color:#fff;">Advanced
+                            Verification</h4>
+                        <p id="advanced-kyc-status" style="color:#95f2cb; font-size:12px; font-weight:500;">Not
+                            certified</p>
                     </div>
-                    <div class="v-icon-circle" style="width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; background:transparent;"><i class="fa-solid fa-user-shield" style="color:rgba(255,255,255,0.7); font-size:20px;"></i></div>
+                    <div class="v-icon-circle"
+                        style="width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; background:transparent;">
+                        <i class="fa-solid fa-user-shield" style="color:rgba(255,255,255,0.7); font-size:20px;"></i>
+                    </div>
                 </div>
             </div>
 
             <div class="sidebar-links custom-sidebar-links" style="padding-top:20px;">
-                <div class="s-link" onclick="navTo('transaction-screen'); closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
+                <div class="s-link" onclick="navTo('transaction-screen'); closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
                     Transaction History
                 </div>
-                <div class="s-link" onclick="navTo('share-screen'); closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
+                <div class="s-link" onclick="navTo('share-screen'); closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
                     Share With Friends
                 </div>
-                <div class="s-link" onclick="navTo('support-screen'); closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
+                <div class="s-link" onclick="navTo('support-screen'); closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
                     Support center
                 </div>
-                <div class="s-link" onclick="navTo('about-screen'); closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
+                <div class="s-link" onclick="navTo('about-screen'); closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
                     About Us
                 </div>
-                <div class="s-link" onclick="navTo('settings-screen'); closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
+                <div class="s-link" onclick="navTo('settings-screen'); closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0;">
                     Settings
                 </div>
-                <a href="/trexis.apk" download="trexis.apk" class="s-link" onclick="closeSidebar();" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0; text-decoration:none; display:block;">
+                <a href="/trexis.apk" download="trexis.apk" class="s-link" onclick="closeSidebar();"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:0; text-decoration:none; display:block;">
                     Download APP
                 </a>
-                <div class="s-link s-link-expand" onclick="toggleSecurityMenu(this)" style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:8px;">
+                <div class="s-link s-link-expand" onclick="toggleSecurityMenu(this)"
+                    style="padding:16px 20px; font-size:15px; font-weight:400; border-bottom:1px solid var(--border-color); color:var(--text-primary); gap:8px;">
                     Security
-                    <i class="fa-solid fa-chevron-down expand-icon" style="font-size:12px; color:var(--text-muted);"></i>
+                    <i class="fa-solid fa-chevron-down expand-icon"
+                        style="font-size:12px; color:var(--text-muted);"></i>
                 </div>
                 <div class="security-submenu" id="security-submenu" style="padding-left:20px;">
-                    <div class="s-sub-link" onclick="navTo('change-password-screen'); closeSidebar();" style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Change login password</div>
-                    <div class="s-sub-link" onclick="navTo('bind-address-screen'); closeSidebar();" style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Bind withdrawal address</div>
-                    <div class="s-sub-link" onclick="navTo('google-auth-screen'); closeSidebar();" style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Google Verification code</div>
+                    <div class="s-sub-link" onclick="navTo('change-password-screen'); closeSidebar();"
+                        style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Change
+                        login password</div>
+                    <div class="s-sub-link" onclick="navTo('bind-address-screen'); closeSidebar();"
+                        style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Bind
+                        withdrawal address</div>
+                    <div class="s-sub-link" onclick="navTo('google-auth-screen'); closeSidebar();"
+                        style="padding:12px 20px; font-size:14px; border-bottom:1px solid var(--border-color);">Google
+                        Verification code</div>
                 </div>
             </div>
         </div>
@@ -133,19 +175,22 @@
                 <div class="slides" id="banner-slides-container">
                     <!-- Banners loaded dynamically -->
                 </div>
-                <div class="slider-dots" id="banner-dots-container" style="position: absolute; bottom: 10px; width: 100%; text-align: center; z-index: 2;">
+                <div class="slider-dots" id="banner-dots-container"
+                    style="position: absolute; bottom: 10px; width: 100%; text-align: center; z-index: 2;">
                     <!-- Dots loaded dynamically -->
                 </div>
                 <div class="banner-avatar" id="banner-avatar-img" onclick="openSidebar()">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;border-radius:50%;overflow:hidden;">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+                        style="width:100%;height:100%;display:block;border-radius:50%;overflow:hidden;">
                         <!-- Shirt -->
-                        <path d="M 15 100 C 15 65, 85 65, 85 100 Z" fill="#a4c6ff"/>
+                        <path d="M 15 100 C 15 65, 85 65, 85 100 Z" fill="#a4c6ff" />
                         <!-- Neck -->
-                        <rect x="40" y="60" width="20" height="20" fill="#f4ceb1" rx="5"/>
+                        <rect x="40" y="60" width="20" height="20" fill="#f4ceb1" rx="5" />
                         <!-- Face -->
-                        <path d="M 28 45 C 28 75, 72 75, 72 45 C 72 15, 28 15, 28 45 Z" fill="#fce4cc"/>
+                        <path d="M 28 45 C 28 75, 72 75, 72 45 C 72 15, 28 15, 28 45 Z" fill="#fce4cc" />
                         <!-- Hair -->
-                        <path d="M 25 45 C 25 10, 75 10, 75 45 C 75 45, 60 25, 50 25 C 40 25, 25 45, 25 45 Z" fill="#5c534f"/>
+                        <path d="M 25 45 C 25 10, 75 10, 75 45 C 75 45, 60 25, 50 25 C 40 25, 25 45, 25 45 Z"
+                            fill="#5c534f" />
                     </svg>
                 </div>
                 <div class="banner-notif" onclick="navTo('notifications-screen')" id="notif-dot-main">
@@ -157,7 +202,8 @@
             <div class="marquee-bar">
                 <i class="fa-solid fa-bullhorn"></i>
                 <div class="marquee-wrap">
-                    <marquee id="home-ticker-text">Trexis demonstrates commitment to legal and transparent operations with
+                    <marquee id="home-ticker-text">Trexis demonstrates commitment to legal and transparent operations
+                        with
                         full licensing. Safe, Fast, and Easy Trading for all professional investors.</marquee>
                 </div>
                 <i class="fa-solid fa-arrow-right"></i>
@@ -211,24 +257,38 @@
                 </div>
             </div>
 
-            <div class="quick-buy-banner" onclick="switchTab('futures-screen')" style="background: linear-gradient(to right, #1ac78c, #14b27a); position: relative; overflow: hidden; padding: 14px 20px; border-radius: 0; display: flex; justify-content: space-between; align-items: center; margin: 0; min-height:64px; box-shadow:none;">
+            <div class="quick-buy-banner" onclick="switchTab('futures-screen')"
+                style="background: linear-gradient(to right, #1ac78c, #14b27a); position: relative; overflow: hidden; padding: 14px 20px; border-radius: 0; display: flex; justify-content: space-between; align-items: center; margin: 0; min-height:64px; box-shadow:none;">
                 <!-- Dotted pattern left -->
-                <div style="position: absolute; left: -10px; top: -10px; width: 120px; height: 120%; background-image: radial-gradient(rgba(255,255,255,0.2) 1.5px, transparent 1.5px); background-size: 8px 8px; mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));"></div>
+                <div
+                    style="position: absolute; left: -10px; top: -10px; width: 120px; height: 120%; background-image: radial-gradient(rgba(255,255,255,0.2) 1.5px, transparent 1.5px); background-size: 8px 8px; mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));">
+                </div>
                 <!-- Big Circle -->
-                <div style="position: absolute; top: -60px; left: 35%; width: 160px; height: 160px; background: linear-gradient(to bottom right, rgba(255,255,255,0.15), transparent); border-radius: 50%;"></div>
+                <div
+                    style="position: absolute; top: -60px; left: 35%; width: 160px; height: 160px; background: linear-gradient(to bottom right, rgba(255,255,255,0.15), transparent); border-radius: 50%;">
+                </div>
                 <!-- Small Circle -->
-                <div style="position: absolute; top: 15px; left: 55%; width: 40px; height: 40px; background: linear-gradient(to bottom right, rgba(255,255,255,0.15), transparent); border-radius: 50%;"></div>
+                <div
+                    style="position: absolute; top: 15px; left: 55%; width: 40px; height: 40px; background: linear-gradient(to bottom right, rgba(255,255,255,0.15), transparent); border-radius: 50%;">
+                </div>
                 <!-- Tiny Circle -->
-                <div style="position: absolute; top: 40px; left: 48%; width: 12px; height: 12px; background: rgba(0,0,0,0.08); border-radius: 50%;"></div>
+                <div
+                    style="position: absolute; top: 40px; left: 48%; width: 12px; height: 12px; background: rgba(0,0,0,0.08); border-radius: 50%;">
+                </div>
 
                 <div style="position: relative; z-index: 1;">
-                    <div style="color: #fff; font-size: 17px; font-weight: 800; font-family: 'Inter', sans-serif; letter-spacing: -0.2px;">Quickly buy coins</div>
-                    <div style="color: #fff; font-size: 13px; font-weight: 400; margin-top: 2px;">Safe and convenient</div>
+                    <div
+                        style="color: #fff; font-size: 17px; font-weight: 800; font-family: 'Inter', sans-serif; letter-spacing: -0.2px;">
+                        Quickly buy coins</div>
+                    <div style="color: #fff; font-size: 13px; font-weight: 400; margin-top: 2px;">Safe and convenient
+                    </div>
                 </div>
-                
-                <div style="position: relative; z-index: 1; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #4ce0a7, #32cd93); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,0.4);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
+
+                <div
+                    style="position: relative; z-index: 1; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #4ce0a7, #32cd93); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,0.4);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </div>
             </div>
@@ -253,12 +313,16 @@
      MARKETS SCREEN
 ════════════════════════════════════════════════════════ -->
         <div id="markets-screen" class="screen">
-            <div class="screen-header-plain" style="padding:16px 16px 10px; position:relative; display:flex; justify-content:center; align-items:center;">
+            <div class="screen-header-plain"
+                style="padding:16px 16px 10px; position:relative; display:flex; justify-content:center; align-items:center;">
                 <div style="display:flex; align-items:center; gap:20px;">
-                    <h2 style="font-size:18px; font-weight:700; margin:0; cursor:pointer;" class="mkt-tab-btn active" onclick="setMktViewTab(this,'futures')">Futures</h2>
-                    <h2 style="font-size:15px; font-weight:400; margin:0; color:var(--text-muted); cursor:pointer;" class="mkt-tab-btn" onclick="setMktViewTab(this,'perpetual')">Perpetual</h2>
+                    <h2 style="font-size:18px; font-weight:700; margin:0; cursor:pointer;" class="mkt-tab-btn active"
+                        onclick="setMktViewTab(this,'futures')">Futures</h2>
+                    <h2 style="font-size:15px; font-weight:400; margin:0; color:var(--text-muted); cursor:pointer;"
+                        class="mkt-tab-btn" onclick="setMktViewTab(this,'perpetual')">Perpetual</h2>
                 </div>
-                <i class="fa-solid fa-magnifying-glass" onclick="document.getElementById('markets-search').classList.toggle('hidden-search');"
+                <i class="fa-solid fa-magnifying-glass"
+                    onclick="document.getElementById('markets-search').classList.toggle('hidden-search');"
                     style="color:var(--text-secondary);cursor:pointer;font-size:18px;position:absolute;right:16px;"></i>
             </div>
             <div class="search-bar-wrap hidden-search" id="markets-search">
@@ -272,7 +336,8 @@
                 style="display:flex; justify-content:space-between; color:var(--text-secondary); padding:10px 16px 8px; font-size:12px; border-bottom:1px solid rgba(255,255,255,0.06);">
                 <div style="flex:1.4;">Pair</div>
                 <div style="flex:1; text-align:right; padding-right:10px;">Price</div>
-                <div style="flex:0.8; text-align:right; cursor:pointer;" onclick="toggleMktSort()">Change <i class="fa-solid fa-sort" style="font-size:11px; margin-left:3px;"></i></div>
+                <div style="flex:0.8; text-align:right; cursor:pointer;" onclick="toggleMktSort()">Change <i
+                        class="fa-solid fa-sort" style="font-size:11px; margin-left:3px;"></i></div>
             </div>
             <div class="market-items" id="markets-list">
                 <!-- Will be rendered by JS -->
@@ -308,25 +373,32 @@
             </div>
 
             <div style="padding:15px; border-bottom:1px solid #f0f0f0;">
-                <div class="timeframe-tabs new-style" id="futures-timeframes" style="display:flex; gap:10px; margin-bottom:20px; padding:0; border-bottom:none;">
-                    <button class="active" onclick="setTimeframe(this,'1m')" data-tf="1m" data-sec="60" style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">60s</button>
-                    <button onclick="setTimeframe(this,'1m')" data-tf="1m" data-sec="120" style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">120s</button>
-                    <button onclick="setTimeframe(this,'5m')" data-tf="5m" data-sec="300" style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">5min</button>
-                    <button onclick="setTimeframe(this,'15m')" data-tf="15m" data-sec="600" style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">10min</button>
+                <div class="timeframe-tabs new-style" id="futures-timeframes"
+                    style="display:flex; gap:10px; margin-bottom:20px; padding:0; border-bottom:none;">
+                    <button class="active" onclick="setTimeframe(this,'1m')" data-tf="1m" data-sec="60"
+                        style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">60s</button>
+                    <button onclick="setTimeframe(this,'1m')" data-tf="1m" data-sec="120"
+                        style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">120s</button>
+                    <button onclick="setTimeframe(this,'5m')" data-tf="5m" data-sec="300"
+                        style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">5min</button>
+                    <button onclick="setTimeframe(this,'15m')" data-tf="15m" data-sec="600"
+                        style="padding:8px 16px; border-radius:6px; border:none; font-size:14px;">10min</button>
                 </div>
-                
+
                 <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-secondary);">
+                    <div
+                        style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-secondary);">
                         <span style="line-height:1.2;">Order<br>deadline(UTC+5)</span>
                         <span id="header-order-time">2026/5/23 15:08:00</span>
                     </div>
-                    
+
                     <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
                         <span style="font-size:13px; color:#02c076;">Countdown</span>
                         <span style="font-size:16px; color:#02c076;" id="header-countdown">32 s</span>
                     </div>
-                    
-                    <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-secondary); text-align:right;">
+
+                    <div
+                        style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-secondary); text-align:right;">
                         <span>Time Period</span>
                         <span id="header-time-period">15:08~15:09</span>
                     </div>
@@ -398,10 +470,12 @@
             <!-- Order Panel Slide-up (shows when CALL/PUT tapped) -->
             <div id="order-panel-overlay" class="order-panel-overlay" onclick="closeOrderPanel()" style="display:none;">
             </div>
-            <div id="order-panel" class="order-panel" style="display:none; background:#fff; border-top:none; box-shadow:0 -4px 15px rgba(0,0,0,0.05);">
+            <div id="order-panel" class="order-panel"
+                style="display:none; background:#fff; border-top:none; box-shadow:0 -4px 15px rgba(0,0,0,0.05);">
                 <div class="order-panel-header">
                     <span class="order-pair-title" style="color:var(--text-secondary);">BTC / USDT</span>
-                    <span onclick="closeOrderPanel()" style="cursor:pointer;color:var(--text-secondary);font-size:16px;">Cancel</span>
+                    <span onclick="closeOrderPanel()"
+                        style="cursor:pointer;color:var(--text-secondary);font-size:16px;">Cancel</span>
                 </div>
                 <div class="order-panel-body">
                     <div class="time-selector" id="order-time-selector" style="width:70px;">
@@ -410,7 +484,8 @@
                     <div class="order-panel-right" style="margin-left:10px;">
                         <div class="order-minmax">
                             <span></span>
-                            <span style="display:flex; flex-direction:column; gap:8px; text-align:right;">Available <span style="color:#02c076;" class="up">0</span></span>
+                            <span style="display:flex; flex-direction:column; gap:8px; text-align:right;">Available
+                                <span style="color:#02c076;" class="up">0</span></span>
                         </div>
                         <div style="font-size:15px;color:#999;margin-bottom:15px;">Amount</div>
                         <div class="amount-input-box">
@@ -429,13 +504,17 @@
             </div>
 
             <div class="trading-buttons" style="display: flex; gap: 10px; padding: 0 14px; margin-bottom: 8px;">
-                <button class="call-btn" onclick="openOrderPanel('CALL')" style="flex: 1; border: none; background: #02c076; color: #fff; border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; cursor: pointer;">
-                    <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-arrow-trend-up"></i> CALL</span>
+                <button class="call-btn" onclick="openOrderPanel('CALL')"
+                    style="flex: 1; border: none; background: #02c076; color: #fff; border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: 6px;"><i
+                            class="fa-solid fa-arrow-trend-up"></i> CALL</span>
                     <span class="pct-label" id="call-ratio-val">50.62%</span>
                 </button>
-                <button class="put-btn" onclick="openOrderPanel('PUT')" style="flex: 1; border: none; background: #f84960; color: #fff; border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; cursor: pointer;">
+                <button class="put-btn" onclick="openOrderPanel('PUT')"
+                    style="flex: 1; border: none; background: #f84960; color: #fff; border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; cursor: pointer;">
                     <span class="pct-label" id="put-ratio-val">51.38%</span>
-                    <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-arrow-trend-down"></i> PUT</span>
+                    <span style="display: flex; align-items: center; gap: 6px;"><i
+                            class="fa-solid fa-arrow-trend-down"></i> PUT</span>
                 </button>
             </div>
 
@@ -445,10 +524,12 @@
                 <div class="perp-pair-picker-panel" onclick="event.stopPropagation()">
                     <div style="padding: 20px 16px 0; display: flex; flex-direction: column;">
                         <div style="display:flex; justify-content: flex-end; margin-bottom: 24px;">
-                            <i class="fa-solid fa-indent" onclick="closeFuturesPairPicker()" style="cursor:pointer; color:#fff; font-size:20px; transform: scaleX(-1);"></i>
+                            <i class="fa-solid fa-indent" onclick="closeFuturesPairPicker()"
+                                style="cursor:pointer; color:#fff; font-size:20px; transform: scaleX(-1);"></i>
                         </div>
                         <div>
-                            <span style="font-weight:700; color:#fff; font-size:15px; border-bottom:2px solid #02c076; padding-bottom:8px; display:inline-block;">Trade</span>
+                            <span
+                                style="font-weight:700; color:#fff; font-size:15px; border-bottom:2px solid #02c076; padding-bottom:8px; display:inline-block;">Trade</span>
                         </div>
                     </div>
                     <div id="futures-pair-list"></div>
@@ -567,10 +648,12 @@
                 <div class="perp-pair-picker-panel" onclick="event.stopPropagation()">
                     <div style="padding: 20px 16px 0; display: flex; flex-direction: column;">
                         <div style="display:flex; justify-content: flex-end; margin-bottom: 24px;">
-                            <i class="fa-solid fa-indent" onclick="closePerpPairPicker()" style="cursor:pointer; color:#fff; font-size:20px; transform: scaleX(-1);"></i>
+                            <i class="fa-solid fa-indent" onclick="closePerpPairPicker()"
+                                style="cursor:pointer; color:#fff; font-size:20px; transform: scaleX(-1);"></i>
                         </div>
                         <div>
-                            <span style="font-weight:700; color:#fff; font-size:15px; border-bottom:2px solid #02c076; padding-bottom:8px; display:inline-block;">Trade</span>
+                            <span
+                                style="font-weight:700; color:#fff; font-size:15px; border-bottom:2px solid #02c076; padding-bottom:8px; display:inline-block;">Trade</span>
                         </div>
                     </div>
                     <div id="perp-pair-list"></div>
@@ -647,15 +730,18 @@
                 <h2 style="font-size:20px;font-weight:400;color:var(--text-primary);">Assets</h2>
             </div>
 
-            <div class="assets-top-card" id="assets-top-card-main" style="margin: 0 14px; border-radius: 8px; background: #1fc07c; box-shadow: none;">
+            <div class="assets-top-card" id="assets-top-card-main"
+                style="margin: 0 14px; border-radius: 8px; background: #1fc07c; box-shadow: none;">
                 <div class="assets-card-inner" style="padding: 16px 20px;">
-                    <div class="assets-title-row" style="color: #fff; font-size: 13px;">Total Assets <i class="fa-regular fa-eye" style="cursor:pointer; margin-left: 4px;"
+                    <div class="assets-title-row" style="color: #fff; font-size: 13px;">Total Assets <i
+                            class="fa-regular fa-eye" style="cursor:pointer; margin-left: 4px;"
                             onclick="toggleAssetsVisibility()"></i></div>
-                    <div class="assets-balance" id="assets-balance-val" style="color: #fff; font-size: 24px; font-weight: 700; margin: 6px 0;">0.00 <i class="fa-solid fa-caret-down"
-                            style="font-size:14px;margin-left:4px;"></i></div>
-                    <div class="assets-pnl" style="color: #fff; font-size: 13px;">Today's PnL: <span id="assets-pnl-val">0</span> <i
-                            class="fa-solid fa-rotate-right" style="cursor:pointer;margin-left:4px;"
-                            onclick="refreshPnl()"></i></div>
+                    <div class="assets-balance" id="assets-balance-val"
+                        style="color: #fff; font-size: 24px; font-weight: 700; margin: 6px 0;">0.00 <i
+                            class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i></div>
+                    <div class="assets-pnl" style="color: #fff; font-size: 13px;">Today's PnL: <span
+                            id="assets-pnl-val">0</span> <i class="fa-solid fa-rotate-right"
+                            style="cursor:pointer;margin-left:4px;" onclick="refreshPnl()"></i></div>
                 </div>
             </div>
 
@@ -692,40 +778,54 @@
                 <div class="action-button" onclick="navTo('fund-transfer-screen')" aria-label="Transfer">
                     <svg class="action-icon-new" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                         <circle class="icon-line" cx="32" cy="32" r="28" />
-                        <path d="M28 26 L28 38 M25 29 L28 26 L31 29" fill="none" stroke="#f5a623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M36 38 L36 26 M33 35 L36 38 L39 35" fill="none" stroke="#f5a623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M28 26 L28 38 M25 29 L28 26 L31 29" fill="none" stroke="#f5a623" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M36 38 L36 26 M33 35 L36 38 L39 35" fill="none" stroke="#f5a623" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <div class="icon-label">Transfer</div>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 14px; margin-bottom: 24px;">
-                <div style="font-size: 14px; color: var(--text-secondary);">Current Account: <span style="color: var(--text-primary); margin-left: 4px;">Real Account</span></div>
-                <div style="background: rgba(150,150,150,0.1); padding: 6px 12px; border-radius: 16px; font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;">
-                    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 10px; margin-right: 6px;"></i> Toggle
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 0 14px; margin-bottom: 24px;">
+                <div style="font-size: 14px; color: var(--text-secondary);">Current Account: <span
+                        style="color: var(--text-primary); margin-left: 4px;">Real Account</span></div>
+                <div
+                    style="background: rgba(150,150,150,0.1); padding: 6px 12px; border-radius: 16px; font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;">
+                    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 10px; margin-right: 6px;"></i>
+                    Toggle
                 </div>
             </div>
 
-            <h3 class="section-title" style="padding-left: 14px; font-size: 18px; font-weight: 400; margin-bottom: 16px; color: var(--text-primary);">My account</h3>
+            <h3 class="section-title"
+                style="padding-left: 14px; font-size: 18px; font-weight: 400; margin-bottom: 16px; color: var(--text-primary);">
+                My account</h3>
             <div class="my-account-list" style="padding: 0 14px;">
-                <div class="account-card" onclick="navTo('exchange-screen')" style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 12px; border: none; align-items: center; display: flex; justify-content: space-between;">
+                <div class="account-card" onclick="navTo('exchange-screen')"
+                    style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 12px; border: none; align-items: center; display: flex; justify-content: space-between;">
                     <div class="ac-left" style="display: flex; flex-direction: column; gap: 4px;">
                         <div class="ac-name" style="color: var(--text-secondary); font-size: 13px;">Exchange</div>
-                        <div class="ac-val" id="acct-exchange-bal" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
+                        <div class="ac-val" id="acct-exchange-bal"
+                            style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
                     </div>
                     <i class="fa-solid fa-chevron-right" style="color:var(--text-secondary); font-size: 12px;"></i>
                 </div>
-                <div class="account-card" onclick="navTo('trade-screen')" style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 12px; border: none; align-items: center; display: flex; justify-content: space-between;">
+                <div class="account-card" onclick="navTo('trade-screen')"
+                    style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 12px; border: none; align-items: center; display: flex; justify-content: space-between;">
                     <div class="ac-left" style="display: flex; flex-direction: column; gap: 4px;">
                         <div class="ac-name" style="color: var(--text-secondary); font-size: 13px;">Trade</div>
-                        <div class="ac-val" id="acct-trade-bal" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
+                        <div class="ac-val" id="acct-trade-bal"
+                            style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
                     </div>
                     <i class="fa-solid fa-chevron-right" style="color:var(--text-secondary); font-size: 12px;"></i>
                 </div>
-                <div class="account-card" onclick="navTo('perpetual-screen')" style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: none; align-items: center; display: flex; justify-content: space-between;">
+                <div class="account-card" onclick="navTo('perpetual-screen')"
+                    style="background: rgba(150,150,150,0.06); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: none; align-items: center; display: flex; justify-content: space-between;">
                     <div class="ac-left" style="display: flex; flex-direction: column; gap: 4px;">
                         <div class="ac-name" style="color: var(--text-secondary); font-size: 13px;">Perpetual</div>
-                        <div class="ac-val" id="acct-perpetual-bal" style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
+                        <div class="ac-val" id="acct-perpetual-bal"
+                            style="font-size: 16px; font-weight: 600; color: var(--text-primary);">0.00</div>
                     </div>
                     <i class="fa-solid fa-chevron-right" style="color:var(--text-secondary); font-size: 12px;"></i>
                 </div>
@@ -747,31 +847,36 @@
                     <div class="assets-title-row">Exchange Assets <i class="fa-regular fa-eye"></i></div>
                     <div class="assets-balance" id="exchange-assets-bal">0.00 <i class="fa-solid fa-caret-down"
                             style="font-size:14px;margin-left:4px;"></i></div>
-                    <div class="assets-pnl">Today's PnL: <span id="exchange-pnl-val">0.00</span> <i class="fa-solid fa-rotate-right"
-                            style="margin-left:4px;"></i></div>
+                    <div class="assets-pnl">Today's PnL: <span id="exchange-pnl-val">0.00</span> <i
+                            class="fa-solid fa-rotate-right" style="margin-left:4px;"></i></div>
                 </div>
             </div>
             <div class="assets-actions" style="border-bottom:none;">
                 <div class="action-btn-circle" onclick="navTo('deposit-screen')">
-                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <circle class="icon-line" cx="32" cy="32" r="28" />
-    <path class="icon-arrow" d="M43 28.5 H31 V23 L19 32 L31 41 V35.5 H43 Z" />
-</svg>
+                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle class="icon-line" cx="32" cy="32" r="28" />
+                        <path class="icon-arrow" d="M43 28.5 H31 V23 L19 32 L31 41 V35.5 H43 Z" />
+                    </svg>
                     <span>Deposit</span>
                 </div>
                 <div class="action-btn-circle" onclick="navTo('withdrawal-screen')">
-                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <circle class="icon-line" cx="32" cy="32" r="28" />
-    <path class="icon-arrow" d="M21 28.5 H33 V23 L45 32 L33 41 V35.5 H21 Z" />
-</svg>
+                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle class="icon-line" cx="32" cy="32" r="28" />
+                        <path class="icon-arrow" d="M21 28.5 H33 V23 L45 32 L33 41 V35.5 H21 Z" />
+                    </svg>
                     <span>Withdrawal</span>
                 </div>
                 <div class="action-btn-circle" onclick="navTo('fund-transfer-screen')">
-                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <circle class="icon-line" cx="32" cy="32" r="28" />
-    <path d="M28 26 L28 38 M25 29 L28 26 L31 29" fill="none" stroke="#f5a623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M36 38 L36 26 M33 35 L36 38 L39 35" fill="none" stroke="#f5a623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>
+                    <svg class="action-icon-new" style="width:36px;height:36px; margin-bottom: 2px;" viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle class="icon-line" cx="32" cy="32" r="28" />
+                        <path d="M28 26 L28 38 M25 29 L28 26 L31 29" fill="none" stroke="#f5a623" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M36 38 L36 26 M33 35 L36 38 L39 35" fill="none" stroke="#f5a623" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
                     <span>Transfer</span>
                 </div>
             </div>
@@ -867,8 +972,8 @@
                     <div class="assets-title-row">Trade Assets <i class="fa-regular fa-eye"></i></div>
                     <div class="assets-balance" id="trade-assets-bal">0.00 <i class="fa-solid fa-caret-down"
                             style="font-size:14px;margin-left:4px;"></i></div>
-                    <div class="assets-pnl">Today's PnL: <span id="trade-pnl-val">0.00</span> <i class="fa-solid fa-rotate-right"
-                            style="margin-left:4px;"></i></div>
+                    <div class="assets-pnl">Today's PnL: <span id="trade-pnl-val">0.00</span> <i
+                            class="fa-solid fa-rotate-right" style="margin-left:4px;"></i></div>
                 </div>
             </div>
             <div class="assets-list" style="padding:10px 20px;">
@@ -923,12 +1028,20 @@
 
             </div>
             <div class="important-notice" style="background:transparent; padding:0 20px;">
-                <h3 style="color:var(--text-primary); font-size:16px; margin-bottom:12px; font-weight:700;">Important Notice</h3>
-                <ol style="padding-left:14px; margin:0; color:var(--text-secondary); font-size:13px; line-height:1.6; list-style-type:decimal;">
-                    <li style="margin-bottom:8px; padding-left:4px;">Please select the above-mentioned token system and currency type and transfer the corresponding amount for deposit. Please do not transfer any other irrelevant assets, otherwise they will not be retrieved.</li>
-                    <li style="margin-bottom:8px; padding-left:4px;">After you recharge the above address, you need to confirm the entire network node before it can be credited;</li>
-                    <li style="margin-bottom:8px; padding-left:4px;">Please make sure that your computer and browser are safe to prevent information from being tampered with or leaked;</li>
-                    <li style="padding-left:4px;">The above deposit address is the official payment address of the platform, please look for the official deposit address of the platform, and the loss of funds caused by incorrect charging shall be borne by yourself;</li>
+                <h3 style="color:var(--text-primary); font-size:16px; margin-bottom:12px; font-weight:700;">Important
+                    Notice</h3>
+                <ol
+                    style="padding-left:14px; margin:0; color:var(--text-secondary); font-size:13px; line-height:1.6; list-style-type:decimal;">
+                    <li style="margin-bottom:8px; padding-left:4px;">Please select the above-mentioned token system and
+                        currency type and transfer the corresponding amount for deposit. Please do not transfer any
+                        other irrelevant assets, otherwise they will not be retrieved.</li>
+                    <li style="margin-bottom:8px; padding-left:4px;">After you recharge the above address, you need to
+                        confirm the entire network node before it can be credited;</li>
+                    <li style="margin-bottom:8px; padding-left:4px;">Please make sure that your computer and browser are
+                        safe to prevent information from being tampered with or leaked;</li>
+                    <li style="padding-left:4px;">The above deposit address is the official payment address of the
+                        platform, please look for the official deposit address of the platform, and the loss of funds
+                        caused by incorrect charging shall be borne by yourself;</li>
                 </ol>
             </div>
 
@@ -1046,66 +1159,101 @@
 ════════════════════════════════════════════════════════ -->
         <div id="fund-transfer-screen" class="screen" style="background:#fff; min-height:100vh;">
             <div class="sub-header centered-header" style="background:#fff; border-bottom:none;">
-                <i class="fa-solid fa-chevron-left back-btn" style="color:var(--text-secondary);" onclick="navTo('assets-screen')"></i>
+                <i class="fa-solid fa-chevron-left back-btn" style="color:var(--text-secondary);"
+                    onclick="navTo('assets-screen')"></i>
                 <h2 style="color:#333;">Fund Transfer</h2>
                 <i class="fa-regular fa-file-lines" style="color:var(--text-secondary);cursor:pointer;"
                     onclick="navTo('transfer-record-screen')"></i>
             </div>
             <div class="form-container" style="padding:15px 20px;">
-                <div class="form-section-title" style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">From</div>
-                <div class="select-dropdown" onclick="toggleDropdown('from-dropdown')" style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <div class="form-section-title"
+                    style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">From</div>
+                <div class="select-dropdown" onclick="toggleDropdown('from-dropdown')"
+                    style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <span id="from-wallet-label" style="color:#333; font-size:14px; font-weight:500;">Exchange</span>
                     <i class="fa-solid fa-chevron-down" style="color:#666; font-size:12px;"></i>
                 </div>
-                <div class="dropdown-menu" id="from-dropdown" style="display:none; background:#fff; border:1px solid #f0f0f0; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;" onclick="selectTransferWallet('from','Exchange')">Exchange</div>
-                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;" onclick="selectTransferWallet('from','Trade')">Trade</div>
-                    <div class="dropdown-item" style="color:#333;" onclick="selectTransferWallet('from','Perpetual')">Perpetual</div>
+                <div class="dropdown-menu" id="from-dropdown"
+                    style="display:none; background:#fff; border:1px solid #f0f0f0; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;"
+                        onclick="selectTransferWallet('from','Exchange')">Exchange</div>
+                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;"
+                        onclick="selectTransferWallet('from','Trade')">Trade</div>
+                    <div class="dropdown-item" style="color:#333;" onclick="selectTransferWallet('from','Perpetual')">
+                        Perpetual</div>
                 </div>
 
-                <div class="form-section-title" style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">Transfer to</div>
-                <div class="select-dropdown" onclick="toggleDropdown('to-dropdown')" style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <div class="form-section-title"
+                    style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">Transfer to</div>
+                <div class="select-dropdown" onclick="toggleDropdown('to-dropdown')"
+                    style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <span id="to-wallet-label" style="color:#333; font-size:14px; font-weight:500;">Trade</span>
                     <i class="fa-solid fa-chevron-down" style="color:#666; font-size:12px;"></i>
                 </div>
-                <div class="dropdown-menu" id="to-dropdown" style="display:none; background:#fff; border:1px solid #f0f0f0; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;" onclick="selectTransferWallet('to','Exchange')">Exchange</div>
-                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;" onclick="selectTransferWallet('to','Trade')">Trade</div>
-                    <div class="dropdown-item" style="color:#333;" onclick="selectTransferWallet('to','Perpetual')">Perpetual</div>
+                <div class="dropdown-menu" id="to-dropdown"
+                    style="display:none; background:#fff; border:1px solid #f0f0f0; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;"
+                        onclick="selectTransferWallet('to','Exchange')">Exchange</div>
+                    <div class="dropdown-item" style="color:#333; border-bottom:1px solid #f0f0f0;"
+                        onclick="selectTransferWallet('to','Trade')">Trade</div>
+                    <div class="dropdown-item" style="color:#333;" onclick="selectTransferWallet('to','Perpetual')">
+                        Perpetual</div>
                 </div>
 
-                <div class="form-section-title" style="display:flex; justify-content:space-between; color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">
+                <div class="form-section-title"
+                    style="display:flex; justify-content:space-between; color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">
                     <span>Please select a currency</span>
-                    <span style="color:#888; font-size:12px; font-weight:normal;">Available:<span id="transfer-avail-bal">0</span></span>
+                    <span style="color:#888; font-size:12px; font-weight:normal;">Available:<span
+                            id="transfer-avail-bal">0</span></span>
                 </div>
-                <div class="select-dropdown" onclick="openCurrencyPicker()" style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                <div class="select-dropdown" onclick="openCurrencyPicker()"
+                    style="background:#f2f2f2; border:none; padding:14px 15px; border-radius:4px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <span id="selected-currency-label" style="color:#333; font-size:14px; font-weight:500;">USDT</span>
                     <i class="fa-solid fa-chevron-down" style="color:#666; font-size:12px;"></i>
                 </div>
 
                 <!-- Currency Picker Bottom Sheet -->
-                <div id="currency-picker-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;" onclick="closeCurrencyPicker()">
-                    <div style="position:absolute; bottom:0; left:0; right:0; background:#fff; border-radius:16px 16px 0 0; padding:0; max-height:60vh; overflow-y:auto;" onclick="event.stopPropagation()">
-                        <div style="padding:16px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
+                <div id="currency-picker-overlay"
+                    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;"
+                    onclick="closeCurrencyPicker()">
+                    <div style="position:absolute; bottom:0; left:0; right:0; background:#fff; border-radius:16px 16px 0 0; padding:0; max-height:60vh; overflow-y:auto;"
+                        onclick="event.stopPropagation()">
+                        <div
+                            style="padding:16px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:16px; font-weight:600; color:#333;">Select Currency</span>
-                            <i class="fa-solid fa-xmark" style="color:#999; font-size:18px; cursor:pointer;" onclick="closeCurrencyPicker()"></i>
+                            <i class="fa-solid fa-xmark" style="color:#999; font-size:18px; cursor:pointer;"
+                                onclick="closeCurrencyPicker()"></i>
                         </div>
-                        <div onclick="selectCurrency('USDT')" style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">USDT</div>
-                        <div onclick="selectCurrency('ETH')"  style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">ETH</div>
-                        <div onclick="selectCurrency('BTC')"  style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">BTC</div>
-                        <div onclick="selectCurrency('USDC')" style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">USDC</div>
-                        <div onclick="selectCurrency('DAI')"  style="padding:18px 20px; font-size:16px; color:#333; cursor:pointer;">DAI</div>
+                        <div onclick="selectCurrency('USDT')"
+                            style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">
+                            USDT</div>
+                        <div onclick="selectCurrency('ETH')"
+                            style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">
+                            ETH</div>
+                        <div onclick="selectCurrency('BTC')"
+                            style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">
+                            BTC</div>
+                        <div onclick="selectCurrency('USDC')"
+                            style="padding:18px 20px; font-size:16px; color:#333; border-bottom:1px solid #f5f5f5; cursor:pointer;">
+                            USDC</div>
+                        <div onclick="selectCurrency('DAI')"
+                            style="padding:18px 20px; font-size:16px; color:#333; cursor:pointer;">DAI</div>
                     </div>
                 </div>
 
-                <div class="form-section-title" style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">Amount of transfers</div>
-                <div style="background:#f2f2f2; padding:14px 15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                    <input type="number" id="transfer-amount" placeholder="Please enter the transferred" style="background:none; border:none; outline:none; color:var(--text-secondary); width:100%; font-size:14px;">
-                    <span onclick="setTransferAll()" style="color:var(--text-secondary); font-size:14px; font-weight:600; cursor:pointer; margin-left:10px;">All</span>
+                <div class="form-section-title"
+                    style="color:#333; font-weight:600; font-size:14px; margin-bottom:10px;">Amount of transfers</div>
+                <div
+                    style="background:#f2f2f2; padding:14px 15px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <input type="number" id="transfer-amount" placeholder="Please enter the transferred"
+                        style="background:none; border:none; outline:none; color:var(--text-secondary); width:100%; font-size:14px;">
+                    <span onclick="setTransferAll()"
+                        style="color:var(--text-secondary); font-size:14px; font-weight:600; cursor:pointer; margin-left:10px;">All</span>
                 </div>
             </div>
             <div style="padding:40px 20px 20px;">
-                <button class="btn-green-full" onclick="doTransfer()" style="background:#1abc9c; border-radius:24px; font-size:16px; font-weight:500; padding:14px; width:100%; border:none; color:#fff;">Confirm</button>
+                <button class="btn-green-full" onclick="doTransfer()"
+                    style="background:#1abc9c; border-radius:24px; font-size:16px; font-weight:500; padding:14px; width:100%; border:none; color:#fff;">Confirm</button>
             </div>
         </div>
 
@@ -1216,7 +1364,8 @@
                             password</span>
                     </label>
                     <button class="btn-green-full" onclick="doLogin()">Login</button>
-                    <a href="/trexis.apk" download="trexis.apk" class="btn-outline-full" style="display:block; text-align:center; text-decoration:none;">Download APP</a>
+                    <a href="/trexis.apk" download="trexis.apk" class="btn-outline-full"
+                        style="display:block; text-align:center; text-decoration:none;">Download APP</a>
                     <div class="auth-links">
                         <span onclick="navTo('register-screen')" style="cursor:pointer;">Register</span>
                         <span onclick="showToast('Please contact customer service')" style="cursor:pointer;">Forget
@@ -1236,7 +1385,8 @@
                     </div>
                     <p style="text-align:center;margin-top:12px;font-size:16px;font-weight:600;">Balance Not Met</p>
                     <p style="text-align:center;margin-top:8px;font-size:13px;color:var(--text-muted);line-height:1.5;">
-                        Minimum <strong style="color:var(--accent);"><span id="min-tier-label">$300</span> USDT</strong> balance is required to trade
+                        Minimum <strong style="color:var(--accent);"><span id="min-tier-label">$300</span> USDT</strong>
+                        balance is required to trade
                         signals.<br>Please deposit funds to continue.</p>
                     <button onclick="closeBalanceCriteria();navTo('deposit-screen')"
                         style="margin-top:18px;width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Deposit
@@ -1473,7 +1623,9 @@
                         <i class="fa-solid fa-users" style="color:var(--text-secondary);font-size:13px;"></i>
                     </div>
                     <div id="share-ref-list-container">
-                        <div class="no-data-block"><p>No referrals yet</p></div>
+                        <div class="no-data-block">
+                            <p>No referrals yet</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1481,73 +1633,94 @@
 
         <!-- SUPPORT SCREEN -->
         <div id="support-screen" class="screen">
-            <div class="sub-header" style="justify-content:center; position:relative; box-shadow:none; border-bottom:none;">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')" style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
+            <div class="sub-header"
+                style="justify-content:center; position:relative; box-shadow:none; border-bottom:none;">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')"
+                    style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
                 <h2 style="font-size:16px; font-weight:700;">Support center</h2>
             </div>
             <div style="padding:10px 20px;">
 
                 <!-- Search Bar -->
-                <div class="search-bar" style="background:#f5f6f8; border-radius:4px; padding:10px 15px; margin-bottom:25px; display:flex; align-items:center;">
+                <div class="search-bar"
+                    style="background:#f5f6f8; border-radius:4px; padding:10px 15px; margin-bottom:25px; display:flex; align-items:center;">
                     <i class="fa-solid fa-magnifying-glass" style="color:#999; font-size:14px; margin-right:10px;"></i>
-                    <input type="text" placeholder="Search" style="border:none; background:transparent; font-size:14px; color:var(--text-primary); width:100%; outline:none;">
+                    <input type="text" placeholder="Search"
+                        style="border:none; background:transparent; font-size:14px; color:var(--text-primary); width:100%; outline:none;">
                 </div>
 
-                <h3 style="font-size:18px; font-weight:700; margin-bottom:15px; color:var(--text-primary);">Support center</h3>
+                <h3 style="font-size:18px; font-weight:700; margin-bottom:15px; color:var(--text-primary);">Support
+                    center</h3>
 
                 <!-- FAQ List -->
                 <div style="display:flex; flex-direction:column; gap:16px;">
-                    <div class="support-faq-item" onclick="openFaq(0)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(0)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">About official accounts and demo accounts</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(1)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(1)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">What is transaction volume?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(2)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(2)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">Why do we need to transfer funds?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(3)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(3)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">What are futures?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(4)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(4)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">Why does the amount of assets after conversion change?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(5)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(5)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">Why do we need real-name authentication?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(6)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(6)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">What is frozen assets?</span>
                     </div>
 
-                    <div class="support-faq-item" onclick="openFaq(7)" style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
-                        <div style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
+                    <div class="support-faq-item" onclick="openFaq(7)"
+                        style="display:flex; align-items:flex-start; gap:12px; font-size:14px; color:var(--text-primary); cursor:pointer;">
+                        <div
+                            style="display:flex; align-items:center; position:relative; width:18px; height:18px; border-radius:50%; border:1.5px solid #20b584; justify-content:center; flex-shrink:0;">
                             <i class="fa-solid fa-star" style="color:#20b584; font-size:10px;"></i>
                         </div>
                         <span style="line-height:1.4;">What are the rules of futures trading?</span>
@@ -1558,17 +1731,24 @@
 
         <!-- FAQ DETAIL SCREEN -->
         <div id="faq-detail-screen" class="screen">
-            <div class="sub-header" style="justify-content:center; position:relative; box-shadow:none; border-bottom:1px solid #f0f0f0;">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('support-screen')" style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
+            <div class="sub-header"
+                style="justify-content:center; position:relative; box-shadow:none; border-bottom:1px solid #f0f0f0;">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('support-screen')"
+                    style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
                 <h2 style="font-size:16px; font-weight:700;">Support center</h2>
             </div>
-            
+
 
 
             <div style="padding:20px;">
-                <h3 id="faq-detail-title" style="font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:20px; line-height:1.4;">About official accounts and demo accounts</h3>
+                <h3 id="faq-detail-title"
+                    style="font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:20px; line-height:1.4;">
+                    About official accounts and demo accounts</h3>
                 <div id="faq-detail-body" style="font-size:15px; color:#666; line-height:1.5;">
-                    A full account can use all the online features of the platform, a demo account can only use some of the platform's features in a limited way, and cannot use liquidity mining for revenue, as well as the ability to charge and withdraw coins. (Demo accounts can receive fixed virtual funds once a month on the 1st)
+                    A full account can use all the online features of the platform, a demo account can only use some of
+                    the platform's features in a limited way, and cannot use liquidity mining for revenue, as well as
+                    the ability to charge and withdraw coins. (Demo accounts can receive fixed virtual funds once a
+                    month on the 1st)
                 </div>
             </div>
         </div>
@@ -1621,50 +1801,67 @@
 
         <!-- ABOUT SCREEN -->
         <div id="about-screen" class="screen">
-            <div class="sub-header" style="justify-content:center; position:relative; box-shadow:none; border-bottom:1px solid #f0f0f0;">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')" style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
+            <div class="sub-header"
+                style="justify-content:center; position:relative; box-shadow:none; border-bottom:1px solid #f0f0f0;">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')"
+                    style="position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:16px;"></i>
                 <h2 style="font-size:16px; font-weight:700;">About Us</h2>
             </div>
             <div style="padding:20px;">
-                <h3 style="font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:20px;">About Us</h3>
+                <h3 style="font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:20px;">About Us
+                </h3>
                 <p style="font-size:14px; color:var(--text-primary); line-height:1.5; text-align:justify;">
-                    Trexis is an innovative digital asset trading platform serving professional traders worldwide, dedicated to discovering high-quality and innovative digital asset investment opportunities. Currently, the platform offers trading and investment services for over 40 digital asset products. Headquartered in the United States and operated by the Trexis team, Trexis is a leading global provider of blockchain asset financial services, serving millions of users in over 130 countries and regions worldwide. The company has independent offices, trading and operations centers in smaller countries and regions such as Singapore, South Korea, and Hong Kong. Trexis and its sub-brands are global leaders in technology platforms, product lines, security and risk control systems, and operational and customer service systems.
+                    Trexis is an innovative digital asset trading platform serving professional traders worldwide,
+                    dedicated to discovering high-quality and innovative digital asset investment opportunities.
+                    Currently, the platform offers trading and investment services for over 40 digital asset products.
+                    Headquartered in the United States and operated by the Trexis team, Trexis is a leading global
+                    provider of blockchain asset financial services, serving millions of users in over 130 countries and
+                    regions worldwide. The company has independent offices, trading and operations centers in smaller
+                    countries and regions such as Singapore, South Korea, and Hong Kong. Trexis and its sub-brands are
+                    global leaders in technology platforms, product lines, security and risk control systems, and
+                    operational and customer service systems.
                 </p>
             </div>
         </div>
 
         <!-- SETTINGS SCREEN -->
         <div id="settings-screen" class="screen">
-            <div class="sub-header" style="justify-content:flex-start; position:relative; box-shadow:none; border-bottom:none; padding-bottom:10px;">
+            <div class="sub-header"
+                style="justify-content:flex-start; position:relative; box-shadow:none; border-bottom:none; padding-bottom:10px;">
                 <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')" style="font-size:16px;"></i>
             </div>
             <h2 style="font-size:32px; font-weight:700; color:var(--text-primary); margin:0 20px 30px;">Settings</h2>
-            
+
             <div style="padding:0 20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0; cursor:pointer;" onclick="showToast('Language: English')">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0; cursor:pointer;"
+                    onclick="showToast('Language: English')">
                     <span style="font-size:15px; color:var(--text-primary);">Language</span>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="font-size:14px; color:#999;">English</span>
                         <i class="fa-solid fa-chevron-right" style="color:#bbb; font-size:14px;"></i>
                     </div>
                 </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0; cursor:pointer;" onclick="showToast('Currency: USD')">
+
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0; cursor:pointer;"
+                    onclick="showToast('Currency: USD')">
                     <span style="font-size:15px; color:var(--text-primary);">Denomination currency</span>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="font-size:14px; color:#999;">$</span>
                         <i class="fa-solid fa-chevron-right" style="color:#bbb; font-size:14px;"></i>
                     </div>
                 </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0;">
+
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #f0f0f0;">
                     <span style="font-size:15px; color:var(--text-primary);">Version number</span>
                     <span style="font-size:14px; color:#999;">2.0.4</span>
                 </div>
             </div>
 
             <div style="padding:40px 20px;">
-                <button onclick="doLogout()" style="width:100%; padding:14px; background:#a9aeb4; color:#fff; border:none; border-radius:25px; font-size:15px; font-weight:500; cursor:pointer;">Log out</button>
+                <button onclick="doLogout()"
+                    style="width:100%; padding:14px; background:#a9aeb4; color:#fff; border:none; border-radius:25px; font-size:15px; font-weight:500; cursor:pointer;">Log
+                    out</button>
             </div>
         </div>
 
@@ -1678,7 +1875,10 @@
             <div class="my-account-list">
                 <div class="account-card" onclick="navTo('change-password-screen')">
                     <div class="ac-left">
-                        <div style="display:flex;align-items:center;gap:10px;"><div class="action-icon-new" style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;"><i class="fa-solid fa-lock" style="color:#f5a623;font-size:13px;"></i></div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="action-icon-new"
+                                style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;">
+                                <i class="fa-solid fa-lock" style="color:#f5a623;font-size:13px;"></i></div>
                             <div class="ac-name">Modify Password</div>
                         </div>
                     </div>
@@ -1686,7 +1886,10 @@
                 </div>
                 <div class="account-card" onclick="navTo('bind-address-screen')">
                     <div class="ac-left">
-                        <div style="display:flex;align-items:center;gap:10px;"><div class="action-icon-new" style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;"><i class="fa-solid fa-wallet" style="color:#f5a623;font-size:13px;"></i></div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="action-icon-new"
+                                style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;">
+                                <i class="fa-solid fa-wallet" style="color:#f5a623;font-size:13px;"></i></div>
                             <div class="ac-name">Bind withdrawal address</div>
                         </div>
                     </div>
@@ -1695,7 +1898,10 @@
 
                 <div class="account-card" onclick="navTo('google-auth-screen')">
                     <div class="ac-left">
-                        <div style="display:flex;align-items:center;gap:10px;"><div class="action-icon-new" style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;"><i class="fa-brands fa-google" style="color:#f5a623;font-size:13px;"></i></div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="action-icon-new"
+                                style="display:flex;align-items:center;justify-content:center;border:2px solid var(--text-primary);border-radius:50%;width:28px;height:28px;flex-shrink:0;">
+                                <i class="fa-brands fa-google" style="color:#f5a623;font-size:13px;"></i></div>
                             <div class="ac-name">Google Authenticator</div>
                         </div>
                         <div class="ac-val" style="font-size:12px;color:var(--down-color);">Not linked</div>
@@ -1853,31 +2059,37 @@
             </div>
         </div>
 
-        
 
-    
-<!-- BASIC VERIFICATION -->
+
+
+        <!-- BASIC VERIFICATION -->
         <div id="basic-verification-screen" class="screen">
             <div class="sub-header"><i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')"></i>
                 <h2>Basic Verification</h2><span></span>
             </div>
-            
-            <div id="basic-kyc-content" style="background:var(--bg-dark); height:100vh; padding:0 20px 20px 20px; color:var(--text-primary);">
-                <div style="font-size:22px; font-weight:700; line-height:1.3; padding: 20px 0 30px; color:var(--text-primary);">
+
+            <div id="basic-kyc-content"
+                style="background:var(--bg-dark); height:100vh; padding:0 20px 20px 20px; color:var(--text-primary);">
+                <div
+                    style="font-size:22px; font-weight:700; line-height:1.3; padding: 20px 0 30px; color:var(--text-primary);">
                     Select the country of issue of your document
                 </div>
 
-                <div id="basic-kyc-status-banner" style="display:none;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;text-align:center;"></div>
+                <div id="basic-kyc-status-banner"
+                    style="display:none;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;text-align:center;">
+                </div>
 
                 <div id="basic-kyc-form">
-                    
-                    
+
+
                     <!-- Clickable Country Selector -->
                     <div style="position:relative; margin-bottom:16px;" onclick="openCountryModal()">
                         <div style="position:absolute; left:16px; top:15px; pointer-events:none;">
-                            <img src="https://flagcdn.com/w20/us.png" id="kyc-flag-img" style="width:20px; border-radius:2px;" alt="flag">
+                            <img src="https://flagcdn.com/w20/us.png" id="kyc-flag-img"
+                                style="width:20px; border-radius:2px;" alt="flag">
                         </div>
-                        <div id="kyc-country-display" style="width:100%; padding:16px 40px 16px 46px; background:var(--bg-card); border-radius:10px; font-size:16px; color:var(--text-primary); cursor:pointer;">
+                        <div id="kyc-country-display"
+                            style="width:100%; padding:16px 40px 16px 46px; background:var(--bg-card); border-radius:10px; font-size:16px; color:var(--text-primary); cursor:pointer;">
                             United States
                         </div>
                         <!-- Hidden input to store value for backend -->
@@ -1892,24 +2104,28 @@
                         <div style="position:absolute; left:16px; top:15px; color:#9ca3af;">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <input type="text" id="kyc-fullname" placeholder="Please Enter Your Name" style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
+                        <input type="text" id="kyc-fullname" placeholder="Please Enter Your Name"
+                            style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
                     </div>
 
                     <div style="position:relative; margin-bottom:16px;">
                         <div style="position:absolute; left:16px; top:15px; color:#9ca3af;">
                             <i class="fa-solid fa-id-card"></i>
                         </div>
-                        <input type="text" id="kyc-idnumber" placeholder="ID Number" style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
+                        <input type="text" id="kyc-idnumber" placeholder="ID Number"
+                            style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
                     </div>
 
                     <div style="position:relative; margin-bottom:30px;">
                         <div style="position:absolute; left:16px; top:15px; color:#9ca3af;">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
-                        <input type="text" id="kyc-city" placeholder="City" style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
+                        <input type="text" id="kyc-city" placeholder="City"
+                            style="width:100%; padding:16px 16px 16px 46px; background:var(--bg-card); border:none; border-radius:10px; font-size:16px; color:var(--text-primary); outline:none;">
                     </div>
 
-                    <button onclick="submitBasicKyc()" style="width:100%; padding:16px; background:#1fc78f; color:#fff; border:none; border-radius:24px; font-size:16px; font-weight:500; cursor:pointer;">
+                    <button onclick="submitBasicKyc()"
+                        style="width:100%; padding:16px; background:#1fc78f; color:#fff; border:none; border-radius:24px; font-size:16px; font-weight:500; cursor:pointer;">
                         Submit
                     </button>
 
@@ -1977,42 +2193,50 @@
 
         <!-- MORE SCREEN -->
         <div id="more-screen" class="screen" style="background:#fff; min-height:100vh;">
-            <div class="sub-header" style="border-bottom:none; display:flex; justify-content:space-between; align-items:center; padding:15px 20px; background:#fff;">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')" style="color:var(--text-secondary); font-size:18px;"></i>
+            <div class="sub-header"
+                style="border-bottom:none; display:flex; justify-content:space-between; align-items:center; padding:15px 20px; background:#fff;">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('home-screen')"
+                    style="color:var(--text-secondary); font-size:18px;"></i>
                 <i class="fa-solid fa-pen" style="color:var(--text-secondary); font-size:16px;"></i>
             </div>
-            
+
             <div style="padding:10px 20px;">
-                
+
                 <!-- Conventional -->
                 <div style="margin-bottom:30px;">
                     <div style="font-size:18px; color:#333; margin-bottom:20px; font-weight:500;">Conventional</div>
                     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px 10px;">
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('deposit-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('deposit-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M25 22 H17 M21 18 L17 22 L21 26" fill="none" stroke="#f6b856" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M25 22 H17 M21 18 L17 22 L21 26" fill="none" stroke="#f6b856" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Deposit</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('withdrawal-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('withdrawal-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M19 22 H27 M23 18 L27 22 L23 26" fill="none" stroke="#f6b856" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M19 22 H27 M23 18 L27 22 L23 26" fill="none" stroke="#f6b856" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Withdrawal</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="openConvertModal()">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="openConvertModal()">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <rect x="10" y="12" width="24" height="20" rx="6" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M22 12 H28 C31.31 12 34 14.69 34 18 V22 L22 12 Z" fill="#f6b856"/>
+                                <rect x="10" y="12" width="24" height="20" rx="6" fill="none" stroke="#4a5568"
+                                    stroke-width="1.5" />
+                                <path d="M22 12 H28 C31.31 12 34 14.69 34 18 V22 L22 12 Z" fill="#f6b856" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Convert</span>
                         </div>
-                        
+
                     </div>
                 </div>
 
@@ -2020,32 +2244,36 @@
                 <div style="margin-bottom:30px;">
                     <div style="font-size:18px; color:#333; margin-bottom:20px; font-weight:500;">Trade</div>
                     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px 10px;">
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('perpetual-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('perpetual-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M22 22 L22 6 A16 16 0 0 1 38 22 Z" fill="#f6b856"/>
+                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M22 22 L22 6 A16 16 0 0 1 38 22 Z" fill="#f6b856" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Perpetual</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('futures-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('futures-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M19 28 L27 15" stroke="#f6b856" stroke-width="2.5" stroke-linecap="round"/>
-                                <path d="M17 26 L25 13" stroke="#f6b856" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M19 28 L27 15" stroke="#f6b856" stroke-width="2.5" stroke-linecap="round" />
+                                <path d="M17 26 L25 13" stroke="#f6b856" stroke-width="2.5" stroke-linecap="round" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Futures</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('fund-transfer-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('fund-transfer-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <path d="M18 26 V16 M15 19 L18 16 L21 19 M26 18 V28 M23 25 L26 28 L29 25" fill="none" stroke="#f6b856" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="22" cy="22" r="16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M18 26 V16 M15 19 L18 16 L21 19 M26 18 V28 M23 25 L26 28 L29 25" fill="none"
+                                    stroke="#f6b856" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Transfer</span>
                         </div>
-                        
+
                     </div>
                 </div>
 
@@ -2053,36 +2281,48 @@
                 <div style="margin-bottom:30px;">
                     <div style="font-size:18px; color:#333; margin-bottom:20px; font-weight:500;">Other</div>
                     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px 10px;">
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="openChatScreen()">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="openChatScreen()">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <path d="M14 36 V12 C14 12, 18 9, 24 12 C30 15, 34 12, 34 12 V24 C34 24, 30 27, 24 24 C18 21, 14 24, 14 24" fill="none" stroke="#4a5568" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <rect x="22" y="23" width="12" height="6" rx="2" fill="#f6b856"/>
+                                <path
+                                    d="M14 36 V12 C14 12, 18 9, 24 12 C30 15, 34 12, 34 12 V24 C34 24, 30 27, 24 24 C18 21, 14 24, 14 24"
+                                    fill="none" stroke="#4a5568" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <rect x="22" y="23" width="12" height="6" rx="2" fill="#f6b856" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Help</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="openChatScreen()">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="openChatScreen()">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <path d="M22 10 C13 10 7 15 7 22 C7 26 9 29 13 31 C13 35 9 37 9 37 C15 37 19 35 21 33 C21.5 33.1 22 33.1 22.5 33.1 C31.5 33.1 37 28 37 22 C37 15 31 10 22 10 Z" fill="none" stroke="#4a5568" stroke-width="1.5" stroke-linejoin="round"/>
-                                <path d="M16 19 H28 M16 24 H24" fill="none" stroke="#f6b856" stroke-width="2" stroke-linecap="round"/>
+                                <path
+                                    d="M22 10 C13 10 7 15 7 22 C7 26 9 29 13 31 C13 35 9 37 9 37 C15 37 19 35 21 33 C21.5 33.1 22 33.1 22.5 33.1 C31.5 33.1 37 28 37 22 C37 15 31 10 22 10 Z"
+                                    fill="none" stroke="#4a5568" stroke-width="1.5" stroke-linejoin="round" />
+                                <path d="M16 19 H28 M16 24 H24" fill="none" stroke="#f6b856" stroke-width="2"
+                                    stroke-linecap="round" />
                             </svg>
                             <span style="font-size:13px; color:#666;">Contact Us</span>
                         </div>
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;" onclick="navTo('about-screen')">
+
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="navTo('about-screen')">
                             <svg width="44" height="44" viewBox="0 0 44 44">
-                                <rect x="14" y="10" width="16" height="24" rx="3" fill="none" stroke="#4a5568" stroke-width="1.5"/>
-                                <line x1="18" y1="16" x2="26" y2="16" stroke="#4a5568" stroke-width="1.5" stroke-linecap="round"/>
-                                <line x1="18" y1="21" x2="24" y2="21" stroke="#4a5568" stroke-width="1.5" stroke-linecap="round"/>
-                                <rect x="22" y="24" width="8" height="10" rx="3" fill="#f6b856"/>
+                                <rect x="14" y="10" width="16" height="24" rx="3" fill="none" stroke="#4a5568"
+                                    stroke-width="1.5" />
+                                <line x1="18" y1="16" x2="26" y2="16" stroke="#4a5568" stroke-width="1.5"
+                                    stroke-linecap="round" />
+                                <line x1="18" y1="21" x2="24" y2="21" stroke="#4a5568" stroke-width="1.5"
+                                    stroke-linecap="round" />
+                                <rect x="22" y="24" width="8" height="10" rx="3" fill="#f6b856" />
                             </svg>
                             <span style="font-size:13px; color:#666;">About Us</span>
                         </div>
-                        
+
                     </div>
                 </div>
-                
+
             </div>
         </div>
 
@@ -2278,106 +2518,141 @@
 
     <!-- Fund Transfer Modal -->
     <div id="fund-transfer-overlay" class="tips-overlay" style="display:none;" onclick="closeFundTransferModal()">
-        <div class="bottom-sheet" style="padding:0; background: var(--bg-card); display:flex; flex-direction:column;" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-color);">
+        <div class="bottom-sheet" style="padding:0; background: var(--bg-card); display:flex; flex-direction:column;"
+            onclick="event.stopPropagation()">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-color);">
                 <span style="font-size:18px; font-weight:600; color:var(--text-primary);">Transfer</span>
-                <i class="fa-solid fa-xmark" style="font-size:18px; color:var(--text-primary); cursor:pointer;" onclick="closeFundTransferModal()"></i>
+                <i class="fa-solid fa-xmark" style="font-size:18px; color:var(--text-primary); cursor:pointer;"
+                    onclick="closeFundTransferModal()"></i>
             </div>
-            
+
             <div style="padding:20px;">
                 <!-- From / To Selectors -->
                 <div style="display:flex; align-items:center; margin-bottom:24px; position:relative;">
                     <div style="display:flex; flex-direction:column; align-items:center; margin-right:16px;">
-                        <div style="width:8px; height:8px; border-radius:50%; background:var(--text-secondary); margin-top:8px;"></div>
+                        <div
+                            style="width:8px; height:8px; border-radius:50%; background:var(--text-secondary); margin-top:8px;">
+                        </div>
                         <div style="width:1px; height:36px; background:var(--border-color); margin:4px 0;"></div>
-                        <div style="width:8px; height:8px; border-radius:50%; background:var(--up-color); margin-bottom:8px;"></div>
+                        <div
+                            style="width:8px; height:8px; border-radius:50%; background:var(--up-color); margin-bottom:8px;">
+                        </div>
                     </div>
-                    
+
                     <div style="flex:1;">
                         <!-- From -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:12px;">
                             <span style="color:var(--text-secondary); font-size:14px; width:50px;">From</span>
-                            <div class="select-dropdown" style="flex:1; border:none; padding:0; justify-content:flex-end;" onclick="toggleDropdown('transfer-from-dd')">
-                                <span id="transfer-from-val" style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Exchange</span>
-                                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:var(--text-secondary);"></i>
+                            <div class="select-dropdown"
+                                style="flex:1; border:none; padding:0; justify-content:flex-end;"
+                                onclick="toggleDropdown('transfer-from-dd')">
+                                <span id="transfer-from-val"
+                                    style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Exchange</span>
+                                <i class="fa-solid fa-chevron-right"
+                                    style="font-size:12px; color:var(--text-secondary);"></i>
                             </div>
-                            <div class="dropdown-menu" id="transfer-from-dd" style="display:none; right:0; top:30px; min-width:140px;">
+                            <div class="dropdown-menu" id="transfer-from-dd"
+                                style="display:none; right:0; top:30px; min-width:140px;">
                                 <div class="dropdown-item" onclick="setTransferVal('from', 'Exchange')">Exchange</div>
                                 <div class="dropdown-item" onclick="setTransferVal('from', 'Trade')">Trade</div>
                                 <div class="dropdown-item" onclick="setTransferVal('from', 'Perpetual')">Perpetual</div>
                             </div>
                         </div>
-                        
+
                         <!-- To -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:4px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; padding-bottom:4px;">
                             <span style="color:var(--text-secondary); font-size:14px; width:50px;">To</span>
-                            <div class="select-dropdown" style="flex:1; border:none; padding:0; justify-content:flex-end;" onclick="toggleDropdown('transfer-to-dd')">
-                                <span id="transfer-to-val" style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Trade</span>
-                                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:var(--text-secondary);"></i>
+                            <div class="select-dropdown"
+                                style="flex:1; border:none; padding:0; justify-content:flex-end;"
+                                onclick="toggleDropdown('transfer-to-dd')">
+                                <span id="transfer-to-val"
+                                    style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Trade</span>
+                                <i class="fa-solid fa-chevron-right"
+                                    style="font-size:12px; color:var(--text-secondary);"></i>
                             </div>
-                            <div class="dropdown-menu" id="transfer-to-dd" style="display:none; right:0; top:30px; min-width:140px;">
+                            <div class="dropdown-menu" id="transfer-to-dd"
+                                style="display:none; right:0; top:30px; min-width:140px;">
                                 <div class="dropdown-item" onclick="setTransferVal('to', 'Exchange')">Exchange</div>
                                 <div class="dropdown-item" onclick="setTransferVal('to', 'Trade')">Trade</div>
                                 <div class="dropdown-item" onclick="setTransferVal('to', 'Perpetual')">Perpetual</div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--bg-main); display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.1); border:1px solid var(--border-color);" onclick="swapTransferDirection()">
+
+                    <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:var(--bg-main); display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.1); border:1px solid var(--border-color);"
+                        onclick="swapTransferDirection()">
                         <i class="fa-solid fa-arrow-up-arrow-down" style="color:var(--up-color); font-size:14px;"></i>
                     </div>
                 </div>
 
                 <!-- Currency -->
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--bg-main); border-radius:8px; margin-bottom:16px;">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--bg-main); border-radius:8px; margin-bottom:16px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" style="width:24px; height:24px; border-radius:50%;">
+                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png"
+                            style="width:24px; height:24px; border-radius:50%;">
                         <span style="font-weight:600; font-size:16px; color:var(--text-primary);">USDT</span>
                     </div>
                     <i class="fa-solid fa-chevron-right" style="font-size:12px; color:var(--text-secondary);"></i>
                 </div>
-                
+
                 <!-- Amount -->
                 <div style="background:var(--bg-main); border-radius:8px; padding:12px 16px; margin-bottom:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <input type="number" id="modal-transfer-amount" placeholder="Please enter amount" style="background:none; border:none; outline:none; color:var(--text-primary); font-size:16px; font-weight:600; flex:1;" oninput="checkTransferBtn()">
-                        <span style="color:var(--up-color); font-weight:600; font-size:14px; cursor:pointer;" onclick="setNewTransferAll()">Max</span>
+                        <input type="number" id="modal-transfer-amount" placeholder="Please enter amount"
+                            style="background:none; border:none; outline:none; color:var(--text-primary); font-size:16px; font-weight:600; flex:1;"
+                            oninput="checkTransferBtn()">
+                        <span style="color:var(--up-color); font-weight:600; font-size:14px; cursor:pointer;"
+                            onclick="setNewTransferAll()">Max</span>
                     </div>
                 </div>
-                
+
                 <!-- Available -->
                 <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:24px;">
                     <span style="color:var(--text-secondary);">Available</span>
-                    <span style="color:var(--text-primary); font-weight:500;"><span id="transfer-avail-amt">0.00</span> USDT</span>
+                    <span style="color:var(--text-primary); font-weight:500;"><span id="transfer-avail-amt">0.00</span>
+                        USDT</span>
                 </div>
-                
+
                 <!-- Confirm Button -->
-                <button id="modal-transfer-confirm-btn" class="btn-green-full" style="padding:14px; font-size:16px; font-weight:600; border-radius:8px; opacity:0.5; pointer-events:none;" onclick="confirmNewTransfer()">Confirm Transfer</button>
+                <button id="modal-transfer-confirm-btn" class="btn-green-full"
+                    style="padding:14px; font-size:16px; font-weight:600; border-radius:8px; opacity:0.5; pointer-events:none;"
+                    onclick="confirmNewTransfer()">Confirm Transfer</button>
             </div>
         </div>
     </div>
 
     <!-- Penalty Terms Modal -->
     <div id="penalty-terms-overlay" class="tips-overlay" style="display:none;" onclick="closePenaltyTermsModal()">
-        <div class="wrong-pass-modal" style="padding:24px;width:320px;max-width:90%;text-align:center;" onclick="event.stopPropagation()">
+        <div class="wrong-pass-modal" style="padding:24px;width:320px;max-width:90%;text-align:center;"
+            onclick="event.stopPropagation()">
             <div class="wrong-pass-icon" style="margin-bottom:16px;">
                 <i class="fa-solid fa-triangle-exclamation" style="color:var(--down-color);font-size:36px;"></i>
             </div>
             <h3 style="margin-bottom:12px;font-size:18px;color:var(--text-primary);">Early Withdrawal Warning</h3>
-            <p id="penalty-terms-text" style="font-size:14px;color:var(--text-secondary);line-height:1.5;margin-bottom:24px;text-align:left;">
+            <p id="penalty-terms-text"
+                style="font-size:14px;color:var(--text-secondary);line-height:1.5;margin-bottom:24px;text-align:left;">
                 <!-- Dynamically loaded terms -->
             </p>
             <div style="display:flex;gap:12px;">
-                <button class="btn-secondary" style="flex:1;padding:12px;border-radius:8px;font-weight:600;" onclick="closePenaltyTermsModal()">Cancel</button>
-                <button class="btn-green-full" style="flex:1;padding:12px;border-radius:8px;font-weight:600;" onclick="proceedNewTransfer()">Accept</button>
+                <button class="btn-secondary" style="flex:1;padding:12px;border-radius:8px;font-weight:600;"
+                    onclick="closePenaltyTermsModal()">Cancel</button>
+                <button class="btn-green-full" style="flex:1;padding:12px;border-radius:8px;font-weight:600;"
+                    onclick="proceedNewTransfer()">Accept</button>
             </div>
         </div>
     </div>
-    
+
     <!-- SUCCESS TOAST MODAL -->
-    <div id="success-toast-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:12px; padding:30px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.2); min-width: 240px;">
-            <div style="width:70px; height:70px; background:#02c076; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px;">
+    <div id="success-toast-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:12px; padding:30px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.2); min-width: 240px;">
+            <div
+                style="width:70px; height:70px; background:#02c076; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px;">
                 <i class="fa-solid fa-check" style="color:#fff; font-size:36px;"></i>
             </div>
             <div id="success-toast-msg" style="color:#333; font-size:16px; font-weight:600;">Success</div>
@@ -2392,7 +2667,7 @@
     <!-- Global Click Sound Engine -->
     <audio id="global-click-sound" src="click_sound.mp3" preload="auto"></audio>
     <script>
-        document.addEventListener('click', function() {
+        document.addEventListener('click', function () {
             const clickAudio = document.getElementById('global-click-sound');
             if (clickAudio) {
                 clickAudio.currentTime = 0;
@@ -2402,17 +2677,22 @@
     </script>
 
     <!-- COUNTRY SELECTOR MODAL -->
-    <div id="country-selector-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; flex-direction:column;">
+    <div id="country-selector-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; flex-direction:column;">
         <!-- Top White Panel -->
         <div style="background:#fff; width:100%; height:75vh; display:flex; flex-direction:column;">
             <div style="padding:20px 20px 10px 20px; display:flex; align-items:center; gap:12px;">
                 <div style="flex:1; position:relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:14px; top:14px; color:#9ca3af;"></i>
-                    <input type="text" id="country-search-input" placeholder="Search" style="width:100%; padding:12px 14px 12px 40px; background:#f3f4f6; border:none; border-radius:8px; font-size:16px; outline:none; color:#374151;" onkeyup="filterCountries()">
+                    <i class="fa-solid fa-magnifying-glass"
+                        style="position:absolute; left:14px; top:14px; color:#9ca3af;"></i>
+                    <input type="text" id="country-search-input" placeholder="Search"
+                        style="width:100%; padding:12px 14px 12px 40px; background:#f3f4f6; border:none; border-radius:8px; font-size:16px; outline:none; color:#374151;"
+                        onkeyup="filterCountries()">
                 </div>
-                <i class="fa-solid fa-xmark" style="color:#9ca3af; font-size:22px; cursor:pointer; padding:5px;" onclick="closeCountryModal()"></i>
+                <i class="fa-solid fa-xmark" style="color:#9ca3af; font-size:22px; cursor:pointer; padding:5px;"
+                    onclick="closeCountryModal()"></i>
             </div>
-            
+
             <div id="country-list-container" style="flex:1; overflow-y:auto; padding:10px 20px;">
                 <!-- Countries injected here -->
             </div>
@@ -2441,7 +2721,7 @@
 
         function renderCountries(list) {
             const container = document.getElementById('country-list-container');
-            if(!container) return;
+            if (!container) return;
             container.innerHTML = list.map(c => `
                 <div onclick="selectCountry('${c.name}', '${c.code}')" style="display:flex; align-items:center; padding:16px 0; border-bottom:1px solid #f9fafb; cursor:pointer;">
                     <img src="https://flagcdn.com/w20/${c.code}.png" style="width:24px; border-radius:2px; margin-right:16px;" alt="${c.name}">
@@ -2473,7 +2753,7 @@
             document.getElementById('kyc-flag-img').style.display = 'inline-block';
             closeCountryModal();
         }
-        
+
         // Initial render just in case
         document.addEventListener('DOMContentLoaded', () => {
             renderCountries(countryList);
@@ -2482,11 +2762,14 @@
 
     <!-- KYC Warning popup -->
     <div id="kyc-warning-overlay" class="tips-overlay" style="display:none;" onclick="this.style.display='none'">
-        <div class="wrong-pass-modal" onclick="event.stopPropagation()" style="position:relative; width: 300px; padding: 30px 20px;">
-            <div class="wrong-pass-icon" style="border: 3px dashed #f84960; margin-bottom: 16px; width: 64px; height: 64px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin:0 auto;">
+        <div class="wrong-pass-modal" onclick="event.stopPropagation()"
+            style="position:relative; width: 300px; padding: 30px 20px;">
+            <div class="wrong-pass-icon"
+                style="border: 3px dashed #f84960; margin-bottom: 16px; width: 64px; height: 64px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin:0 auto;">
                 <i class="fa-solid fa-xmark" style="color:#f84960;font-size:36px;"></i>
             </div>
-            <p style="text-align:center;font-size:18px;font-weight:600;color:var(--text-primary);margin-top:20px;">Please fill first basic info</p>
+            <p style="text-align:center;font-size:18px;font-weight:600;color:var(--text-primary);margin-top:20px;">
+                Please fill first basic info</p>
         </div>
     </div>
 </body>
