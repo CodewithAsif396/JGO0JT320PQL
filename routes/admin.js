@@ -614,8 +614,18 @@ router.post('/signals', authMiddleware, adminMiddleware, async (req, res) => {
 
 router.delete('/signals/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    await prisma.signal.update({ where: { id: req.params.id }, data: { status: 'CANCELLED' } });
+    const signal = await prisma.signal.findUnique({ where: { id: req.params.id } });
+    if (!signal) return res.status(404).json({ error: 'Signal not found' });
+
     if (global.ss) global.ss.cancelSignal(req.params.id);
+    
+    // Preserve pair and duration for user trade history
+    await prisma.trade.updateMany({ 
+      where: { signalId: req.params.id }, 
+      data: { signalId: null, pair: signal.pair, duration: signal.duration } 
+    });
+    
+    await prisma.signal.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });

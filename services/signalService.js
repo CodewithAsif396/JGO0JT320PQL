@@ -6,6 +6,44 @@ class SignalService {
     this.io = io;
     this.ns = notificationService;
     this.timers = new Map();
+    this._restoreTimers();
+  }
+
+  async _restoreTimers() {
+    try {
+      const activeSignals = await prisma.signal.findMany({
+        where: { status: 'ACTIVE' }
+      });
+      for (const signal of activeSignals) {
+        const endTime = new Date(signal.entryTime).getTime() + (signal.duration * 1000);
+        const delay = endTime - Date.now();
+        if (delay <= 0) {
+          this.completeSignal(signal.id);
+        } else {
+          this.timers.set(
+            signal.id + '_end',
+            setTimeout(() => this.completeSignal(signal.id), delay)
+          );
+        }
+      }
+
+      const pendingSignals = await prisma.signal.findMany({
+        where: { status: 'PENDING' }
+      });
+      for (const signal of pendingSignals) {
+        const delay = new Date(signal.entryTime).getTime() - Date.now();
+        if (delay <= 0) {
+          this.startSignal(signal.id);
+        } else {
+          this.timers.set(
+            signal.id,
+            setTimeout(() => this.startSignal(signal.id), delay)
+          );
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore timers:', e.message);
+    }
   }
 
   async createSignal(data) {
@@ -59,7 +97,7 @@ class SignalService {
     } else {
       this.io.emit('new_signal', signal);
     }
-    this._notifyEligibleUsers(signal).catch(() => {});
+    this._notifyEligibleUsers(signal).catch(() => { });
     return signal;
   }
 
@@ -70,7 +108,7 @@ class SignalService {
 
     if (signal.targetUserId) {
       // Only notify the specific target user
-      if (this.ns) await this.ns.send(signal.targetUserId, title, body, 'SIGNAL').catch(() => {});
+      if (this.ns) await this.ns.send(signal.targetUserId, title, body, 'SIGNAL').catch(() => { });
       return;
     }
 
@@ -89,7 +127,7 @@ class SignalService {
       const total = (user.balance || 0) + (user.tradeBalance || 0) + (user.perpetualBalance || 0);
       const tier = total >= t3 ? 3 : total >= t2 ? 2 : total >= t1 ? 1 : 0;
       if (tier > 0 && signal.visibilityTier <= tier && this.ns) {
-        await this.ns.send(user.id, title, body, 'SIGNAL').catch(() => {});
+        await this.ns.send(user.id, title, body, 'SIGNAL').catch(() => { });
       }
     }
   }
@@ -124,32 +162,36 @@ class SignalService {
       for (const trade of signal.trades) {
         if (trade.outcome !== 'PENDING') continue;
 
-        let isWin;
-        if (adminResult === 'WIN') isWin = true;
-        else if (adminResult === 'LOSS') isWin = false;
-        else isWin = (trade.direction === signal.direction);
+        try {
+          let isWin;
+          if (adminResult === 'WIN') isWin = true;
+          else if (adminResult === 'LOSS') isWin = false;
+          else isWin = (trade.direction === signal.direction);
 
-        const profit = isWin ? trade.amount * (signal.rewardPercentage / 100) : -trade.amount;
-        const payout = isWin ? trade.amount + profit : 0;
+          const profit = isWin ? trade.amount * (signal.rewardPercentage / 100) : -trade.amount;
+          const payout = isWin ? trade.amount + profit : 0;
 
-        await prisma.$transaction([
-          prisma.trade.update({
-            where: { id: trade.id },
-            data: { outcome: isWin ? 'WIN' : 'LOSS', profit }
-          }),
-          prisma.user.update({
-            where: { id: trade.userId },
-            data: isWin
-              ? { tradeBalance: { increment: payout }, profitBalance: { increment: profit } }
-              : { profitBalance: { increment: profit } }
-          })
-        ]);
+          await prisma.$transaction([
+            prisma.trade.update({
+              where: { id: trade.id },
+              data: { outcome: isWin ? 'WIN' : 'LOSS', profit }
+            }),
+            prisma.user.update({
+              where: { id: trade.userId },
+              data: isWin
+                ? { tradeBalance: { increment: payout }, profitBalance: { increment: profit } }
+                : { profitBalance: { increment: profit } }
+            })
+          ]);
 
-        if (this.ns) {
-          const msg = isWin
-            ? `You won ${profit.toFixed(2)} USDT on ${signal.pair} ${signal.direction}! Total returned: ${payout.toFixed(2)} USDT`
-            : `Your ${signal.pair} ${signal.direction} trade lost ${trade.amount.toFixed(2)} USDT.`;
-          await this.ns.send(trade.userId, isWin ? 'Signal Win!' : 'Signal Loss', msg, 'SIGNAL').catch(() => {});
+          if (this.ns) {
+            const msg = isWin
+              ? `You won ${profit.toFixed(2)} USDT on ${signal.pair} ${signal.direction}! Total returned: ${payout.toFixed(2)} USDT`
+              : `Your ${signal.pair} ${signal.direction} trade lost ${trade.amount.toFixed(2)} USDT.`;
+            await this.ns.send(trade.userId, isWin ? 'Signal Win!' : 'Signal Loss', msg, 'SIGNAL').catch(() => { });
+          }
+        } catch (tradeError) {
+          console.error(`Error completing trade ${trade.id} for signal ${signalId}:`, tradeError.message);
         }
       }
 

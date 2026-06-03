@@ -272,19 +272,19 @@ function renderHomeMarkets(tab = 'change') {
 function coinIconHtml(sym, bg, size) {
     size = size || 34;
     const fs = Math.max(10, Math.floor(size * 0.45));
-    
+
     let url = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/svg/color/' + sym.toLowerCase() + '.svg';
     if (sym === 'SHIB') url = 'https://assets.coincap.io/assets/icons/shib@2x.png';
-    
+
     let fallbackHtml = '<span style="font-size:' + fs + 'px;color:#fff;font-weight:700;z-index:1;">' + sym.charAt(0) + '</span>';
     if (sym === 'XAU') fallbackHtml = '<i class="fa-solid fa-coins" style="color:#fff;font-size:' + fs + 'px;z-index:1;"></i>';
     if (sym === 'XAG') fallbackHtml = '<i class="fa-solid fa-coins" style="color:#fff;font-size:' + fs + 'px;z-index:1;"></i>';
     if (sym === 'XPT') fallbackHtml = '<i class="fa-solid fa-ring" style="color:#fff;font-size:' + fs + 'px;z-index:1;"></i>';
     if (sym === 'XPD') fallbackHtml = '<i class="fa-solid fa-gem" style="color:#fff;font-size:' + fs + 'px;z-index:1;"></i>';
-    
+
     let isMetal = ['XAU', 'XAG', 'XPT', 'XPD'].includes(sym);
     let imgHtml = isMetal ? '' : '<img src="' + url + '" width="' + size + '" height="' + size + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:2;" onerror="this.remove()">';
-    
+
     return '<div style="width:' + size + 'px;height:' + size + 'px;background:' + bg + ';border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">' +
         fallbackHtml +
         imgHtml +
@@ -435,7 +435,7 @@ function renderMarkets(filter) {
     const data = q ? allCoins.filter(c => c.sym.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) : allCoins;
     list.innerHTML = data.map(c => {
         const rawPrice = parseFloat(c.price.toString().replace(/,/g, '')) || 0;
-        const fmtPrice = rawPrice < 0.1 ? rawPrice.toFixed(5) : (rawPrice < 100 ? rawPrice.toFixed(3) : rawPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        const fmtPrice = rawPrice < 0.1 ? rawPrice.toFixed(5) : (rawPrice < 100 ? rawPrice.toFixed(3) : rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         const fakeVol = rawPrice > 1000 ? (Math.random() * 400 + 50).toFixed(2) + 'M' : (Math.random() * 30 + 1).toFixed(2) + 'M';
         return `
         <div class="market-item" onclick="openTradingPair('${c.sym}')" style="cursor:pointer; display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04);">
@@ -463,7 +463,7 @@ function setCatTab(btn) {
 function setMktViewTab(btn, view) {
     document.querySelectorAll('.mkt-tab-btn').forEach(b => { b.classList.remove('active'); b.style.fontWeight = '400'; b.style.color = 'var(--text-muted)'; });
     btn.classList.add('active'); btn.style.fontWeight = '700'; btn.style.color = '#fff';
-    
+
     // In future, this would route to distinct API datasets based on 'view'.
     // For now, re-render to reflect state changes.
     renderMarkets(document.getElementById('markets-search-input')?.value || '');
@@ -506,7 +506,7 @@ function renderFakeHistory() {
             '<span style="font-size:13px;font-weight:600;">' + it.pair.replace('USDT', '/USDT') + '</span>' +
             '<span class="' + (it.dir === 'CALL' ? 'up' : 'down') + '" style="font-weight:600;font-size:12px;">' + it.dir + '</span></div>' +
             '<div class="card-row"><span class="lbl">Entry Price</span><span class="val">' + (t.entryPrice ? Number(t.entryPrice).toFixed(4) : '--') + '</span></div>' +
-                  '<div class="card-row"><span class="lbl">Amount</span><span class="val">' + it.amt + ' USDT</span></div>' +
+            '<div class="card-row"><span class="lbl">Amount</span><span class="val">' + it.amt + ' USDT</span></div>' +
             '<div class="card-row"><span class="lbl">P&amp;L</span><span class="val ' + (it.win ? 'up' : 'down') + '">' + it.profit + '</span></div></div>';
     }).join('') + '</div>';
 }
@@ -585,7 +585,7 @@ async function renderActivePositions() {
                 '<span style="font-weight:600;font-size:13px;">' + pair + '</span>' +
                 '<span class="' + dirClass + '" style="font-weight:600;">' + dirIcon + ' ' + dir + cancelBtn + '</span></div>' +
                 '<div class="card-row"><span class="lbl">Entry Price</span><span class="val">' + (t.entryPrice ? Number(t.entryPrice).toFixed(4) : '--') + '</span></div>' +
-                  '<div class="card-row"><span class="lbl">Amount</span><span class="val">' + t.amount.toFixed(2) + ' USDT</span></div>' +
+                '<div class="card-row"><span class="lbl">Amount</span><span class="val">' + t.amount.toFixed(2) + ' USDT</span></div>' +
                 '<div class="card-row"><span class="lbl">Open Time</span><span class="val">' + date + '</span></div>' +
                 '<div class="card-row"><span class="lbl">Status</span><span class="val" style="color:#f3ba2f;">ACTIVE</span></div>' +
                 '<div class="card-row"><span class="lbl">Time Left</span><span class="val up pos-countdown" data-id="' + t.id + '" data-manual="' + (t.signalId ? 'false' : 'true') + '" data-end="' + endTime + '">' + countdown + '</span></div>' +
@@ -601,6 +601,13 @@ async function renderActivePositions() {
                     clearInterval(t);
                     if (el.dataset.manual === 'true') {
                         resolveManualTrade(el.dataset.id);
+                    } else {
+                        // Signal trade: Auto-refresh after 3 seconds to move to history
+                        setTimeout(function () {
+                            loadTradeHistory();
+                            renderActivePositions();
+                            refreshUserData();
+                        }, 3000);
                     }
                 }
             }, 1000);
@@ -766,15 +773,15 @@ function toggleAssetsVisibility() {
     const bal = document.getElementById('assets-balance-val');
     const b = userData?.balance ?? 0;
     const p = userData?.profitBalance ?? 0;
-    
+
     if (bal) bal.innerHTML = assetsVisible
         ? `${b.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`
         : '****** <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>';
-        
+
     const pVal = userData?.profitBalance ?? 0;
     const pStr = pVal > 0 ? `+${pVal.toFixed(2)}` : pVal.toFixed(2);
     const pColor = pVal > 0 ? 'var(--up-color)' : (pVal < 0 ? 'var(--down-color)' : '#fff');
-    
+
     const pnlEls = ['assets-pnl-val', 'exchange-pnl-val', 'trade-pnl-val'];
     pnlEls.forEach(id => {
         const el = document.getElementById(id);
@@ -784,9 +791,9 @@ function toggleAssetsVisibility() {
         }
     });
 }
-async function refreshPnl() { 
-    await refreshUserData(); 
-    showToast('PnL refreshed!'); 
+async function refreshPnl() {
+    await refreshUserData();
+    showToast('PnL refreshed!');
 }
 
 // ── DEPOSIT ──
@@ -896,7 +903,7 @@ async function doTransfer() {
                     _futuresBal = balData.tradeBalance ?? _futuresBal;
                     _perpBal = balData.perpetualBalance ?? _perpBal;
                 }
-            } catch(e2) {
+            } catch (e2) {
                 _setSubBal(from, fromBal - amount);
                 _setSubBal(to, _getSubBal(to) + amount);
             }
@@ -912,7 +919,7 @@ async function doTransfer() {
         } else {
             showToast(data.error || 'Transfer failed. Please try again.');
         }
-    } catch(e) {
+    } catch (e) {
         _setSubBal(from, fromBal - amount);
         _setSubBal(to, _getSubBal(to) + amount);
         const spotEl = document.getElementById('acct-exchange-bal');
@@ -1178,7 +1185,7 @@ function initChart(symbol, interval) {
     else if (bSym === 'XAGUSDT') bSym = 'LTCUSDT';
     else if (bSym === 'XPTUSDT') bSym = 'ETHUSDT';
     else if (bSym === 'XPDUSDT') bSym = 'BCHUSDT';
-    
+
     // Use Binance Vision as fallback to avoid IP bans
     fetch('/api/mexc/klines?symbol=' + bSym + '&interval=' + interval + '&limit=150')
         .then(function (r) { return r.json(); })
@@ -1198,10 +1205,10 @@ function initChart(symbol, interval) {
                     apexChartData = data.map(function (k) { return { x: +k[0], y: [+k[1], +k[2], +k[3], +k[4]] }; });
                     apexChart = _rebuildChart(apexChartData, apexChartRaw, chartState, 'main-chart', 360);
                     updateOHLCRow('chart-ma-row', sym, interval, data[data.length - 1]);
-                }).catch(() => {});
+                }).catch(() => { });
         });
 
-    
+
     if (window._chartWs) { clearInterval(window._chartWs); window._chartWs = null; }
     function pollChartMexc() {
         fetch('/api/mexc/klines?symbol=' + bSym + '&interval=' + interval + '&limit=1')
@@ -1223,7 +1230,7 @@ function initChart(symbol, interval) {
                 }
                 updateOHLCRow('chart-ma-row', sym, interval, rawC);
                 _updateRealtimeChart(apexChart, chartState, rawC);
-            }).catch(() => {});
+            }).catch(() => { });
     }
     window._chartWs = setInterval(pollChartMexc, 2000);
 }
@@ -1265,10 +1272,10 @@ function initPerpChart(symbol, interval) {
                     apexPerpData = data.map(function (k) { return { x: +k[0], y: [+k[1], +k[2], +k[3], +k[4]] }; });
                     apexPerpChart = _rebuildChart(apexPerpData, apexPerpRaw, perpState, 'perp-main-chart', 310);
                     updateOHLCRow('perp-ma-row', sym, interval, data[data.length - 1]);
-                }).catch(() => {});
+                }).catch(() => { });
         });
 
-    
+
     if (window._perpWs) { clearInterval(window._perpWs); window._perpWs = null; }
     function pollPerpMexc() {
         fetch('/api/mexc/klines?symbol=' + bSym + '&interval=' + interval + '&limit=1')
@@ -1290,7 +1297,7 @@ function initPerpChart(symbol, interval) {
                 }
                 updateOHLCRow('perp-chart-ma-row', sym, interval, rawC);
                 _updateRealtimeChart(apexPerpChart, perpState, rawC);
-            }).catch(() => {});
+            }).catch(() => { });
     }
     window._perpWs = setInterval(pollPerpMexc, 2000);
 }
@@ -1365,7 +1372,7 @@ let signalTimers = {};    // signalId → setInterval handle
 let currentPair = 'ETH/USDT';
 
 function initSocket() {
-   window.updateOHLCRow = function() {};
+    window.updateOHLCRow = function () { };
     socket = io();
     if (authToken) socket.emit('authenticate', authToken);
 
@@ -1377,7 +1384,7 @@ function initSocket() {
         fetchSignals();
         showToast('New Signal: ' + signal.pair + ' ' + signal.direction);
         const tickerEl = document.getElementById('home-ticker-text');
-        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const durMins = signal.duration ? Math.round(signal.duration / 60) + 'min' : '';
         if (tickerEl) tickerEl.textContent = 'HOT SIGNAL ALERT: ' + signal.pair + ' ' + signal.direction + (sigTime ? ' @ ' + sigTime : '') + (durMins ? ' | Duration: ' + durMins : '') + ' - GET READY TO TRADE!';
         // Show bell badge immediately
@@ -1391,7 +1398,7 @@ function initSocket() {
         renderSignalCards();
         showToast('Signal ACTIVE: ' + signal.pair + ' — Follow Now!');
         const tickerEl = document.getElementById('home-ticker-text');
-        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+        const sigTime = signal.entryTime ? new Date(signal.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const durMins = signal.duration ? Math.round(signal.duration / 60) + 'min' : '';
         if (tickerEl) tickerEl.textContent = '🔴 SIGNAL ACTIVE: ' + signal.pair + ' ' + signal.direction + (sigTime ? ' @ ' + sigTime : '') + (durMins ? ' | ' + durMins : '') + ' - TRADE NOW!';
         // Show bell badge immediately
@@ -1469,7 +1476,7 @@ function updateMarketUI(prices) {
         const coin = allCoins.find(c => c.sym === sym);
         if (coin) {
             const prevPrice = parseFloat(coin.price.replace(/,/g, '')) || 0;
-            let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
             coin.price = formattedPrice;
             coin.ch = (up ? '+' : '') + data.change.toFixed(2) + '%';
             coin.up = up;
@@ -1477,9 +1484,9 @@ function updateMarketUI(prices) {
             const hmPrice = document.getElementById('hm-price-' + sym);
             const hmChg = document.getElementById('hm-chg-' + sym);
             if (hmPrice) { hmPrice.textContent = coin.price; hmPrice.className = 'price ' + (up ? 'up' : 'down'); }
-            if (hmChg) { 
-                hmChg.textContent = coin.ch; 
-                hmChg.style.background = up ? '#02c076' : '#f84960'; 
+            if (hmChg) {
+                hmChg.textContent = coin.ch;
+                hmChg.style.background = up ? '#02c076' : '#f84960';
             }
         }
 
@@ -1489,13 +1496,13 @@ function updateMarketUI(prices) {
         const spEl = document.getElementById('tick-sp-' + sym);
         if (priceEl) {
             const prev = priceEl.textContent;
-            let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
             priceEl.textContent = formattedPrice;
             priceEl.className = 'price ' + (up ? 'up' : 'down');
             if (prev !== priceEl.textContent) flashEl(priceEl, up);
         }
-        if (chgEl) { 
-            chgEl.textContent = (up ? '+' : '') + data.change.toFixed(2) + '%'; 
+        if (chgEl) {
+            chgEl.textContent = (up ? '+' : '') + data.change.toFixed(2) + '%';
             chgEl.style.background = up ? '#00c087' : '#f84960';
         }
         if (spEl && coin) spEl.innerHTML = makeSparkline(coin);
@@ -1507,7 +1514,7 @@ function updateMarketUI(prices) {
             const fcEl = document.getElementById('futures-price-chg');
             const pn = document.querySelector('#futures-screen .pair-change');
             if (fpEl) {
-                let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                let formattedPrice = data.price < 0.1 ? data.price.toFixed(5) : (data.price < 100 ? data.price.toFixed(4) : data.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                 fpEl.textContent = formattedPrice + ' USDT';
                 fpEl.className = 'futures-live-price-val ' + (up ? 'up' : 'down');
                 flashEl(fpEl, up);
@@ -1651,7 +1658,7 @@ function updateUIWithUserData() {
     const refContainers = [document.getElementById('ref-list-container'), document.getElementById('share-ref-list-container')];
     const refs = userData.referrals || [];
     let htmlContent = '<div class="no-data-block"><p>No referrals yet</p></div>';
-    
+
     if (refs.length > 0) {
         htmlContent = refs.map(r => {
             const commission = ((r.investments || 0) * 0.05).toFixed(2);
@@ -1849,7 +1856,7 @@ async function fetchSignals() {
 function renderVipTiers(tiers) {
     const tbody = document.getElementById('vip-tiers-tbody');
     if (!tbody) return;
-    
+
     // We expect tiers.t1, tiers.t2, etc. (up to t4 or higher)
     let html = '';
     const tierLimits = [
@@ -1858,18 +1865,18 @@ function renderVipTiers(tiers) {
         { lv: 3, min: tiers.t3 || 1500, label: '3 Signals / day' },
         { lv: 4, min: tiers.t4 || 2000, label: '4 Signals / day' }
     ];
-    
-    tierLimits.forEach(function(t, idx) {
-        let max = tierLimits[idx+1] ? tierLimits[idx+1].min : '';
+
+    tierLimits.forEach(function (t, idx) {
+        let max = tierLimits[idx + 1] ? tierLimits[idx + 1].min : '';
         html += `
         <tr>
             <td style="padding:5px;">LV${t.lv}</td>
-            <td style="text-align:right;padding:5px;">$${t.min} ${max !== '' ? 'to $' + (max-1) : 'and above'} <span style="display:block;font-size:10px;color:var(--accent);margin-top:2px;">(${t.label})</span></td>
+            <td style="text-align:right;padding:5px;">$${t.min} ${max !== '' ? 'to $' + (max - 1) : 'and above'} <span style="display:block;font-size:10px;color:var(--accent);margin-top:2px;">(${t.label})</span></td>
         </tr>`;
     });
-    
+
     tbody.innerHTML = html;
-    
+
     const minLabel = document.getElementById('min-tier-label');
     if (minLabel && tiers.t1) minLabel.innerText = '$' + tiers.t1;
 }
@@ -2132,7 +2139,7 @@ async function placeOrder() {
                     signalId: activeSignal.id,
                     amount: amount,
                     direction: currentOrderDir,
-                    entryPrice: parseFloat((allCoins.find(c => c.sym === (activeSignal.pair.replace('/USDT','').replace('USDT','').toUpperCase())) || allCoins[0])?.price?.toString()?.replace(/,/g, '') || '0')
+                    entryPrice: parseFloat((allCoins.find(c => c.sym === (activeSignal.pair.replace('/USDT', '').replace('USDT', '').toUpperCase())) || allCoins[0])?.price?.toString()?.replace(/,/g, '') || '0')
                 })
             });
             const data = await res.json();
@@ -2158,7 +2165,7 @@ async function placeOrder() {
         const res = await fetch('/api/signals/manual-trade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-            body: JSON.stringify({ pair: sym, amount: amount, direction: currentOrderDir, duration: 600, entryPrice: parseFloat((allCoins.find(c => c.sym === sym.replace('USDT','')) || allCoins[0]).price.toString().replace(/,/g, '')) })
+            body: JSON.stringify({ pair: sym, amount: amount, direction: currentOrderDir, duration: 600, entryPrice: parseFloat((allCoins.find(c => c.sym === sym.replace('USDT', '')) || allCoins[0]).price.toString().replace(/,/g, '')) })
         });
         const data = await res.json();
         if (actionBtn) { actionBtn.disabled = false; actionBtn.textContent = currentOrderDir; }
@@ -2226,7 +2233,7 @@ function updateKycUI() {
 
     const basicEl = document.getElementById('basic-kyc-status');
     const advancedEl = document.getElementById('advanced-kyc-status');
-    
+
     if (basicEl) {
         if (!kycData || !kycData.fullName || status === 'NONE') {
             basicEl.textContent = 'Not Certified';
@@ -2364,15 +2371,15 @@ async function loadWithdrawalRecords() {
             container.innerHTML = '<div class="no-data-block" style="padding-top:60px;"><i class="fa-solid fa-receipt" style="font-size:40px;color:var(--text-muted);margin-bottom:12px;"></i><p>No withdrawal records</p></div>';
             return;
         }
-        const statusClass = { 
-            pending: 'pending-status', PENDING: 'pending-status', 
-            completed: 'paid-status', COMPLETED: 'paid-status', 
+        const statusClass = {
+            pending: 'pending-status', PENDING: 'pending-status',
+            completed: 'paid-status', COMPLETED: 'paid-status',
             failed: 'fail-status', FAILED: 'fail-status',
             rejected: 'fail-status', REJECTED: 'fail-status'
         };
-        const statusLabel = { 
-            pending: 'Under Audit', PENDING: 'Under Audit', 
-            completed: 'Paid', COMPLETED: 'Paid', 
+        const statusLabel = {
+            pending: 'Under Audit', PENDING: 'Under Audit',
+            completed: 'Paid', COMPLETED: 'Paid',
             failed: 'Failed', FAILED: 'Failed',
             rejected: 'Rejected', REJECTED: 'Rejected'
         };
@@ -3384,27 +3391,27 @@ function proceedNewTransfer() {
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
         body: JSON.stringify({ fromWallet: transferFrom, toWallet: transferTo, amount: amt })
     })
-    .then(r => r.json())
-    .then(d => {
-        btn.innerHTML = 'Confirm Transfer';
-        if (d.error) {
-            showToast(d.error);
-        } else {
-            if (d.penaltyAmount && d.penaltyAmount > 0) {
-                showToast('Transfer successful! ' + d.penaltyAmount.toFixed(2) + ' USDT deducted as early withdrawal penalty.');
+        .then(r => r.json())
+        .then(d => {
+            btn.innerHTML = 'Confirm Transfer';
+            if (d.error) {
+                showToast(d.error);
             } else {
-                showToast('Transfer successful!');
+                if (d.penaltyAmount && d.penaltyAmount > 0) {
+                    showToast('Transfer successful! ' + d.penaltyAmount.toFixed(2) + ' USDT deducted as early withdrawal penalty.');
+                } else {
+                    showToast('Transfer successful!');
+                }
+                document.getElementById('modal-transfer-amount').value = '';
+                closeFundTransferModal();
+                refreshUserData(); // Refresh global balances
+                if (typeof fetchBalancesForTransfer === 'function') fetchBalancesForTransfer();
             }
-            document.getElementById('modal-transfer-amount').value = '';
-            closeFundTransferModal();
-            refreshUserData(); // Refresh global balances
-            if (typeof fetchBalancesForTransfer === 'function') fetchBalancesForTransfer();
-        }
-    })
-    .catch(e => {
-        btn.innerHTML = 'Confirm Transfer';
-        showToast('Transfer failed. Try again.');
-    });
+        })
+        .catch(e => {
+            btn.innerHTML = 'Confirm Transfer';
+            showToast('Transfer failed. Try again.');
+        });
 }
 
 
@@ -3440,20 +3447,20 @@ function updateHeaderCountdown() {
     if (document.getElementById('futures-screen').style.display === 'none') return;
     const activeBtn = document.querySelector('#futures-timeframes button.active');
     if (!activeBtn) return;
-    
+
     const periodSecs = parseInt(activeBtn.dataset.sec) || 60;
     const now = new Date();
-    
+
     // Time relative to start of Unix epoch (makes math easy)
     const nowSecs = Math.floor(now.getTime() / 1000);
     const nextBoundarySecs = Math.ceil(nowSecs / periodSecs) * periodSecs;
-    
+
     let remain = nextBoundarySecs - nowSecs;
     if (remain === 0) remain = periodSecs;
-    
+
     const elCountdown = document.getElementById('header-countdown');
     if (elCountdown) elCountdown.textContent = remain + ' s';
-    
+
     // Order time formatting
     const y = now.getFullYear();
     const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -3463,7 +3470,7 @@ function updateHeaderCountdown() {
     const ss = String(now.getSeconds()).padStart(2, '0');
     const elOrderTime = document.getElementById('header-order-time');
     if (elOrderTime) elOrderTime.textContent = y + '/' + m + '/' + d + ' ' + hh + ':' + mm + ':' + ss;
-    
+
     // Time period formatting
     const startBoundary = new Date((nextBoundarySecs - periodSecs) * 1000);
     const endBoundary = new Date(nextBoundarySecs * 1000);
@@ -3471,7 +3478,7 @@ function updateHeaderCountdown() {
     const startM = String(startBoundary.getMinutes()).padStart(2, '0');
     const endH = String(endBoundary.getHours()).padStart(2, '0');
     const endM = String(endBoundary.getMinutes()).padStart(2, '0');
-    
+
     const elTimePeriod = document.getElementById('header-time-period');
     if (elTimePeriod) elTimePeriod.textContent = startH + ':' + startM + '~' + endH + ':' + endM;
 }
@@ -3484,7 +3491,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let bannerSlideIndex = 0;
 let bannerInterval = null;
 
-window.currentSlide = function(n) {
+window.currentSlide = function (n) {
     showBannerSlide(n);
 };
 
@@ -3563,7 +3570,7 @@ async function loadBanners() {
     const s = await _fetchAppSettings();
     const bannerContainer = document.getElementById('banner-slides-container');
     const dotContainer = document.getElementById('banner-dots-container');
-    
+
     if (!bannerContainer || !dotContainer) return;
 
     let banners = ['home_slider_1.png', 'home_slider_2.png']; // Forced local banners
@@ -3573,13 +3580,13 @@ async function loadBanners() {
     banners.forEach((url, i) => {
         const isActive = i === 0 ? 'active' : '';
         slidesHtml += `<div class="slide ${isActive}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: ${i === 0 ? 1 : 0}; transition: opacity 0.5s ease-in-out;">
-            <img src="${url}" alt="Banner ${i+1}" style="width:100%; height:140px; display:block; object-fit:cover; border-radius: 8px;">
+            <img src="${url}" alt="Banner ${i + 1}" style="width:100%; height:140px; display:block; object-fit:cover; border-radius: 8px;">
         </div>`;
         dotsHtml += `<span class="dot ${isActive}" onclick="currentSlide(${i})" style="cursor: pointer; height: 6px; width: 6px; margin: 0 4px; background-color: rgba(255,255,255,0.5); border-radius: 50%; display: inline-block; transition: background-color 0.3s ease;"></span>`;
     });
     bannerContainer.innerHTML = slidesHtml;
     dotContainer.innerHTML = dotsHtml;
-    
+
     // Initialize the slider loop
     showBannerSlide(0);
 }
@@ -3617,7 +3624,7 @@ function setWithdrawalMax() {
     }
 }
 
-window.cancelManualTrade = async function(id) {
+window.cancelManualTrade = async function (id) {
     if (!authToken) return;
     try {
         const res = await fetch('/api/signals/manual-cancel', {
@@ -3631,9 +3638,9 @@ window.cancelManualTrade = async function(id) {
         refreshUserData();
         renderActivePositions();
         loadTradeHistory();
-    } catch(e) {}
+    } catch (e) { }
 };
-window.resolveManualTrade = async function(id) {
+window.resolveManualTrade = async function (id) {
     if (!authToken) return;
     try {
         await fetch('/api/signals/manual-resolve', {
@@ -3644,5 +3651,5 @@ window.resolveManualTrade = async function(id) {
         refreshUserData();
         renderActivePositions();
         loadTradeHistory();
-    } catch(e) {}
+    } catch (e) { }
 };
