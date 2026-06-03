@@ -3646,3 +3646,5 @@ window.resolveManualTrade = async function(id) {
         loadTradeHistory();
     } catch(e) {}
 };
+/ /   T r i g g e r   R e n d e r   D e p l o y   f o r   P o s t g r e S Q L   i n t e g r a t i o n  
+ 
