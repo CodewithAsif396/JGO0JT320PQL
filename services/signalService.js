@@ -103,8 +103,9 @@ class SignalService {
 
   async _notifyEligibleUsers(signal) {
     const arrow = signal.direction === 'CALL' ? '↑' : '↓';
-    const title = `New ${signal.marketType} Signal: ${signal.pair} ${arrow} ${signal.direction}`;
-    const body = `${signal.riskLevel} risk · Suggested: $${signal.suggestedAmount || 'Flexible'} · Reward: ${signal.rewardPercentage}%`;
+    const entryTime = new Date(signal.entryTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Karachi' });
+    const title = `New Signal: ${signal.pair} ${arrow} ${signal.direction} @ ${entryTime}`;
+    const body = `Entry: ${entryTime} · Risk: ${signal.riskLevel} · Reward: ${signal.rewardPercentage}%`;
 
     if (signal.targetUserId) {
       // Only notify the specific target user
