@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // USDT TRC20 contract addresses
 const USDT_CONTRACT = {
   mainnet: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
-  shasta:  'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs'
+  shasta: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs'
 };
 
 class DepositPoller {
@@ -20,7 +20,7 @@ class DepositPoller {
   }
 
   start() {
-    const intervalMs = parseInt(process.env.DEPOSIT_POLL_INTERVAL_MS) || 30000;
+    const intervalMs = parseInt(process.env.DEPOSIT_POLL_INTERVAL_MS) || 600000; // 10 minutes default
     setTimeout(() => {
       this.poll();
       setInterval(() => this.poll(), intervalMs);
@@ -39,9 +39,16 @@ class DepositPoller {
         await this.checkAddressTRC20(wallet).catch(err =>
           console.error(`TRC20 poller error for ${wallet.tronAddress}:`, err.message)
         );
+        
+        // Sleep between requests to avoid 429 Too Many Requests limits (burst)
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         await this.checkAddressTRX(wallet).catch(err =>
           console.error(`TRX poller error for ${wallet.tronAddress}:`, err.message)
         );
+
+        // Sleep between wallets to stretch out the checks over time safely
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } finally {
       this.polling = false;
