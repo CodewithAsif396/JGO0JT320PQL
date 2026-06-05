@@ -109,6 +109,34 @@ router.post('/users/:id/reset-password', authMiddleware, adminMiddleware, async 
   }
 });
 
+router.delete('/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    await prisma.$transaction([
+      prisma.loginHistory.deleteMany({ where: { userId } }),
+      prisma.walletAddress.deleteMany({ where: { userId } }),
+      prisma.tronWallet.deleteMany({ where: { userId } }),
+      prisma.deposit.deleteMany({ where: { userId } }),
+      prisma.withdrawal.deleteMany({ where: { userId } }),
+      prisma.balanceAdjustment.deleteMany({ where: { userId } }),
+      prisma.trade.deleteMany({ where: { userId } }),
+      prisma.kYC.deleteMany({ where: { userId } }),
+      prisma.transaction.deleteMany({ where: { userId } }),
+      prisma.notification.deleteMany({ where: { userId } }),
+      prisma.chatMessage.deleteMany({ where: { userId } }),
+      prisma.investment.deleteMany({ where: { userId } }),
+      prisma.walletTransferLog.deleteMany({ where: { userId } }),
+      prisma.investmentLock.deleteMany({ where: { userId } }),
+      prisma.user.updateMany({ where: { referredById: userId }, data: { referredById: null } }),
+      prisma.signal.updateMany({ where: { targetUserId: userId }, data: { targetUserId: null } }),
+      prisma.user.delete({ where: { id: userId } })
+    ]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── BALANCE ADJUSTMENTS ──
 router.post('/balance/adjust', authMiddleware, adminMiddleware, async (req, res) => {
   try {

@@ -111,7 +111,20 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
     if (!user) return res.status(404).json({ error: 'Not found' });
     if (user.suspended) return res.status(403).json({ error: 'Account suspended' });
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const todayTrades = await prisma.trade.findMany({
+      where: {
+        userId: user.id,
+        createdAt: { gte: startOfDay },
+        outcome: { in: ['WIN', 'LOSS'] }
+      }
+    });
+    const todayPnl = todayTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+
     const { password, resetToken, ...safe } = user;
+    safe.todayPnl = todayPnl;
     res.json(safe);
   } catch (error) {
     res.status(500).json({ error: error.message });

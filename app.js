@@ -782,7 +782,7 @@ function toggleAssetsVisibility() {
         ? `${b.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`
         : '****** <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>';
 
-    const pVal = userData?.profitBalance ?? 0;
+    const pVal = userData?.todayPnl !== undefined ? userData.todayPnl : (userData?.profitBalance ?? 0);
     const pStr = pVal > 0 ? `+${pVal.toFixed(2)}` : pVal.toFixed(2);
     const pColor = pVal > 0 ? 'var(--up-color)' : (pVal < 0 ? 'var(--down-color)' : '#fff');
 
@@ -1635,7 +1635,7 @@ function updateUIWithUserData() {
     if (trVal) trVal.textContent = `≈ ${trBalVal.toFixed(2)}`;
 
     // PnL
-    const pVal = userData.profitBalance || 0;
+    const pVal = userData.todayPnl !== undefined ? userData.todayPnl : (userData.profitBalance || 0);
     const pStr = pVal > 0 ? `+${pVal.toFixed(2)}` : pVal.toFixed(2);
     const pColor = pVal > 0 ? 'var(--up-color)' : (pVal < 0 ? 'var(--down-color)' : '#fff');
     const pnlEls = ['assets-pnl-val', 'exchange-pnl-val', 'trade-pnl-val'];
