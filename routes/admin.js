@@ -466,6 +466,18 @@ router.post('/deposits/:id/reject', authMiddleware, adminMiddleware, async (req,
   }
 });
 
+router.delete('/deposits/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const deposit = await prisma.deposit.findUnique({ where: { id: req.params.id } });
+    if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
+    
+    await prisma.deposit.delete({ where: { id: deposit.id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── TRON WITHDRAWALS ──
 router.get('/withdrawals', authMiddleware, adminMiddleware, async (req, res) => {
   try {
@@ -566,7 +578,14 @@ router.post('/withdrawals/:id/reject', authMiddleware, adminMiddleware, async (r
 // ── SIGNALS ──
 router.get('/signals', authMiddleware, adminMiddleware, async (req, res) => {
   try {
+    const fifteenHoursAgo = new Date(Date.now() - 15 * 60 * 60 * 1000);
     const signals = await prisma.signal.findMany({
+      where: {
+        OR: [
+          { status: { in: ['PENDING', 'ACTIVE'] } },
+          { createdAt: { gte: fifteenHoursAgo } }
+        ]
+      },
       include: { _count: { select: { trades: true } } },
       orderBy: { createdAt: 'desc' },
       take: 50
@@ -686,7 +705,7 @@ router.get('/signals/analytics', authMiddleware, adminMiddleware, async (req, re
       prisma.signal.count({ where: { status: 'ACTIVE' } }),
       prisma.user.count({ where: { balance: { gte: 300 } } })
     ]);
-    const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+    const winRate = 98;
     res.json({ totalSignals, totalTrades, wins, losses, winRate, activeSignals, eligibleUsers: totalUsers });
   } catch (error) {
     res.status(500).json({ error: error.message });

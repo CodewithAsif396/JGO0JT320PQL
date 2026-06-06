@@ -186,6 +186,12 @@ class DepositPoller {
     const amountTrx = value.amount / 1_000_000;
     const fromAddress = TronWeb.address.fromHex(value.owner_address);
 
+    // Ignore 0 TRX (smart contract triggers) and 15 TRX (internal gas/sweep fees)
+    if (amountTrx === 0 || amountTrx === 15) {
+      console.log(`[DepositPoller] Ignored internal/fee deposit of ${amountTrx} TRX for user ${wallet.userId}`);
+      return;
+    }
+
     const existing = await prisma.deposit.findUnique({ where: { txHash } });
     if (existing) return;
 

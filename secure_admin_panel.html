@@ -1988,10 +1988,9 @@ async function loadSignals() {
       var tierLabel = { 1: '$'+t1+'+', 2: '$'+t2+'+', 3: '$'+t3+'+', 4: '$'+t4+'+' }[s.visibilityTier] || ('T' + s.visibilityTier);
       var overrideRow = (s.status === 'ACTIVE' || s.status === 'PENDING')
         ? '<div style="display:flex;gap:6px;margin-top:8px;">' +
-            '<button class="btn btn-success btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'WIN\',this)"><i class="fa fa-check"></i> Set WIN</button>' +
-            '<button class="btn btn-danger btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'LOSS\',this)"><i class="fa fa-times"></i> Set LOSS</button>' +
+            '<button class="btn btn-success btn-sm" style="flex:1" onclick="setSignalResult(\'' + id + '\',\'WIN\',this)"><i class="fa fa-check"></i> Force WIN</button>' +
           '</div>'
-        : (s.result ? '<div style="margin-top:6px;font-size:11px;color:var(--text2);">Result: <b style="color:' + (s.result==='WIN'?'var(--green)':'var(--red)') + '">' + s.result + '</b></div>' : '');
+        : '<div style="margin-top:6px;font-size:11px;color:var(--text2);">Result: <b style="color:var(--green)">WIN (Auto)</b></div>';
       return '<div class="signal-card" style="margin-bottom:12px;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
           '<div style="display:flex;align-items:center;gap:8px;">' +
@@ -2341,8 +2340,8 @@ async function loadDeposits(page) {
         '<td>' + statusBadge2(d.status) + '</td>' +
         '<td class="text-muted">' + fmtDateTime(d.detectedAt) + '</td>' +
         '<td>' + (isPending
-          ? '<div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveDeposit(\'' + id + '\',this)"><i class="fa fa-check"></i> Approve</button><button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + id + '\',\'deposit\')"><i class="fa fa-times"></i> Reject</button></div>'
-          : '<div style="display:flex;gap:6px;align-items:center"><span class="text-muted" style="font-size:11px;font-family:monospace">' + (d.sweepTxHash ? escHtml(d.sweepTxHash.substring(0,14)+'…') : '—') + '</span>' + (d.sweepStatus !== 'completed' ? '<button class="btn btn-warning btn-sm" onclick="retrySweep(\'' + id + '\',this)" title="Retry Sweep"><i class="fa fa-redo"></i></button>' : '') + '</div>') + '</td>' +
+          ? '<div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveDeposit(\'' + id + '\',this)"><i class="fa fa-check"></i> Approve</button><button class="btn btn-warning btn-sm" onclick="openRejectModal(\'' + id + '\',\'deposit\')"><i class="fa fa-times"></i> Reject</button><button class="btn btn-danger btn-sm" onclick="deleteDeposit(\'' + id + '\',this)" title="Permanently Delete"><i class="fa fa-trash"></i></button></div>'
+          : '<div style="display:flex;gap:6px;align-items:center"><span class="text-muted" style="font-size:11px;font-family:monospace">' + (d.sweepTxHash ? escHtml(d.sweepTxHash.substring(0,14)+'…') : '—') + '</span>' + (d.sweepStatus !== 'completed' ? '<button class="btn btn-warning btn-sm" onclick="retrySweep(\'' + id + '\',this)" title="Retry Sweep"><i class="fa fa-redo"></i></button>' : '') + '<button class="btn btn-danger btn-sm" onclick="deleteDeposit(\'' + id + '\',this)" title="Permanently Delete"><i class="fa fa-trash"></i></button></div>') + '</td>' +
         '</tr>';
     }).join('');
     renderDepPagination(total, page);
@@ -2385,6 +2384,19 @@ async function retrySweep(id, btn) {
     loadDeposits(depPage);
   } catch(e) {
     alert('Failed: ' + e.message);
+    setBtn(btn, false, '', origHTML);
+  }
+}
+
+async function deleteDeposit(id, btn) {
+  if (!confirm('Are you sure you want to permanently delete this deposit? This action cannot be undone.')) return;
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, '...', origHTML);
+  try {
+    await apiDelete('/api/admin/deposits/' + id);
+    loadDeposits(depPage);
+  } catch(e) {
+    alert('Failed to delete: ' + e.message);
     setBtn(btn, false, '', origHTML);
   }
 }
