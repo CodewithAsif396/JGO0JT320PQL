@@ -966,11 +966,12 @@
           </div>
           <div class="table-header">
             <span class="table-title" id="depTabTitle">Pending Deposits</span>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteDeposits()" id="bulkDelDepBtn" style="display:none"><i class="fa fa-trash"></i> Delete Selected</button>
             <button class="btn btn-secondary btn-sm" onclick="loadDeposits(depPage)"><i class="fa fa-sync"></i> Refresh</button>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>#</th><th>User</th><th>From Address</th><th>Amount</th><th>Sweep</th><th>Status</th><th>Detected</th><th>Actions</th></tr></thead>
+              <thead><tr><th><input type="checkbox" onclick="toggleAllDep(this)"></th><th>User</th><th>From Address</th><th>Amount</th><th>Sweep</th><th>Status</th><th>Detected</th><th>Actions</th></tr></thead>
               <tbody id="depBody"></tbody>
             </table>
           </div>
@@ -2332,7 +2333,7 @@ async function loadDeposits(page) {
       var isPending = d.status === 'pending_approval';
       var sweepBadge = d.sweepStatus === 'completed' ? '<span class="badge badge-completed">swept</span>' : d.sweepStatus === 'failed' ? '<span class="badge badge-failed">sweep err</span>' : '<span class="badge badge-pending">pending</span>';
       return '<tr>' +
-        '<td class="text-muted">' + ((page-1)*20+i+1) + '</td>' +
+        '<td class="text-muted">' + (isPending ? '<input type="checkbox" class="dep-cb" value="' + id + '" onchange="checkDepCb()">' : ((page-1)*20+i+1)) + '</td>' +
         '<td>' + escHtml(d.user ? d.user.email : d.userId) + '</td>' +
         '<td class="text-muted" style="font-size:11px;font-family:monospace">' + escHtml((d.fromAddress||'').substring(0,18)+'…') + '</td>' +
         '<td class="text-accent fw-600">' + fmt(d.amount) + ' TRX</td>' +
@@ -2345,6 +2346,7 @@ async function loadDeposits(page) {
         '</tr>';
     }).join('');
     renderDepPagination(total, page);
+    checkDepCb(); // Reset button state on load
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="8"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
   }
@@ -2399,6 +2401,37 @@ async function deleteDeposit(id, btn) {
     alert('Failed to delete: ' + e.message);
     setBtn(btn, false, '', origHTML);
   }
+}
+
+function toggleAllDep(el) {
+  var cbs = document.querySelectorAll('.dep-cb');
+  cbs.forEach(cb => cb.checked = el.checked);
+  checkDepCb();
+}
+
+function checkDepCb() {
+  var anyChecked = document.querySelector('.dep-cb:checked') !== null;
+  document.getElementById('bulkDelDepBtn').style.display = anyChecked ? 'inline-block' : 'none';
+}
+
+async function bulkDeleteDeposits() {
+  var cbs = document.querySelectorAll('.dep-cb:checked');
+  if (!cbs.length) return;
+  if (!confirm('Are you sure you want to permanently delete ' + cbs.length + ' selected deposits?')) return;
+  
+  var btn = document.getElementById('bulkDelDepBtn');
+  var origHTML = btn.innerHTML;
+  setBtn(btn, true, 'Deleting...', origHTML);
+  
+  for (var i = 0; i < cbs.length; i++) {
+    try {
+      await apiDelete('/api/admin/deposits/' + cbs[i].value);
+    } catch(e) { console.error('Failed to delete', cbs[i].value, e); }
+  }
+  
+  document.querySelector('thead input[type="checkbox"]').checked = false;
+  loadDeposits(depPage);
+  setBtn(btn, false, '', origHTML);
 }
 
 // ==================== WITHDRAWALS ====================
