@@ -430,11 +430,13 @@
       <input type="password" id="loginPassword" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
     </div>
     <div class="form-group">
-      <label style="display:flex; justify-content:space-between;">
+      <label style="display:flex; justify-content:space-between; align-items:center;">
         <span>Security Check</span>
-        <span id="captchaQuestion" style="font-weight:700; color:var(--accent);"></span>
+        <div style="text-align:right">
+          <canvas id="captchaCanvas" width="130" height="40" onclick="generateCaptcha()" style="cursor:pointer; background:#111; border:1px solid #333; border-radius:4px; display:block;" title="Click to refresh"></canvas>
+        </div>
       </label>
-      <input type="number" id="loginCaptcha" placeholder="Enter answer">
+      <input type="text" id="loginCaptcha" placeholder="Enter the letters & numbers" style="text-transform: uppercase;">
     </div>
     <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">
       <i class="fa fa-sign-in-alt"></i> Sign In
@@ -1286,8 +1288,8 @@ async function doLogin() {
   var btn = document.getElementById('loginBtn');
   var alertEl = document.getElementById('loginAlert');
   if (!email || !password) { showAlert(alertEl, 'Please enter email and password.', 'error'); return; }
-  if (parseInt(captcha) !== captchaAnswer) { 
-    showAlert(alertEl, 'Incorrect security check answer.', 'error'); 
+  if ((captcha || '').toUpperCase().trim() !== captchaAnswer) { 
+    showAlert(alertEl, 'Incorrect captcha code entered.', 'error'); 
     generateCaptcha();
     return; 
   }
@@ -1324,13 +1326,53 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-let captchaAnswer = 0;
+let captchaAnswer = '';
 function generateCaptcha() {
-  var num1 = Math.floor(Math.random() * 10) + 1;
-  var num2 = Math.floor(Math.random() * 10) + 1;
-  captchaAnswer = num1 + num2;
-  var qEl = document.getElementById('captchaQuestion');
-  if (qEl) qEl.textContent = num1 + ' + ' + num2 + ' = ?';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoiding ambiguous chars like 0,O,1,I
+  let captcha = '';
+  for (let i = 0; i < 5; i++) {
+    captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  captchaAnswer = captcha;
+  
+  var canvas = document.getElementById('captchaCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  
+  // Background
+  ctx.fillStyle = '#1e222d'; 
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw random noise
+  for (let i = 0; i < 40; i++) {
+    ctx.fillStyle = 'rgba(' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ', 0.5)';
+    ctx.beginPath();
+    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  // Draw text with random rotations and colors
+  ctx.font = 'bold 22px monospace';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < captcha.length; i++) {
+    ctx.save();
+    ctx.translate(15 + i * 22, 20);
+    ctx.rotate((Math.random() - 0.5) * 0.5); // Random rotation
+    ctx.fillStyle = 'hsl(' + Math.floor(Math.random() * 360) + ', 70%, 70%)';
+    ctx.fillText(captcha[i], 0, 0);
+    ctx.restore();
+  }
+  
+  // Draw random cross lines
+  for (let i = 0; i < 5; i++) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.stroke();
+  }
+
   var cEl = document.getElementById('loginCaptcha');
   if (cEl) cEl.value = '';
 }
