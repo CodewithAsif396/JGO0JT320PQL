@@ -107,7 +107,7 @@ router.get('/my-trades', authMiddleware, async (req, res) => {
         const entryTime = new Date(signal.entryTime).getTime();
         const endTime = entryTime + (signal.duration * 1000);
         // 2-second buffer to handle slight client/server clock desync
-        const hasExpired = Date.now() >= (endTime - 2000);
+        const hasExpired = Date.now() >= endTime;
 
         if (signal.status === 'COMPLETED' || (signal.status === 'ACTIVE' && hasExpired)) {
           if (global.ss) {
@@ -197,9 +197,6 @@ router.post('/trade', authMiddleware, async (req, res) => {
       });
     }
 
-    // Count existing trades to detect first trade
-    const existingTradeCount = await prisma.trade.count({ where: { userId: user.id } });
-
     const [trade] = await prisma.$transaction([
       prisma.trade.create({
         data: {
@@ -216,27 +213,6 @@ router.post('/trade', authMiddleware, async (req, res) => {
         data: { tradeBalance: { decrement: amt } }
       })
     ]);
-
-    // One-time referral commission on user's very first trade
-    if (existingTradeCount === 0 && user.referredById) {
-      try {
-        const setting = await prisma.platformSettings.findUnique({ where: { key: 'trade_commission_pct' } });
-        const pct = parseFloat(setting?.value || '5') / 100;
-        const commission = amt * pct;
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: user.referredById },
-            data: { balance: { increment: commission }, referralBalance: { increment: commission } }
-          }),
-          prisma.transaction.create({
-            data: { userId: user.referredById, type: 'REFERRAL_COMMISSION', amount: commission, status: 'COMPLETED', note: `First trade commission from ${user.email} (${amt} USDT)` }
-          })
-        ]);
-        if (global.ns) await global.ns.send(user.referredById, 'Referral Bonus!', `You earned ${commission.toFixed(2)} USDT commission from ${user.email}'s first trade.`, 'REFERRAL');
-      } catch (commErr) {
-        console.error('Referral commission failed:', commErr.message);
-      }
-    }
 
     res.json(trade);
   } catch (error) {
