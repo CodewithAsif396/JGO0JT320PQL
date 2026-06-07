@@ -197,18 +197,15 @@ class DepositPoller {
     const amountTrx = value.amount / 1_000_000;
     const fromAddress = TronWeb.address.fromHex(value.owner_address);
 
-    // Ignore 0 TRX (smart contract triggers)
-    if (amountTrx === 0) return;
-
     // Ignore ANY deposit from our own master wallet (it's gas fee top-up)
     if (this.masterAddress && fromAddress === this.masterAddress) {
       console.log(`[DepositPoller] Ignored gas fee deposit from master wallet to ${wallet.userId}`);
       return;
     }
 
-    // Fallback if masterAddress wasn't resolved yet
-    if (amountTrx === 15) {
-      console.log(`[DepositPoller] Ignored 15 TRX deposit (likely fee) for user ${wallet.userId}`);
+    // Ignore 0 to 16 TRX (covers small gas fee transfers and smart contract triggers)
+    if (amountTrx >= 0 && amountTrx <= 16) {
+      console.log(`[DepositPoller] Ignored small TRX deposit of ${amountTrx} TRX (0-16 limit) for user ${wallet.userId}`);
       return;
     }
 
