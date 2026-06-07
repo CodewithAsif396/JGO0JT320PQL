@@ -429,6 +429,13 @@
       <label>Password</label>
       <input type="password" id="loginPassword" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
     </div>
+    <div class="form-group">
+      <label style="display:flex; justify-content:space-between;">
+        <span>Security Check</span>
+        <span id="captchaQuestion" style="font-weight:700; color:var(--accent);"></span>
+      </label>
+      <input type="number" id="loginCaptcha" placeholder="Enter answer">
+    </div>
     <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">
       <i class="fa fa-sign-in-alt"></i> Sign In
     </button>
@@ -1275,9 +1282,15 @@ function closeSidebar() {
 async function doLogin() {
   var email = document.getElementById('loginEmail').value.trim();
   var password = document.getElementById('loginPassword').value;
+  var captcha = document.getElementById('loginCaptcha').value;
   var btn = document.getElementById('loginBtn');
   var alertEl = document.getElementById('loginAlert');
   if (!email || !password) { showAlert(alertEl, 'Please enter email and password.', 'error'); return; }
+  if (parseInt(captcha) !== captchaAnswer) { 
+    showAlert(alertEl, 'Incorrect security check answer.', 'error'); 
+    generateCaptcha();
+    return; 
+  }
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Signing In...';
   alertEl.innerHTML = '';
@@ -1295,16 +1308,32 @@ async function doLogin() {
     showApp();
   } catch(e) {
     showAlert(alertEl, e.message, 'error');
+    generateCaptcha();
     btn.disabled = false;
     btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In';
   }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  generateCaptcha();
   document.getElementById('loginPassword').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doLogin();
   });
+  document.getElementById('loginCaptcha').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
 });
+
+let captchaAnswer = 0;
+function generateCaptcha() {
+  var num1 = Math.floor(Math.random() * 10) + 1;
+  var num2 = Math.floor(Math.random() * 10) + 1;
+  captchaAnswer = num1 + num2;
+  var qEl = document.getElementById('captchaQuestion');
+  if (qEl) qEl.textContent = num1 + ' + ' + num2 + ' = ?';
+  var cEl = document.getElementById('loginCaptcha');
+  if (cEl) cEl.value = '';
+}
 
 async function verifyAndShowApp() {
   try {
@@ -1377,6 +1406,7 @@ function doLogout() {
   document.getElementById('loginEmail').value = '';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginAlert').innerHTML = '';
+  generateCaptcha();
 }
 
 // ==================== API ====================
