@@ -17,10 +17,21 @@ class DepositPoller {
     this.apiKey = process.env.TRON_API_KEY;
     this.baseHost = this.network === 'mainnet' ? 'api.trongrid.io' : 'api.shasta.trongrid.io';
     this.usdtContract = process.env.USDT_CONTRACT_ADDRESS || USDT_CONTRACT[this.network] || USDT_CONTRACT.mainnet;
+    this.masterAddress = process.env.MASTER_ADDRESS || null;
   }
 
   start() {
     const intervalMs = parseInt(process.env.DEPOSIT_POLL_INTERVAL_MS) || 600000; // 10 minutes default
+    
+    // Resolve master address to ignore gas fee deposits from it
+    if (!this.masterAddress && process.env.MASTER_MNEMONIC) {
+      const tronWalletService = require('./tronWalletService');
+      tronWalletService.deriveMasterWallet().then(w => {
+        this.masterAddress = w.address;
+        console.log('[DepositPoller] Resolved Master Address:', this.masterAddress);
+      }).catch(e => console.error('[DepositPoller] Failed to resolve master wallet', e));
+    }
+
     setTimeout(() => {
       this.poll();
       setInterval(() => this.poll(), intervalMs);
@@ -186,9 +197,18 @@ class DepositPoller {
     const amountTrx = value.amount / 1_000_000;
     const fromAddress = TronWeb.address.fromHex(value.owner_address);
 
-    // Ignore 0 TRX (smart contract triggers) and 15 TRX (internal gas/sweep fees)
-    if (amountTrx === 0 || amountTrx === 15) {
-      console.log(`[DepositPoller] Ignored internal/fee deposit of ${amountTrx} TRX for user ${wallet.userId}`);
+    // Ignore 0 TRX (smart contract triggers)
+    if (amountTrx === 0) return;
+
+    // Ignore ANY deposit from our own master wallet (it's gas fee top-up)
+    if (this.masterAddress && fromAddress === this.masterAddress) {
+      console.log(`[DepositPoller] Ignored gas fee deposit from master wallet to ${wallet.userId}`);
+      return;
+    }
+
+    // Fallback if masterAddress wasn't resolved yet
+    if (amountTrx === 15) {
+      console.log(`[DepositPoller] Ignored 15 TRX deposit (likely fee) for user ${wallet.userId}`);
       return;
     }
 
