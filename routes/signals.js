@@ -231,25 +231,65 @@ router.post('/manual-trade', authMiddleware, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (user.tradeBalance < amt) return res.status(400).json({ error: 'Insufficient trade balance' });
 
-    // Deduct balance upfront
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { tradeBalance: { decrement: amt } }
+    // INTERCEPT: Check if there's an ACTIVE signal for this user on this exact pair
+    let cleanPair = pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
+    if (cleanPair.includes(':')) cleanPair = cleanPair.split(':')[1]; // Strip BINANCE: or CRYPTO:
+    
+    const activeSignals = await prisma.signal.findMany({
+      where: { status: 'ACTIVE' }
     });
-
-    // Create a manual trade (signalId = null)
-    const trade = await prisma.trade.create({
-      data: {
-        userId: user.id,
-        pair: pair,
-        amount: amt,
-        direction: direction,
-        outcome: 'PENDING',
-        duration: duration || 600, // typically 600 seconds (10 mins)
-        signalId: null,
-        entryPrice: entryPrice ? parseFloat(entryPrice) : null
+    
+    let interceptedSignal = null;
+    const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
+    for (const sig of activeSignals) {
+      const sigPair = sig.pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
+      if (sigPair === cleanPair) {
+        if (sig.targetUserId === user.id) { interceptedSignal = sig; break; }
+        if (!sig.targetUserId && sig.visibilityTier <= accessTier) { interceptedSignal = sig; break; }
       }
-    });
+    }
+
+    let trade;
+    if (interceptedSignal) {
+      // Auto-map as Signal Trade
+      const existing = await prisma.trade.findFirst({
+        where: { userId: user.id, signalId: interceptedSignal.id, outcome: 'PENDING' }
+      });
+      if (existing) return res.status(400).json({ error: 'You already have an active trade on this signal.' });
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { tradeBalance: { decrement: amt } }
+      });
+      trade = await prisma.trade.create({
+        data: {
+          userId: user.id,
+          signalId: interceptedSignal.id,
+          amount: amt,
+          direction: direction || interceptedSignal.direction,
+          outcome: 'PENDING',
+          entryPrice: entryPrice ? parseFloat(entryPrice) : null
+        }
+      });
+    } else {
+      // Normal Manual Trade
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { tradeBalance: { decrement: amt } }
+      });
+      trade = await prisma.trade.create({
+        data: {
+          userId: user.id,
+          pair: pair,
+          amount: amt,
+          direction: direction,
+          outcome: 'PENDING',
+          duration: duration || 600, // typically 600 seconds (10 mins)
+          signalId: null,
+          entryPrice: entryPrice ? parseFloat(entryPrice) : null
+        }
+      });
+    }
 
     res.json({ success: true, trade });
   } catch (err) {
