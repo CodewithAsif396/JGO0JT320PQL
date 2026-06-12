@@ -299,7 +299,7 @@ router.get('/penalties', authMiddleware, adminMiddleware, async (req, res) => {
 router.get('/deposits', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { page = 1, status = 'pending_approval' } = req.query;
-    const where = status === 'all' ? {} : { status };
+    const where = status === 'all' ? { status: { not: 'deleted' } } : { status };
     const [deposits, total] = await Promise.all([
       prisma.deposit.findMany({
         where,
@@ -471,7 +471,7 @@ router.delete('/deposits/:id', authMiddleware, adminMiddleware, async (req, res)
     const deposit = await prisma.deposit.findUnique({ where: { id: req.params.id } });
     if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
     
-    await prisma.deposit.delete({ where: { id: deposit.id } });
+    await prisma.deposit.update({ where: { id: deposit.id }, data: { status: 'deleted' } });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
