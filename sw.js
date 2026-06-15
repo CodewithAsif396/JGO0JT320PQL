@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trexis-v4';
+const CACHE_NAME = 'trexis-v5';
 const urlsToCache = [
   '/',
   '/index.html',
