@@ -2478,17 +2478,22 @@ function showWithdrawalDetails(txId) {
     const tx = window._txData[txId];
     if (!tx) return;
     
-    document.getElementById('wd-time').textContent = new Date(tx.requestedAt || tx.createdAt).toLocaleString();
-    document.getElementById('wd-amount').textContent = tx.amount.toFixed(2) + ' USDT';
+    const d = new Date(tx.requestedAt || tx.createdAt);
+    const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')} (UTC+5)`;
+    document.getElementById('wd-time').textContent = dateStr;
+    
+    const fmt = num => Number.isInteger(num) ? num : num.toFixed(2);
+    
+    document.getElementById('wd-amount').textContent = fmt(tx.amount) + ' USDT';
     
     const handlingFee = tx.amount * 0.08;
-    document.getElementById('wd-fee').textContent = handlingFee.toFixed(2) + ' USDT';
+    document.getElementById('wd-fee').textContent = fmt(handlingFee) + ' USDT';
     
     const actualAmount = tx.amount - handlingFee;
-    document.getElementById('wd-actual').textContent = actualAmount.toFixed(2) + ' USDT';
+    document.getElementById('wd-actual').textContent = fmt(actualAmount) + ' USDT';
     
     document.getElementById('wd-chain').textContent = tx.chain || 'TRC20';
-    document.getElementById('wd-address').textContent = tx.address || localStorage.getItem('boundWithdrawAddress') || '--';
+    document.getElementById('wd-address').textContent = tx.toAddress || tx.address || localStorage.getItem('boundWithdrawAddress') || '--';
     
     const statusLabel = {
         pending: 'Under Audit', PENDING: 'Under Audit',
