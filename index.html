@@ -2320,6 +2320,17 @@
                             <span style="font-size:13px; color:#666;">About Us</span>
                         </div>
 
+                        <!-- Locked Days -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"
+                            onclick="showLockedDaysModal()">
+                            <svg width="44" height="44" viewBox="0 0 44 44">
+                                <rect x="14" y="16" width="16" height="16" rx="2" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <path d="M18 16 V12 A4 4 0 0 1 26 12 V16" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                                <circle cx="22" cy="24" r="2" fill="#f6b856" />
+                            </svg>
+                            <span style="font-size:13px; color:#666;">Locked Days</span>
+                        </div>
+
                     </div>
                 </div>
 
@@ -2770,6 +2781,66 @@
             </div>
             <p style="text-align:center;font-size:18px;font-weight:600;color:var(--text-primary);margin-top:20px;">
                 Please fill first basic info</p>
+        </div>
+    </div>
+    <!-- WITHDRAWAL DETAILS SCREEN -->
+    <div id="withdrawal-details-screen" class="screen" style="z-index: 1000;">
+        <div class="sub-header">
+            <i class="fa-solid fa-chevron-left back-btn" onclick="closeWithdrawalDetails()"></i>
+            <h2>Withdrawal details</h2>
+            <span></span>
+        </div>
+        <div style="padding:20px;">
+            <div style="border-radius:12px;padding:20px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Time:</span>
+                    <span id="wd-time" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Withdrawal amount:</span>
+                    <span id="wd-amount" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Handling fee (8%):</span>
+                    <span id="wd-fee" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Actual Amount:</span>
+                    <span id="wd-actual" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Chain name:</span>
+                    <span id="wd-chain" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;align-items:flex-start;">
+                    <span style="color:var(--text-secondary);font-size:14px;white-space:nowrap;margin-right:16px;">Address:</span>
+                    <span id="wd-address" style="color:var(--text-primary);font-size:14px;font-weight:500;word-break:break-all;text-align:right;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Status:</span>
+                    <span id="wd-status" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Reason:</span>
+                    <span id="wd-reason" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Locked Days Modal -->
+    <div id="locked-days-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-card); width:80%; max-width:300px; border-radius:12px; padding:30px 20px; text-align:center;">
+            <div style="font-size:18px; font-weight:bold; color:var(--text-primary); margin-bottom:15px;">Locked Days</div>
+            <div style="font-size:36px; font-weight:bold; color:#f6b856; margin-bottom:10px;" id="locked-days-count">35</div>
+            <div style="font-size:14px; color:var(--text-secondary); margin-bottom:30px;">Remaining Days</div>
+            <button onclick="closeLockedDaysModal()" class="btn-green-full" style="width:100%;">Close</button>
         </div>
     </div>
 </body>

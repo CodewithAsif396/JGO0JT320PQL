@@ -2456,8 +2456,11 @@ async function loadWithdrawalRecords() {
             failed: 'Failed', FAILED: 'Failed',
             rejected: 'Rejected', REJECTED: 'Rejected'
         };
-        container.innerHTML = txs.map(tx => `
-            <div class="record-item">
+        window._txData = window._txData || {};
+        container.innerHTML = txs.map(tx => {
+            window._txData[tx.id] = tx;
+            return `
+            <div class="record-item" onclick="showWithdrawalDetails('${tx.id}')">
                 <div class="record-left">
                     <div class="record-title">Withdrawal</div>
                     <div class="record-time">${new Date(tx.requestedAt || tx.createdAt).toLocaleString()}</div>
@@ -2467,8 +2470,56 @@ async function loadWithdrawalRecords() {
                     <div class="record-status ${statusClass[tx.status] || 'pending-status'}">${statusLabel[tx.status] || tx.status.toUpperCase()}</div>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     } catch (e) { }
+}
+
+function showWithdrawalDetails(txId) {
+    const tx = window._txData[txId];
+    if (!tx) return;
+    
+    document.getElementById('wd-time').textContent = new Date(tx.requestedAt || tx.createdAt).toLocaleString();
+    document.getElementById('wd-amount').textContent = tx.amount.toFixed(2) + ' USDT';
+    
+    const handlingFee = tx.amount * 0.08;
+    document.getElementById('wd-fee').textContent = handlingFee.toFixed(2) + ' USDT';
+    
+    const actualAmount = tx.amount - handlingFee;
+    document.getElementById('wd-actual').textContent = actualAmount.toFixed(2) + ' USDT';
+    
+    document.getElementById('wd-chain').textContent = tx.chain || 'TRC20';
+    document.getElementById('wd-address').textContent = tx.address || localStorage.getItem('boundWithdrawAddress') || '--';
+    
+    const statusLabel = {
+        pending: 'Under Audit', PENDING: 'Under Audit',
+        completed: 'Paid', COMPLETED: 'Paid',
+        failed: 'Failed', FAILED: 'Failed',
+        rejected: 'Rejected', REJECTED: 'Rejected'
+    };
+    const statusClass = {
+        pending: 'var(--text-secondary)', PENDING: 'var(--text-secondary)',
+        completed: 'var(--up-color)', COMPLETED: 'var(--up-color)',
+        failed: 'var(--down-color)', FAILED: 'var(--down-color)',
+        rejected: 'var(--down-color)', REJECTED: 'var(--down-color)'
+    };
+    
+    const statusEl = document.getElementById('wd-status');
+    statusEl.textContent = statusLabel[tx.status] || tx.status.toUpperCase();
+    statusEl.style.color = statusClass[tx.status] || 'var(--text-secondary)';
+    
+    document.getElementById('wd-reason').textContent = tx.rejectReason || '-';
+    
+    const modal = document.getElementById('withdrawal-details-screen');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function closeWithdrawalDetails() {
+    const modal = document.getElementById('withdrawal-details-screen');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // ── PERPETUAL PAIR PICKER ──
@@ -3725,4 +3776,32 @@ window.resolveManualTrade = async function (id) {
         renderActivePositions();
         loadTradeHistory();
     } catch (e) { }
+};
+
+// ══════════════════════════════════════════════════════
+// LOCKED DAYS MODAL
+// ══════════════════════════════════════════════════════
+window.showLockedDaysModal = function() {
+    let remaining = 35;
+    if (userData && userData.createdAt) {
+        const createdDate = new Date(userData.createdAt);
+        const now = new Date();
+        const diffTime = now.getTime() - createdDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        remaining = 35 - diffDays;
+        if (remaining < 0) remaining = 0;
+    }
+    
+    document.getElementById('locked-days-count').innerText = remaining;
+    const modal = document.getElementById('locked-days-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+    }
+};
+
+window.closeLockedDaysModal = function() {
+    const modal = document.getElementById('locked-days-modal');
+    if(modal) {
+        modal.style.display = 'none';
+    }
 };
