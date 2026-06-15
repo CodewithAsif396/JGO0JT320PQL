@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
-const prisma = new PrismaClient();
+const prisma = require('../prismaClient');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 

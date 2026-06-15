@@ -50,8 +50,7 @@ app.get(adminPath, (_req, res) => res.sendFile(__dirname + '/secure_admin_panel.
 // Public app settings endpoint (no auth) — about us, support links, etc.
 app.get('/api/public/settings', async (_req, res) => {
   try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = require('./prismaClient');
     const PUBLIC_KEYS = ['app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners'];
     const rows = await prisma.platformSettings.findMany({ where: { key: { in: PUBLIC_KEYS } } });
     const obj = {};
@@ -65,8 +64,7 @@ app.get('/api/public/settings', async (_req, res) => {
 // Public ticker endpoint (no auth)
 app.get('/api/ticker', async (_req, res) => {
   try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = require('./prismaClient');
     const [tickerSetting, termsSetting] = await Promise.all([
       prisma.platformSettings.findUnique({ where: { key: 'ticker_text' } }),
       prisma.platformSettings.findUnique({ where: { key: 'penalty_terms_text' } })

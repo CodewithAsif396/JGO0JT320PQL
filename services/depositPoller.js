@@ -1,8 +1,6 @@
 const https = require('https');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient');
 const { TronWeb } = require('tronweb');
-
-const prisma = new PrismaClient();
 
 // USDT TRC20 contract addresses
 const USDT_CONTRACT = {
