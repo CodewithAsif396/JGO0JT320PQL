@@ -2478,6 +2478,64 @@ function showWithdrawalDetails(txId) {
     const tx = window._txData[txId];
     if (!tx) return;
     
+    let modal = document.getElementById('withdrawal-details-screen');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'withdrawal-details-screen';
+        modal.className = 'screen full-page';
+        modal.style.zIndex = '1000';
+        modal.innerHTML = `
+        <div class="sub-header">
+            <i class="fa-solid fa-chevron-left back-btn" onclick="closeWithdrawalDetails()"></i>
+            <h2>Withdrawal details</h2>
+            <span></span>
+        </div>
+        <div style="padding:20px;">
+            <div style="border-radius:12px;padding:20px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Time:</span>
+                    <span id="wd-time" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Withdrawal amount:</span>
+                    <span id="wd-amount" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Handling fee (8%):</span>
+                    <span id="wd-fee" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Actual Amount:</span>
+                    <span id="wd-actual" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Chain name:</span>
+                    <span id="wd-chain" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;align-items:flex-start;">
+                    <span style="color:var(--text-secondary);font-size:14px;white-space:nowrap;margin-right:16px;">Address:</span>
+                    <span id="wd-address" style="color:var(--text-primary);font-size:14px;font-weight:500;word-break:break-all;text-align:right;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Status:</span>
+                    <span id="wd-status" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Reason:</span>
+                    <span id="wd-reason" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    
     const d = new Date(tx.requestedAt || tx.createdAt);
     const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')} (UTC+5)`;
     document.getElementById('wd-time').textContent = dateStr;
@@ -2514,10 +2572,7 @@ function showWithdrawalDetails(txId) {
     
     document.getElementById('wd-reason').textContent = tx.rejectReason || '-';
     
-    const modal = document.getElementById('withdrawal-details-screen');
-    if (modal) {
-        modal.style.display = 'block';
-    }
+    modal.style.display = 'block';
 }
 
 function closeWithdrawalDetails() {
