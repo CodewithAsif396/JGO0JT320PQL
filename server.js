@@ -23,8 +23,18 @@ const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
-const allowedOrigins = ['http://localhost', 'https://localhost', 'capacitor://localhost', 'http://127.0.0.1'];
-if (process.env.APP_DOMAIN) allowedOrigins.push(process.env.APP_DOMAIN);
+const allowedOrigins = [
+  'http://localhost', 
+  'https://localhost', 
+  'capacitor://localhost', 
+  'http://127.0.0.1',
+  'https://trexisplatform.site',
+  'https://www.trexisplatform.site'
+];
+if (process.env.APP_DOMAIN) {
+  allowedOrigins.push(process.env.APP_DOMAIN);
+  allowedOrigins.push(`https://${process.env.APP_DOMAIN}`);
+}
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
