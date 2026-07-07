@@ -4,6 +4,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const { Server } = require('socket.io');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const xss = require('xss-clean');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -20,8 +24,35 @@ const io = new Server(server, {
 });
 
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// --- HARD SECURITY LAYER ---
+// Protect against tracing, cross-site scripting (XSS), and clickjacking
+app.use(helmet({ 
+  contentSecurityPolicy: false, // Disabled to allow external images/CDNs (like ui-avatars, MEXC)
+  crossOriginEmbedderPolicy: false
+})); 
+
+// Prevent Multiple Link Attacks & Brute Force (Rate Limiting)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window
+  max: 1200, // Limit each IP to 1200 requests per 15 minutes
+  message: { error: 'Too many requests from this IP, please try again later.' },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use(limiter);
+
+// Protect against HTTP Parameter Pollution attacks
+app.use(hpp());
+
+// Protect against Cross-Site Scripting (XSS) attacks
+app.use(xss());
+// ---------------------------
+
+// PREVENT DOS ATTACKS: Lowered payload limits from 50mb to 5mb. 
+// Hackers could crash the server by sending massive 50MB fake JSON bodies.
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(express.static(__dirname));
 
 // Initialize Services

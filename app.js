@@ -1600,6 +1600,7 @@ function updateUIWithUserData() {
         emailEl.textContent = email.length > 22 ? email.substring(0, 20) + '...' : email;
     }
     if (idEl && userData.id) {
+        idEl.style.display = 'flex';
         idEl.innerHTML = `ID: ${userData.id.substring(0, 12).toUpperCase()} <i class="fa-regular fa-copy" onclick="copyText('${userData.id.substring(0, 12).toUpperCase()}')" style="cursor:pointer;"></i>`;
     }
 
