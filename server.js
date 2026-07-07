@@ -29,7 +29,9 @@ const allowedOrigins = [
   'capacitor://localhost', 
   'http://127.0.0.1',
   'https://trexisplatform.site',
-  'https://www.trexisplatform.site'
+  'https://www.trexisplatform.site',
+  'https://trexisplatorm.site',
+  'https://www.trexisplatorm.site'
 ];
 if (process.env.APP_DOMAIN) {
   allowedOrigins.push(process.env.APP_DOMAIN);
@@ -186,6 +188,12 @@ io.on('connection', (socket) => {
       socket.emit('market_init', marketService.prices);
     } catch (err) {}
   });
+});
+
+// Global Error Handler to ensure API never returns HTML errors
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'An internal server error occurred.' });
 });
 
 const PORT = process.env.PORT || 3000;
