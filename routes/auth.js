@@ -157,8 +157,8 @@ router.post('/admin-login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPass  = process.env.ADMIN_PASS;
+    const adminEmail = process.env.ADMIN_EMAIL || '';
+    const adminPass  = process.env.ADMIN_PASS || '';
 
     if (email.toLowerCase() !== adminEmail.toLowerCase() || password !== adminPass) {
       return res.status(401).json({ error: 'Invalid credentials' });
