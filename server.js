@@ -23,7 +23,19 @@ const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
-app.use(cors());
+const allowedOrigins = ['http://localhost', 'https://localhost', 'capacitor://localhost', 'http://127.0.0.1'];
+if (process.env.APP_DOMAIN) allowedOrigins.push(process.env.APP_DOMAIN);
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS policy'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 // --- HARD SECURITY LAYER ---
 // Protect against tracing, cross-site scripting (XSS), and clickjacking

@@ -16,9 +16,14 @@ router.get('/profile', authMiddleware, async (req, res) => {
         }
       }
     });
-    res.json(user);
+    const safeUser = { ...user };
+    delete safeUser.password;
+    delete safeUser.resetToken;
+    delete safeUser.resetTokenExpiry;
+    delete safeUser.otpSecret;
+    res.json(safeUser);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -32,7 +37,7 @@ router.get('/notifications', authMiddleware, async (req, res) => {
     });
     res.json(notifications);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -45,7 +50,7 @@ router.post('/notifications/read', authMiddleware, async (req, res) => {
     });
     res.sendStatus(200);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -74,7 +79,7 @@ router.post('/change-password', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -93,7 +98,7 @@ router.get('/wallet', authMiddleware, async (req, res) => {
       addresses: Object.fromEntries(user.walletAddresses.map(w => [w.network, w.address]))
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -126,7 +131,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     safe.todayPnl = todayPnl;
     res.json(safe);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 

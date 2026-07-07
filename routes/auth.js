@@ -52,7 +52,7 @@ router.post('/send-otp', async (req, res) => {
       res.status(500).json({ error: 'Email Error: ' + emailResult.error });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -105,7 +105,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: { id: user.id, email: user.email, role: user.role, referralCode: user.referralCode } });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -147,7 +147,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -167,7 +167,7 @@ router.post('/admin-login', async (req, res) => {
     const token = jwt.sign({ userId: 'admin', role: 'ADMIN', email: adminEmail }, process.env.JWT_SECRET, { expiresIn: '12h' });
     res.json({ token, user: { id: 'admin', email: adminEmail, role: 'ADMIN' } });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -179,11 +179,11 @@ router.post('/forgot-password', async (req, res) => {
     const token = genCode(16);
     await prisma.user.update({
       where: { id: user.id },
-      data: { resetToken: token, resetTokenExpiry: new Date(Date.now() + 3600000) }
+      data: { resetToken: token, resetTokenExpiry: new Date(Date.now() + 1800000) } // Expires in exactly 30 minutes
     });
     res.json({ message: 'Reset token generated', resetToken: token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -202,7 +202,7 @@ router.post('/reset-password', async (req, res) => {
     });
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -225,7 +225,7 @@ router.get('/2fa/setup', authMiddleware, async (req, res) => {
 
     res.json({ secret, qr_code_base64: qrDataUrl, enabled: user.twoFaEnabled });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -244,7 +244,7 @@ router.post('/2fa/enable', authMiddleware, async (req, res) => {
     await prisma.user.update({ where: { id: user.id }, data: { twoFaEnabled: true } });
     res.json({ success: true, message: 'Google Authenticator linked successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -254,7 +254,7 @@ router.get('/2fa/status', authMiddleware, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { twoFaEnabled: true } });
     res.json({ enabled: user?.twoFaEnabled || false });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -267,7 +267,7 @@ router.get('/referral-qr', authMiddleware, async (req, res) => {
     const qr = await QRCode.toDataURL(referralUrl, { width: 200, margin: 1 });
     res.json({ qr_code_base64: qr, referralCode: user.referralCode, referralUrl });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -289,7 +289,7 @@ router.get('/debug-env', (req, res) => {
       PORT: process.env.PORT,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -308,7 +308,7 @@ router.get('/admin/otps', authMiddleware, async (req, res) => {
     }));
     res.json(otps);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 

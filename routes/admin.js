@@ -30,7 +30,7 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
     ]);
     res.json({ users, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -55,7 +55,7 @@ router.get('/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -70,7 +70,7 @@ router.post('/users/:id/balance', authMiddleware, adminMiddleware, async (req, r
     const user = await prisma.user.update({ where: { id: req.params.id }, data });
     res.json({ success: true, balance: user.balance, profitBalance: user.profitBalance, referralBalance: user.referralBalance });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -84,7 +84,7 @@ router.post('/users/:id/suspend', authMiddleware, adminMiddleware, async (req, r
     if (global.ns) await global.ns.send(user.id, 'Account Suspended', reason || 'Your account has been suspended. Contact support.', 'SYSTEM');
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -93,7 +93,7 @@ router.post('/users/:id/unsuspend', authMiddleware, adminMiddleware, async (req,
     await prisma.user.update({ where: { id: req.params.id }, data: { suspended: false, suspendedReason: null } });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -105,7 +105,7 @@ router.post('/users/:id/reset-password', authMiddleware, adminMiddleware, async 
     await prisma.user.update({ where: { id: req.params.id }, data: { password: hashed } });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -133,7 +133,7 @@ router.delete('/users/:id', authMiddleware, adminMiddleware, async (req, res) =>
     ]);
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -176,7 +176,7 @@ router.post('/balance/adjust', authMiddleware, adminMiddleware, async (req, res)
 
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -196,7 +196,7 @@ router.get('/balance/adjustments', authMiddleware, adminMiddleware, async (req, 
     ]);
     res.json({ items, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -218,7 +218,7 @@ router.get('/transactions', authMiddleware, adminMiddleware, async (req, res) =>
     ]);
     res.json({ transactions, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -252,7 +252,7 @@ router.post('/transactions/:id/approve', authMiddleware, adminMiddleware, async 
 
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -269,7 +269,7 @@ router.post('/transactions/:id/reject', authMiddleware, adminMiddleware, async (
     if (global.ns) await global.ns.send(transaction.userId, `${transaction.type} Rejected`, reason || `Your ${transaction.type.toLowerCase()} was rejected.`, transaction.type);
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -291,7 +291,7 @@ router.get('/penalties', authMiddleware, adminMiddleware, async (req, res) => {
     ]);
     res.json({ data, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -312,7 +312,7 @@ router.get('/deposits', authMiddleware, adminMiddleware, async (req, res) => {
     ]);
     res.json({ deposits, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -332,7 +332,7 @@ router.get('/deposits/pending', authMiddleware, adminMiddleware, async (req, res
     ]);
     res.json({ deposits, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -404,7 +404,7 @@ router.post('/deposits/:id/approve', authMiddleware, adminMiddleware, async (req
 
     res.json({ success: true, message: 'Deposit approved and sweep initiated' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -462,7 +462,7 @@ router.post('/deposits/:id/reject', authMiddleware, adminMiddleware, async (req,
     if (global.ns) await global.ns.send(deposit.userId, 'Deposit Rejected', reason || 'Your deposit was rejected. Please contact support.', 'DEPOSIT');
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -474,7 +474,7 @@ router.delete('/deposits/:id', authMiddleware, adminMiddleware, async (req, res)
     await prisma.deposit.update({ where: { id: deposit.id }, data: { status: 'deleted' } });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -495,7 +495,7 @@ router.get('/withdrawals', authMiddleware, adminMiddleware, async (req, res) => 
     ]);
     res.json({ withdrawals, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -515,7 +515,7 @@ router.get('/withdrawals/pending', authMiddleware, adminMiddleware, async (req, 
     ]);
     res.json({ withdrawals, total });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -543,7 +543,7 @@ router.post('/withdrawals/:id/approve', authMiddleware, adminMiddleware, async (
     if (global.ns) await global.ns.send(withdrawal.userId, 'Withdrawal Completed', `Your withdrawal of ${withdrawal.amount} USDT has been manually approved and sent.`, 'WITHDRAWAL');
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -571,7 +571,7 @@ router.post('/withdrawals/:id/reject', authMiddleware, adminMiddleware, async (r
     if (global.ns) await global.ns.send(withdrawal.userId, 'Withdrawal Rejected', reason || 'Your withdrawal request was rejected. Funds have been returned.', 'WITHDRAWAL');
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -592,7 +592,7 @@ router.get('/signals', authMiddleware, adminMiddleware, async (req, res) => {
     });
     res.json(signals);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -624,7 +624,7 @@ router.get('/bulk-signals/users', authMiddleware, adminMiddleware, async (req, r
 
     res.json({ tiers, thresholds: { t1, t2, t3, t4 } });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -655,7 +655,7 @@ router.post('/signals', authMiddleware, adminMiddleware, async (req, res) => {
     const signal = await global.ss.createSignal(body);
     res.json(signal);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -675,7 +675,7 @@ router.delete('/signals/:id', authMiddleware, adminMiddleware, async (req, res) 
     await prisma.signal.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -690,7 +690,7 @@ router.patch('/signals/:id/result', authMiddleware, adminMiddleware, async (req,
     });
     res.json(signal);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -708,7 +708,7 @@ router.get('/signals/analytics', authMiddleware, adminMiddleware, async (req, re
     const winRate = 98;
     res.json({ totalSignals, totalTrades, wins, losses, winRate, activeSignals, eligibleUsers: totalUsers });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -725,7 +725,7 @@ router.post('/notify', authMiddleware, adminMiddleware, async (req, res) => {
     await Promise.all(targets.map(id => global.ns?.send(id, title, message, type)));
     res.json({ success: true, sent: targets.length });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -737,7 +737,7 @@ router.get('/settings', authMiddleware, adminMiddleware, async (req, res) => {
     settings.forEach(s => { obj[s.key] = s.value; });
     res.json(obj);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -753,7 +753,7 @@ router.post('/settings', authMiddleware, adminMiddleware, async (req, res) => {
     ));
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -809,7 +809,7 @@ router.get('/dashboard', authMiddleware, adminMiddleware, async (req, res) => {
       activeSignalsList
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -868,7 +868,7 @@ router.get('/analytics', authMiddleware, adminMiddleware, async (req, res) => {
       masterBalance
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -885,7 +885,7 @@ router.get('/referrals', authMiddleware, adminMiddleware, async (req, res) => {
     });
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -898,7 +898,7 @@ router.get('/investments', authMiddleware, adminMiddleware, async (req, res) => 
     });
     res.json(investments);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -913,7 +913,7 @@ router.get('/kyc', authMiddleware, adminMiddleware, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     res.json(kycs);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { res.status(500).json({ error: 'An internal server error occurred.' }); }
 });
 
 // ── STEP 6: KYC APPROVE — HOOK: wallet creation ──
@@ -942,7 +942,7 @@ router.post('/kyc/:id/approve', authMiddleware, adminMiddleware, async (req, res
 
     if (global.ns) await global.ns.send(kyc.userId, 'KYC Approved', 'Your identity verification has been approved! Your TRX deposit address is now available.', 'SYSTEM');
     res.json({ success: true });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { res.status(500).json({ error: 'An internal server error occurred.' }); }
 });
 
 router.post('/kyc/:id/reject', authMiddleware, adminMiddleware, async (req, res) => {
@@ -954,7 +954,7 @@ router.post('/kyc/:id/reject', authMiddleware, adminMiddleware, async (req, res)
     });
     if (global.ns) await global.ns.send(kyc.userId, 'KYC Rejected', reason || 'Your verification was rejected. Please resubmit.', 'SYSTEM');
     res.json({ success: true });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { res.status(500).json({ error: 'An internal server error occurred.' }); }
 });
 
 // ── LIVE CHAT ──

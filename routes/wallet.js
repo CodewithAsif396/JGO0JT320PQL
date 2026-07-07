@@ -13,7 +13,7 @@ router.get('/address', authMiddleware, async (req, res) => {
     const qr = await QRCode.toDataURL(wallet.tronAddress);
     res.json({ address: wallet.tronAddress, qr_code_base64: qr });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -27,7 +27,7 @@ router.get('/balance', authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ balance: user.balance, exchangeBalance: user.exchangeBalance, tradeBalance: user.tradeBalance, perpetualBalance: user.perpetualBalance, lockedBalance: user.lockedBalance });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -43,7 +43,7 @@ router.get('/deposits', authMiddleware, async (req, res) => {
     });
     res.json(deposits);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -59,7 +59,7 @@ router.get('/withdrawals', authMiddleware, async (req, res) => {
     });
     res.json(withdrawals);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -102,7 +102,7 @@ router.post('/withdraw', authMiddleware, async (req, res) => {
     if (global.ns) await global.ns.send(req.user.userId, 'Withdrawal Submitted', `Your withdrawal of ${amt} USDT to ${user.boundAddress} is pending admin approval.`, 'WITHDRAWAL');
     res.json(withdrawal);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -120,7 +120,7 @@ router.get('/bound-address', authMiddleware, async (req, res) => {
       freezeUntil: user.withdrawFreezeUntil || null
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -135,7 +135,7 @@ router.post('/bind-address', authMiddleware, async (req, res) => {
     });
     res.json({ success: true, address: address.trim(), chain: chainType });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -148,7 +148,7 @@ router.post('/unbind-address', authMiddleware, async (req, res) => {
     });
     res.json({ success: true, freezeUntil });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -179,7 +179,7 @@ router.get('/info', authMiddleware, async (req, res) => {
       addresses
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -200,7 +200,7 @@ router.post('/deposit', authMiddleware, async (req, res) => {
     if (global.ns) await global.ns.send(req.user.userId, 'Deposit Received', `Your deposit of ${amt} USDT is under review.`, 'DEPOSIT');
     res.json(tx);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -215,7 +215,7 @@ router.get('/transactions', authMiddleware, async (req, res) => {
     });
     res.json(txs);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -255,7 +255,7 @@ router.post('/convert', authMiddleware, async (req, res) => {
 
     res.json({ success: true, fromAmount: amt, toAmount, toAsset });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -387,7 +387,7 @@ router.post('/transfer', authMiddleware, async (req, res) => {
 
     res.json({ success: true, actualTransferAmt, penaltyAmount });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 

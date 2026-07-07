@@ -77,7 +77,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
     res.json({ signals, accessTier, balance: user.balance, tradeBalance: user.tradeBalance, tiers: await getTierThresholds() });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -138,7 +138,7 @@ router.get('/my-trades', authMiddleware, async (req, res) => {
 
     res.json(trades);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -215,7 +215,7 @@ router.post('/trade', authMiddleware, async (req, res) => {
 
     res.json(trade);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
