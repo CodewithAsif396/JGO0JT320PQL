@@ -102,7 +102,7 @@ router.post('/register', async (req, res) => {
       }))
     });
 
-    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET || 'AsifTrexSecretKey2026@#', { expiresIn: '30d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: { id: user.id, email: user.email, role: user.role, referralCode: user.referralCode } });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -132,7 +132,7 @@ router.post('/login', async (req, res) => {
       }
     }).catch(() => {});
 
-    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET || 'AsifTrexSecretKey2026@#', { expiresIn: '30d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({
       token,
       user: {
@@ -157,14 +157,14 @@ router.post('/admin-login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'anonymouspkgroup@official.com';
-    const adminPass  = process.env.ADMIN_PASS  || 'PK93252@vsd#';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPass  = process.env.ADMIN_PASS;
 
     if (email.toLowerCase() !== adminEmail.toLowerCase() || password !== adminPass) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: 'admin', role: 'ADMIN', email: adminEmail }, process.env.JWT_SECRET || 'AsifTrexSecretKey2026@#', { expiresIn: '12h' });
+    const token = jwt.sign({ userId: 'admin', role: 'ADMIN', email: adminEmail }, process.env.JWT_SECRET, { expiresIn: '12h' });
     res.json({ token, user: { id: 'admin', email: adminEmail, role: 'ADMIN' } });
   } catch (error) {
     res.status(500).json({ error: error.message });
