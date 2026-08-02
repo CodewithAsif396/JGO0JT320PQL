@@ -11,11 +11,11 @@ const xss = require('xss-clean');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-const NotificationService = require('./services/notificationService');
-const WalletService = require('./services/walletService');
-const SignalService = require('./services/signalService');
-const MarketService = require('./services/marketService');
-const DepositPoller = require('./services/depositPoller');
+const NotificationService = require('./backend/services/notificationService');
+const WalletService = require('./backend/services/walletService');
+const SignalService = require('./backend/services/signalService');
+const MarketService = require('./backend/services/marketService');
+const DepositPoller = require('./backend/services/depositPoller');
 
 const app = express();
 const server = http.createServer(app);
@@ -80,7 +80,18 @@ app.use(xss());
 // Hackers could crash the server by sending massive 50MB fake JSON bodies.
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
-app.use(express.static(__dirname));
+// Serve only safe public files (not source code)
+const FRONTEND = path.join(__dirname, 'frontend');
+const PUBLIC_FILES = ['index.html','style.css','app.js','manifest.json','sw.js','pql-logo.png','favicon.png','app-icon.png','privacy-policy.html'];
+PUBLIC_FILES.forEach(f => {
+  app.get('/' + f, (req, res) => res.sendFile(path.join(FRONTEND, f)));
+});
+app.use('/assets', express.static(path.join(FRONTEND, 'assets')));
+app.use('/icons', express.static(path.join(FRONTEND, 'icons')));
+// Block KYC/chat uploads from public access — served only via auth routes
+app.use('/uploads/kyc', (req, res) => res.status(403).json({ error: 'Forbidden' }));
+app.use('/uploads/chat', (req, res) => res.status(403).json({ error: 'Forbidden' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Initialize Services
 const notificationService = new NotificationService(io);
@@ -103,13 +114,13 @@ if (process.env.MASTER_MNEMONIC) {
 
 // Admin Panel Route
 const adminPath = process.env.ADMIN_URL_PATH || '/94875Efn239120';
-app.get(adminPath, (_req, res) => res.sendFile(__dirname + '/secure_admin_panel.html'));
+app.get(adminPath, (_req, res) => res.sendFile(path.join(__dirname, 'frontend', 'secure_admin_panel.html')));
 
 // Public app settings endpoint (no auth) — about us, support links, etc.
 app.get('/api/public/settings', async (_req, res) => {
   try {
-    const prisma = require('./prismaClient');
-    const PUBLIC_KEYS = ['app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners'];
+    const prisma = require('./backend/prismaClient');
+    const PUBLIC_KEYS = ['app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners','rules_content_json','withdrawal_handling_fee_pct'];
     const rows = await prisma.platformSettings.findMany({ where: { key: { in: PUBLIC_KEYS } } });
     const obj = {};
     rows.forEach(r => { obj[r.key] = r.value; });
@@ -122,7 +133,7 @@ app.get('/api/public/settings', async (_req, res) => {
 // Public ticker endpoint (no auth)
 app.get('/api/ticker', async (_req, res) => {
   try {
-    const prisma = require('./prismaClient');
+    const prisma = require('./backend/prismaClient');
     const [tickerSetting, termsSetting] = await Promise.all([
       prisma.platformSettings.findUnique({ where: { key: 'ticker_text' } }),
       prisma.platformSettings.findUnique({ where: { key: 'penalty_terms_text' } })
@@ -139,20 +150,38 @@ app.get('/api/ticker', async (_req, res) => {
   }
 });
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Uploaded files served above (with KYC/chat blocked)
 
 // Attach io to every request so routes can emit events
 app.use((req, _res, next) => { req.io = io; next(); });
 
 // API Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/user', require('./routes/user'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/signals', require('./routes/signals'));
-app.use('/api/wallet', require('./routes/wallet'));
-app.use('/api/kyc', require('./routes/kyc'));
-app.use('/api/chat', require('./routes/chat'));
+app.use('/api/auth', require('./backend/routes/auth'));
+app.use('/api/user', require('./backend/routes/user'));
+app.use('/api/admin', require('./backend/routes/admin'));
+
+// Admin referral management (stub — returns empty data until referral service is added)
+app.get('/api/admin_referral/dashboard', (req, res) => res.json({ totalUsers: 0, totalRewards: 0, activeReferrers: 0, topReferrers: [] }));
+app.get('/api/admin_referral/slabs', async (req, res) => {
+  try { const prisma = require('./backend/prismaClient'); const s = await prisma.platformSettings.findUnique({ where: { key: 'referral_slabs' } }); res.json(s ? JSON.parse(s.value) : []); } catch (e) { res.json([]); }
+});
+app.post('/api/admin_referral/slabs', async (req, res) => {
+  try { const prisma = require('./backend/prismaClient'); await prisma.platformSettings.upsert({ where: { key: 'referral_slabs' }, update: { value: JSON.stringify(req.body) }, create: { key: 'referral_slabs', value: JSON.stringify(req.body) } }); res.json({ success: true }); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.get('/api/admin_referral/content', async (req, res) => {
+  try { const prisma = require('./backend/prismaClient'); const s = await prisma.platformSettings.findUnique({ where: { key: 'referral_content' } }); res.json(s ? JSON.parse(s.value) : {}); } catch (e) { res.json({}); }
+});
+app.post('/api/admin_referral/content', async (req, res) => {
+  try { const prisma = require('./backend/prismaClient'); await prisma.platformSettings.upsert({ where: { key: 'referral_content' }, update: { value: JSON.stringify(req.body) }, create: { key: 'referral_content', value: JSON.stringify(req.body) } }); res.json({ success: true }); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.get('/api/admin_referral/history', (req, res) => res.json({ rewards: [], total: 0 }));
+app.get('/api/admin_referral/report', (req, res) => res.json({ tree: [], summary: {} }));
+app.get('/api/admin_referral/report/pdf', (req, res) => res.status(501).json({ error: 'PDF not configured' }));
+app.use('/api/signals', require('./backend/routes/signals'));
+app.use('/api/wallet', require('./backend/routes/wallet'));
+app.use('/api/kyc', require('./backend/routes/kyc'));
+app.use('/api/chat', require('./backend/routes/chat'));
+app.use('/api/referral', require('./backend/routes/referral'));
 
 // SPA Catch-all route to serve index.html for client-side routing (e.g. /register?ref=...)
 
@@ -176,7 +205,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/') || req.path === '/admin-secure-login-12345') {
     return res.status(404).json({ error: 'Not Found' });
   }
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 // Socket.io Auth & Personal Rooms
 io.on('connection', (socket) => {
