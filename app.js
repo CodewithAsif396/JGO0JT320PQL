@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   Trexis — Full App Logic
+   PQL — Full App Logic
 ═══════════════════════════════════════ */
 
 // ── NAV STACK ──
@@ -16,7 +16,7 @@ function navTo(screenId) {
     const navScreens = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen'];
     if (navScreens.includes(screenId)) {
         const idx = navScreens.indexOf(screenId);
-        document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+        document.querySelectorAll('.pql-nav-btn, .nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
     }
     // Refresh data on important screen changes
     if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen', 'trade-screen'].includes(screenId)) {
@@ -61,8 +61,8 @@ function switchTab(screenId, btnEl) {
     if (PROTECTED_SCREENS.includes(screenId) && !authToken) { _showScreen('login-screen'); return; }
     navStack.length = 0;
     _showScreen(screenId);
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if (btnEl && btnEl.classList && btnEl.classList.contains('nav-btn')) btnEl.classList.add('active');
+    document.querySelectorAll('.pql-nav-btn, .nav-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl && btnEl.classList && (btnEl.classList.contains('pql-nav-btn') || btnEl.classList.contains('nav-btn'))) btnEl.classList.add('active');
     const app = document.getElementById('app');
     if (app) app.scrollTop = 0;
     if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen', 'trade-screen'].includes(screenId)) {
@@ -119,17 +119,10 @@ function _showScreen(screenId) {
 
 // ── SIDEBAR ──
 function openSidebar() {
-    var menu = document.getElementById('sidebar-menu');
-    var overlay = document.getElementById('sidebar-overlay');
-    if (menu) { menu.classList.add('open'); menu.style.display = 'block'; }
-    if (overlay) overlay.style.display = 'block';
+    // Sidebar removed — navigate to Personal Center
+    switchTab('assets-screen', document.querySelectorAll('.pql-nav-btn')[4]);
 }
-function closeSidebar() {
-    var menu = document.getElementById('sidebar-menu');
-    var overlay = document.getElementById('sidebar-overlay');
-    if (menu) { menu.classList.remove('open'); menu.style.display = 'none'; }
-    if (overlay) overlay.style.display = 'none';
-}
+function closeSidebar() { /* no-op */ }
 function toggleSecurityMenu(el) {
     const sub = document.getElementById('security-submenu');
     const icon = el.querySelector('.expand-icon');
@@ -251,19 +244,19 @@ function renderHomeMarkets(tab = 'change') {
         sorted = sorted.sort((a, b) => Math.abs(parseFloat(b.ch) || 0) - Math.abs(parseFloat(a.ch) || 0));
     }
     list.innerHTML = sorted.map(c => `
-        <div class="market-item" onclick="openTradingPair('${c.sym}')" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:6px; margin-bottom:4px;">
-            <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                ${coinIconHtml(c.sym, c.bg, 24)}
-                <div>
-                    <span style="font-weight:700; color:var(--text-primary); font-size:14px;">${c.sym}</span>
-                    <span style="color:var(--text-secondary); font-size:12px;">/ USDT</span>
+        <div class="market-item" onclick="openTradingPair('${c.sym}')" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:0; margin-bottom:0;">
+            <div style="flex:1.5; display:flex; align-items:center; gap:10px;">
+                ${coinIconHtml(c.sym, c.bg, 36)}
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span style="font-weight:700; color:#1a1a2e; font-size:14px; line-height:1;">${c.sym}</span>
+                    <span style="color:#9ca3af; font-size:11px; line-height:1;">/ USDT</span>
                 </div>
             </div>
-            <div style="flex:1; text-align:right; color:var(--text-primary); font-size:14px;">
+            <div style="flex:1; text-align:right; color:#1a1a2e; font-size:14px; font-weight:600; letter-spacing:-0.2px;">
                 <div id="hm-price-${c.sym}">${c.price}</div>
             </div>
             <div style="flex:1; display:flex; justify-content:flex-end;">
-                <div id="hm-chg-${c.sym}" style="background:${c.up ? '#02c076' : '#f84960'}; color:#fff; font-weight:600; padding:4px 8px; border-radius:4px; font-size:12px; text-align:center; min-width:60px;">${c.ch}</div>
+                <div id="hm-chg-${c.sym}" style="background:${c.up ? '#02c076' : '#f84960'}; color:#fff; font-weight:600; padding:6px 10px; border-radius:8px; font-size:12px; text-align:center; min-width:72px; letter-spacing:0.2px;">${c.ch}</div>
             </div>
         </div>`).join('');
 }
@@ -293,9 +286,9 @@ function coinIconHtml(sym, bg, size) {
 
 const allCoins = [
     { sym: 'DASH', name: 'Dash', bg: '#008ce7', price: '48.553', ch: '-4.35%', up: false, sp: [22, 20, 18, 15, 12, 10, 8, 5, 3, 2] },
-    { sym: 'XPT', name: 'Platinum', bg: '#e5e5e5', price: '1929.052', ch: '-1.58%', up: false, sp: [18, 17, 15, 13, 11, 10, 8, 6, 5, 4] },
-    { sym: 'XAG', name: 'Silver', bg: '#c0c0c0', price: '75.011', ch: '-1.21%', up: false, sp: [15, 14, 13, 11, 10, 9, 8, 7, 5, 4] },
-    { sym: 'XPD', name: 'Palladium', bg: '#d4af37', price: '1363.532', ch: '-1.09%', up: false, sp: [19, 18, 16, 15, 13, 12, 10, 8, 7, 6] },
+    { sym: 'XPT', name: 'Platinum', bg: '#7a8c99', price: '1929.052', ch: '-1.58%', up: false, sp: [18, 17, 15, 13, 11, 10, 8, 6, 5, 4] },
+    { sym: 'XAG', name: 'Silver', bg: '#6b7d8a', price: '75.011', ch: '-1.21%', up: false, sp: [15, 14, 13, 11, 10, 9, 8, 7, 5, 4] },
+    { sym: 'XPD', name: 'Palladium', bg: '#b8952a', price: '1363.532', ch: '-1.09%', up: false, sp: [19, 18, 16, 15, 13, 12, 10, 8, 7, 6] },
     { sym: 'ZEC', name: 'Zcash', bg: '#f4b728', price: '666.783', ch: '-1.03%', up: false, sp: [20, 19, 17, 16, 14, 13, 11, 9, 8, 7] },
     { sym: 'XAU', name: 'Gold', bg: '#ffd700', price: '4524.336', ch: '-0.48%', up: false, sp: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7] },
     { sym: 'TRX', name: 'TRON', bg: '#ef0027', price: '0.35946', ch: '+0.05%', up: true, sp: [5, 6, 5, 7, 6, 8, 7, 9, 8, 10] },
@@ -306,7 +299,7 @@ const allCoins = [
     { sym: 'XRP', name: 'XRP', bg: '#00aae4', price: '1.3796', ch: '+0.90%', up: true, sp: [10, 12, 11, 14, 13, 16, 15, 18, 17, 20] },
     { sym: 'LINK', name: 'Chainlink', bg: '#2a5ada', price: '9.723', ch: '+0.93%', up: true, sp: [15, 16, 18, 17, 20, 19, 22, 21, 24, 23] },
     { sym: 'YFI', name: 'Yearn.finance', bg: '#006fce', price: '2520.74', ch: '+1.04%', up: true, sp: [18, 19, 21, 20, 23, 22, 25, 24, 27, 26] },
-    { sym: 'LTC', name: 'Litecoin', bg: '#bfbbbb', price: '54.612', ch: '+1.24%', up: true, sp: [12, 14, 13, 16, 15, 18, 17, 20, 19, 22] },
+    { sym: 'LTC', name: 'Litecoin', bg: '#828282', price: '54.612', ch: '+1.24%', up: true, sp: [12, 14, 13, 16, 15, 18, 17, 20, 19, 22] },
     { sym: 'BCH', name: 'Bitcoin Cash', bg: '#8dc351', price: '377.87', ch: '+1.30%', up: true, sp: [14, 16, 15, 18, 17, 20, 19, 22, 21, 24] },
     { sym: 'DOGE', name: 'Dogecoin', bg: '#c2a633', price: '0.10582', ch: '+2.12%', up: true, sp: [10, 13, 12, 15, 14, 17, 16, 19, 18, 22] },
     { sym: 'DOT', name: 'Polkadot', bg: '#e6007a', price: '1.275', ch: '+2.25%', up: true, sp: [8, 11, 10, 14, 13, 17, 16, 20, 19, 24] },
@@ -438,17 +431,19 @@ function renderMarkets(filter) {
         const fmtPrice = rawPrice < 0.1 ? rawPrice.toFixed(5) : (rawPrice < 100 ? rawPrice.toFixed(3) : rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         const fakeVol = rawPrice > 1000 ? (Math.random() * 400 + 50).toFixed(2) + 'M' : (Math.random() * 30 + 1).toFixed(2) + 'M';
         return `
-        <div class="market-item" onclick="openTradingPair('${c.sym}')" style="cursor:pointer; display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04);">
-            <div style="flex:1.4;">
-                <div style="font-size:14px; font-weight:700; color:#fff;">${c.sym} <span style="font-weight:700; color:#fff;">/ USDT</span></div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">VOL: ${fakeVol}</div>
+        <div class="market-item" onclick="openTradingPair('${c.sym}')" style="cursor:pointer; display:flex; align-items:center; padding:13px 16px; border-bottom:1px solid #f5f5ff; background:#fff;">
+            <div style="flex:1.4; display:flex; align-items:center; gap:10px;">
+                ${coinIconHtml(c.sym, c.bg, 36)}
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#1a1a2e;">${c.sym}<span style="font-weight:500; color:#9ca3af; font-size:12px;"> / USDT</span></div>
+                    <div style="font-size:11px; color:#9ca3af; margin-top:2px;">VOL: ${fakeVol}</div>
+                </div>
             </div>
             <div style="flex:1; text-align:right; padding-right:10px;">
-                <div style="font-size:14px; font-weight:700; color:#fff;">${fmtPrice}</div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">$ ${fmtPrice}</div>
+                <div style="font-size:14px; font-weight:700; color:#1a1a2e;">$ ${fmtPrice}</div>
             </div>
             <div style="flex:0.8; text-align:right;">
-                <span style="display:inline-block; padding:6px 0; border-radius:4px; font-size:12px; font-weight:600; width:72px; text-align:center; color:#fff; background:${c.up ? '#1fc07c' : '#f84960'};">${c.ch}</span>
+                <span style="display:inline-block; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:700; color:#fff; background:${c.up ? '#02c076' : '#f84960'};">${c.ch}</span>
             </div>
         </div>`;
     }).join('');
@@ -1487,10 +1482,11 @@ function updateMarketUI(prices) {
             // Leave the sparkline arrays alone so the charts stay exactly as their initial wavy shapes.
             const hmPrice = document.getElementById('hm-price-' + sym);
             const hmChg = document.getElementById('hm-chg-' + sym);
-            if (hmPrice) { hmPrice.textContent = coin.price; hmPrice.className = 'price ' + (up ? 'up' : 'down'); }
+            if (hmPrice) { hmPrice.textContent = coin.price; hmPrice.style.color = '#1a1a2e'; }
             if (hmChg) {
                 hmChg.textContent = coin.ch;
                 hmChg.style.background = up ? '#02c076' : '#f84960';
+                hmChg.style.color = '#fff';
             }
         }
 
@@ -1597,11 +1593,39 @@ function updateUIWithUserData() {
     const idEl = document.getElementById('sidebar-uid');
     if (emailEl) {
         const email = userData.email || '';
-        emailEl.textContent = email.length > 22 ? email.substring(0, 20) + '...' : email;
+        const savedPhone = localStorage.getItem('phone_' + email);
+        const display = savedPhone || email;
+        emailEl.textContent = display.length > 24 ? display.substring(0, 22) + '...' : display;
     }
     if (idEl && userData.id) {
         idEl.style.display = 'flex';
         idEl.innerHTML = `ID: ${userData.id.substring(0, 12).toUpperCase()} <i class="fa-regular fa-copy" onclick="copyText('${userData.id.substring(0, 12).toUpperCase()}')" style="cursor:pointer;"></i>`;
+    }
+    // Personal Center profile card — show phone if saved, else email
+    const pcEmail = document.getElementById('pc-email');
+    if (pcEmail) {
+        const savedPhone = localStorage.getItem('phone_' + (userData.email || ''));
+        pcEmail.textContent = savedPhone || userData.email || 'Not logged in';
+    }
+    const pcUid = document.getElementById('pc-uid');
+    const pcUidVal = document.getElementById('pc-uid-val');
+    if (pcUid && userData.id) {
+        pcUid.style.display = 'flex';
+        if (pcUidVal) pcUidVal.textContent = userData.id.substring(0, 12).toUpperCase();
+    }
+    const pcKycBadge = document.getElementById('pc-kyc-badge');
+    if (pcKycBadge) {
+        const isVerified = userData.isVerified || false;
+        pcKycBadge.innerHTML = isVerified
+            ? '<i class="fa-solid fa-circle-check" style="font-size:11px;"></i> Verified'
+            : '<i class="fa-solid fa-circle-xmark" style="font-size:11px;"></i> Unverified';
+        pcKycBadge.className = isVerified ? 'pc-badge-verified verified-ok' : 'pc-badge-verified';
+    }
+    // Update avatar with user initials
+    const pcAvatar = document.getElementById('pc-avatar');
+    if (pcAvatar && userData.email) {
+        const initial = (userData.email[0] || 'U').toUpperCase();
+        pcAvatar.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#4c1d95,#8b5cf6);display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:28px;font-weight:800;color:#fff;">${initial}</div>`;
     }
 
     // Assets balance — always show real USDT balance unchanged
@@ -1989,11 +2013,13 @@ async function doLogin() {
 
 async function doRegister() {
     const email = document.getElementById('reg-email')?.value?.trim();
+    const phone = document.getElementById('reg-phone')?.value?.trim();
     const code = document.getElementById('reg-code')?.value?.trim();
     const pass = document.getElementById('reg-pass')?.value;
     const confirm = document.getElementById('reg-confirm')?.value;
     const ref = document.getElementById('reg-invite')?.value?.trim();
     if (!email || !pass || !confirm) { showToast('Please fill all fields'); return; }
+    if (!phone) { showToast('Please enter your mobile number'); return; }
     if (!code) { showToast('Please enter the verification code'); return; }
     if (pass !== confirm) { showToast('Passwords do not match'); return; }
     try {
@@ -2004,13 +2030,51 @@ async function doRegister() {
         });
         const data = await res.json();
         if (data.error) { showToast(data.error); return; }
-        if (typeof showSuccessModal === 'function') {
-            showSuccessModal('Registration successful! Please login.');
-        } else {
-            showToast('Registration successful! Please login.');
-        }
+        // Save phone linked to this email in localStorage
+        localStorage.setItem('phone_' + email, '+92' + phone);
+        showToast('Registration successful! Please login.');
         _showScreen('login-screen');
     } catch (err) { showToast('Server error'); }
+}
+
+async function doForgotPassword() {
+    const email = document.getElementById('forgot-email')?.value?.trim();
+    if (!email) { showToast('Please enter your email'); return; }
+    try {
+        const res = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.error) { showToast(data.error); return; }
+        const token = data.resetToken || '';
+        document.getElementById('forgot-token-display').textContent = token;
+        document.getElementById('reset-token-input').value = token;
+        document.getElementById('forgot-step1').style.display = 'none';
+        document.getElementById('forgot-step2').style.display = 'block';
+        showToast('Reset token generated!');
+    } catch (err) { showToast('Server error. Try again.'); }
+}
+
+async function doResetPassword() {
+    const token = document.getElementById('reset-token-input')?.value?.trim();
+    const newPass = document.getElementById('reset-new-pass')?.value;
+    if (!token || !newPass) { showToast('Please fill all fields'); return; }
+    if (newPass.length < 6) { showToast('Password must be at least 6 characters'); return; }
+    try {
+        const res = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, newPassword: newPass })
+        });
+        const data = await res.json();
+        if (data.error) { showToast(data.error); return; }
+        showToast('Password reset successfully! Please login.');
+        document.getElementById('forgot-step1').style.display = 'block';
+        document.getElementById('forgot-step2').style.display = 'none';
+        navTo('login-screen');
+    } catch (err) { showToast('Server error. Try again.'); }
 }
 
 function showBindAddrTip() {

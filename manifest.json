@@ -1,11 +1,11 @@
 {
-  "name": "Trexis",
-  "short_name": "Trexis",
-  "description": "Trexis Trading Platform",
+  "name": "PQL",
+  "short_name": "PQL",
+  "description": "PQL Trading Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0e17",
-  "theme_color": "#0b0e17",
+  "background_color": "#0b0d1e",
+  "theme_color": "#8b5cf6",
   "icons": [
     {
       "src": "https://cryptologos.cc/logos/tether-usdt-logo.png",

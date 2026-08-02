@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trexis-v5';
+const CACHE_NAME = 'pql-v1';
 const urlsToCache = [
   '/',
   '/index.html',

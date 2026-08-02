@@ -24,10 +24,13 @@ const io = new Server(server, {
 });
 
 const allowedOrigins = [
-  'http://localhost', 
-  'https://localhost', 
-  'capacitor://localhost', 
+  'http://localhost',
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'https://localhost',
+  'capacitor://localhost',
   'http://127.0.0.1',
+  'http://127.0.0.1:3000',
   'https://trexisplatform.site',
   'https://www.trexisplatform.site',
   'https://trexisplatorm.site',
