@@ -1,12 +1,13 @@
 {
-  "name": "advanced-signal-exchange",
+  "name": "pql-platform",
   "version": "1.0.0",
-  "description": "Advanced Signal Exchange Platform",
+  "description": "PQL Professional Crypto Trading Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "postinstall": "prisma generate && prisma db push --accept-data-loss"
+    "build": "cd backend && npx prisma generate && cd ..",
+    "postinstall": "cd backend && npx prisma generate && cd .."
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",

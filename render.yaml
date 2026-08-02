@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: pql-platform
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && cd backend && npx prisma generate && npx prisma db push --accept-data-loss && cd ..
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pql-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 3000
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASS
+        sync: false
+      - key: ADMIN_URL_PATH
+        sync: false
+
+databases:
+  - name: pql-db
+    databaseName: pql
+    user: pql_admin
+    plan: free
+    region: singapore
