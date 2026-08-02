@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "cd backend && npx prisma generate && cd ..",
-    "postinstall": "cd backend && npx prisma generate && cd .."
+    "build": "cd backend && npx prisma generate && npx prisma db push --accept-data-loss"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
