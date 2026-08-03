@@ -157,8 +157,52 @@ app.use('/api/auth', require('./backend/routes/auth'));
 app.use('/api/user', require('./backend/routes/user'));
 app.use('/api/admin', require('./backend/routes/admin'));
 
-// Admin referral management (stub — returns empty data until referral service is added)
-app.get('/api/admin_referral/dashboard', (req, res) => res.json({ totalUsers: 0, totalRewards: 0, activeReferrers: 0, topReferrers: [] }));
+// Admin referral management
+app.get('/api/admin_referral/dashboard', async (req, res) => {
+  try {
+    const prisma = require('./backend/prismaClient');
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const referredWhere = { referredById: { not: null } };
+
+    const [totalReferralUsers, activeReferrals, inactiveReferrals, newReferralsToday, newReferralsThisMonth, rewardAgg, topReferrersRaw, referredUsers] = await Promise.all([
+      prisma.user.count({ where: referredWhere }),
+      prisma.user.count({ where: { ...referredWhere, suspended: false } }),
+      prisma.user.count({ where: { ...referredWhere, suspended: true } }),
+      prisma.user.count({ where: { ...referredWhere, createdAt: { gte: startOfToday } } }),
+      prisma.user.count({ where: { ...referredWhere, createdAt: { gte: startOfMonth } } }),
+      prisma.user.aggregate({ _sum: { referralBalance: true } }),
+      prisma.user.findMany({
+        where: { referrals: { some: {} } },
+        select: { email: true, _count: { select: { referrals: true } } },
+        orderBy: { referrals: { _count: 'desc' } },
+        take: 5
+      }),
+      prisma.user.findMany({ where: referredWhere, select: { id: true } })
+    ]);
+
+    const depositAgg = referredUsers.length
+      ? await prisma.deposit.aggregate({ where: { userId: { in: referredUsers.map(u => u.id) }, status: 'confirmed' }, _sum: { amount: true } })
+      : { _sum: { amount: 0 } };
+
+    res.json({
+      totalReferralUsers,
+      totalRewardsPaid: rewardAgg._sum.referralBalance || 0,
+      // No queued/pending commission state exists — commissions are credited
+      // instantly on deposit approval (see admin.js /transactions/:id/approve).
+      pendingRewards: 0,
+      activeReferrals,
+      inactiveReferrals,
+      totalReferralDeposits: depositAgg._sum.amount || 0,
+      newReferralsToday,
+      newReferralsThisMonth,
+      topReferrers: topReferrersRaw.map(u => ({ email: u.email, count: u._count.referrals }))
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
 app.get('/api/admin_referral/slabs', async (req, res) => {
   try { const prisma = require('./backend/prismaClient'); const s = await prisma.platformSettings.findUnique({ where: { key: 'referral_slabs' } }); res.json(s ? JSON.parse(s.value) : []); } catch (e) { res.json([]); }
 });
@@ -171,7 +215,57 @@ app.get('/api/admin_referral/content', async (req, res) => {
 app.post('/api/admin_referral/content', async (req, res) => {
   try { const prisma = require('./backend/prismaClient'); await prisma.platformSettings.upsert({ where: { key: 'referral_content' }, update: { value: JSON.stringify(req.body) }, create: { key: 'referral_content', value: JSON.stringify(req.body) } }); res.json({ success: true }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
-app.get('/api/admin_referral/history', (req, res) => res.json({ rewards: [], total: 0 }));
+// Each commission payout already exists as a Transaction row (type
+// REFERRAL_COMMISSION, userId = the referrer who got paid) created in
+// admin.js's /transactions/:id/approve — no separate reward log table.
+// The depositor's email is only recorded in that transaction's free-text
+// note ("Referral from x@y.com"), since there's no stored relation to it.
+app.get('/api/admin_referral/history', async (req, res) => {
+  try {
+    const prisma = require('./backend/prismaClient');
+    const page = parseInt(req.query.page) || 1;
+    const { q, from, to } = req.query;
+    const where = { type: 'REFERRAL_COMMISSION' };
+    if (from || to) {
+      where.createdAt = {};
+      if (from) where.createdAt.gte = new Date(from);
+      if (to) where.createdAt.lte = new Date(new Date(to).getTime() + 86400000 - 1);
+    }
+    if (q) {
+      where.OR = [
+        { user: { email: { contains: q, mode: 'insensitive' } } },
+        { note: { contains: q, mode: 'insensitive' } }
+      ];
+    }
+    const [rows, total, pctSetting] = await Promise.all([
+      prisma.transaction.findMany({
+        where,
+        include: { user: { select: { email: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * 20,
+        take: 20
+      }),
+      prisma.transaction.count({ where }),
+      prisma.platformSettings.findUnique({ where: { key: 'referral_percentage' } })
+    ]);
+    const pct = parseFloat(pctSetting?.value || '5');
+    const history = rows.map(t => {
+      const m = /Referral from (.+)$/.exec(t.note || '');
+      return {
+        createdAt: t.createdAt,
+        user: t.user,
+        referrer: { email: m ? m[1] : 'Unknown' },
+        level: 1, // flat single-level commission — no multi-level payout exists yet
+        percentage: pct, // current rate; the rate at payout time isn't stored per-transaction
+        amount: t.amount,
+        status: t.status
+      };
+    });
+    res.json({ history, total });
+  } catch (e) {
+    res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
 app.get('/api/admin_referral/report', (req, res) => res.json({ tree: [], summary: {} }));
 app.get('/api/admin_referral/report/pdf', (req, res) => res.status(501).json({ error: 'PDF not configured' }));
 app.use('/api/signals', require('./backend/routes/signals'));
