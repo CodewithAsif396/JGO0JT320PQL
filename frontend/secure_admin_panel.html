@@ -2569,7 +2569,7 @@ function renderUserModal(u) {
     '<div class="balance-grid" style="grid-template-columns:repeat(5,1fr)">' +
       '<div class="balance-card"><div class="balance-amount text-accent">' + fmt(u.balance) + '</div><div class="balance-label">Exchange Balance</div></div>' +
       '<div class="balance-card"><div class="balance-amount" style="color:#8b5cf6">' + fmt(u.perpetualBalance||0) + '</div><div class="balance-label">Perpetual Balance</div></div>' +
-      '<div class="balance-card" style="border:2px solid #8b5cf6"><div class="balance-amount" style="color:#8b5cf6;font-size:22px">' + fmt((u.balance||0)+(u.perpetualBalance||0)+(u.profitBalance||0)) + '</div><div class="balance-label" style="color:#8b5cf6;font-weight:700;">TOTAL BALANCE</div></div>' +
+      '<div class="balance-card" style="border:2px solid #8b5cf6"><div class="balance-amount" style="color:#8b5cf6;font-size:22px">' + fmt((u.balance||0)+(u.perpetualBalance||0)) + '</div><div class="balance-label" style="color:#8b5cf6;font-weight:700;">TOTAL BALANCE</div></div>' +
       '<div class="balance-card"><div class="balance-amount text-green">' + fmt(u.profitBalance) + '</div><div class="balance-label">Profit Balance</div></div>' +
       '<div class="balance-card"><div class="balance-amount" style="color:var(--blue)">' + fmt(u.referralBalance) + '</div><div class="balance-label">Referral Balance</div></div>' +
     '</div>' +
