@@ -792,7 +792,7 @@
                     <i class="fa-solid fa-chevron-right pc-arr"></i>
                 </div>
 
-                <div class="pc-menu-row" onclick="navTo('deposit-screen')">
+                <div class="pc-menu-row" onclick="navTo('deposit-record-screen')">
                     <div class="pc-menu-icon" style="background:#f0fdf4;"><i class="fa-solid fa-download" style="color:#16a34a;font-size:14px;"></i></div>
                     <span>Deposit Records</span>
                     <i class="fa-solid fa-chevron-right pc-arr"></i>
@@ -1233,6 +1233,22 @@
                         <i class="fa-solid fa-receipt" style="font-size:28px;color:#8b5cf6;opacity:0.5;"></i>
                     </div>
                     <p style="color:#9ca3af;font-size:14px;">No withdrawal records yet</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="deposit-record-screen" class="screen" style="background:#f5f5ff;">
+            <div class="sub-header">
+                <div class="back-btn" onclick="navTo('home-screen')"><i class="fa-solid fa-chevron-left"></i></div>
+                <h2>Deposit Records</h2>
+                <span style="width:32px;"></span>
+            </div>
+            <div id="deposit-records-list" class="record-list" style="padding:12px;">
+                <div style="text-align:center;padding:60px 20px;">
+                    <div style="width:64px;height:64px;border-radius:20px;background:rgba(139,92,246,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                        <i class="fa-solid fa-receipt" style="font-size:28px;color:#8b5cf6;opacity:0.5;"></i>
+                    </div>
+                    <p style="color:#9ca3af;font-size:14px;">No deposit records yet</p>
                 </div>
             </div>
         </div>

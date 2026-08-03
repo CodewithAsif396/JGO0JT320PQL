@@ -16,7 +16,7 @@ function toNumericId(cuid) {
 const navStack = [];
 let currentScreen = 'home-screen';
 
-const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
+const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'deposit-record-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
 
 window.addEventListener('popstate', () => {
     const p = window.location.pathname;
@@ -48,6 +48,7 @@ function navTo(screenId) {
     if (screenId === 'deposit-screen') loadDepositInfo();
     if (screenId === 'notifications-screen') fetchNotifications();
     if (screenId === 'withdrawal-record-screen') loadWithdrawalRecords();
+    if (screenId === 'deposit-record-screen') loadDepositRecords();
     if (screenId === 'withdrawal-screen') loadWithdrawalScreen();
     if (screenId === 'futures-screen') {
         if (!apexChart) {
@@ -1860,10 +1861,16 @@ async function loadTransactions() {
         }
         const statusClass = { PENDING: 'pending-status', COMPLETED: 'paid-status', FAILED: 'fail-status' };
         const statusLabel = { PENDING: 'Pending', COMPLETED: 'Completed', FAILED: 'Failed' };
-        container.innerHTML = txs.map(tx => `
-            <div class="record-item">
+        const titleMap = {
+            DEPOSIT: 'Deposit', WITHDRAWAL: 'Withdrawal', TRANSFER: 'Wallet Transfer',
+            REFERRAL_COMMISSION: 'Referral Commission',
+            ADJUSTMENT_CREDIT: 'Balance Credit', ADJUSTMENT_DEBIT: 'Balance Debit'
+        };
+        window._allTxData = txs;
+        container.innerHTML = txs.map((tx, idx) => `
+            <div class="record-item" onclick="showTxDetail(${idx})">
                 <div class="record-left">
-                    <div class="record-title">${tx.type === 'DEPOSIT' ? 'Deposit' : tx.type === 'WITHDRAWAL' ? 'Withdrawal' : tx.type}</div>
+                    <div class="record-title">${titleMap[tx.type] || tx.type}</div>
                     <div class="record-time">${new Date(tx.createdAt).toLocaleString()}</div>
                 </div>
                 <div class="record-right">
@@ -1875,6 +1882,69 @@ async function loadTransactions() {
     } catch (err) {
         container.innerHTML = '<div class="no-data-block" style="padding-top:60px;"><p>Error loading transactions</p></div>';
     }
+}
+
+function showTxDetail(idx) {
+    const tx = (window._allTxData || [])[idx];
+    if (!tx) return;
+
+    let modal = document.getElementById('tx-details-screen');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'tx-details-screen';
+        modal.className = 'screen full-page';
+        modal.style.zIndex = '1000';
+        modal.innerHTML = `
+        <div class="sub-header">
+            <i class="fa-solid fa-chevron-left back-btn" onclick="closeTxDetail()"></i>
+            <h2>Transaction details</h2>
+            <span></span>
+        </div>
+        <div style="padding:20px;">
+            <div style="border-radius:12px;padding:20px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Type:</span>
+                    <span id="tx-type" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Time:</span>
+                    <span id="tx-time" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Amount:</span>
+                    <span id="tx-amount" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Status:</span>
+                    <span id="tx-status" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <span style="color:var(--text-secondary);font-size:14px;white-space:nowrap;margin-right:16px;">Note:</span>
+                    <span id="tx-note" style="color:var(--text-primary);font-size:14px;font-weight:500;text-align:right;"></span>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('tx-type').textContent = tx.type;
+    document.getElementById('tx-time').textContent = new Date(tx.createdAt).toLocaleString();
+    document.getElementById('tx-amount').textContent = tx.amount.toFixed(2) + ' USDT';
+    const statusEl = document.getElementById('tx-status');
+    statusEl.textContent = tx.status;
+    statusEl.style.color = tx.status === 'COMPLETED' ? 'var(--up-color)' : tx.status === 'FAILED' ? 'var(--down-color)' : 'var(--text-secondary)';
+    document.getElementById('tx-note').textContent = tx.note || '-';
+
+    modal.style.display = 'block';
+}
+
+function closeTxDetail() {
+    const modal = document.getElementById('tx-details-screen');
+    if (modal) modal.style.display = 'none';
 }
 
 async function loadTradeHistory() {
@@ -2671,6 +2741,126 @@ async function loadWithdrawalRecords() {
             </div>
         `}).join('');
     } catch (e) { }
+}
+
+async function loadDepositRecords() {
+    const container = document.getElementById('deposit-records-list');
+    if (!container || !authToken) return;
+    container.innerHTML = '<div class="no-data-block" style="padding-top:40px;"><p>Loading...</p></div>';
+    try {
+        const res = await fetch('/api/wallet/deposits', { headers: { 'Authorization': `Bearer ${authToken}` } });
+        if (!res.ok) return;
+        const deps = await res.json();
+        if (!deps.length) {
+            container.innerHTML = '<div class="no-data-block" style="padding-top:60px;"><i class="fa-solid fa-receipt" style="font-size:40px;color:var(--text-muted);margin-bottom:12px;"></i><p>No deposit records</p></div>';
+            return;
+        }
+        const statusClass = {
+            pending_approval: 'pending-status',
+            confirmed: 'paid-status', CONFIRMED: 'paid-status',
+            rejected: 'fail-status', REJECTED: 'fail-status'
+        };
+        const statusLabel = {
+            pending_approval: 'Under Audit',
+            confirmed: 'Confirmed', CONFIRMED: 'Confirmed',
+            rejected: 'Rejected', REJECTED: 'Rejected'
+        };
+        window._depositData = window._depositData || {};
+        container.innerHTML = deps.map(dep => {
+            window._depositData[dep.id] = dep;
+            return `
+            <div class="record-item" onclick="showDepositDetails('${dep.id}')">
+                <div class="record-left">
+                    <div class="record-title">Deposit</div>
+                    <div class="record-time">${new Date(dep.detectedAt || dep.createdAt).toLocaleString()}</div>
+                </div>
+                <div class="record-right">
+                    <div class="record-coin">${dep.amount.toFixed(2)} ${dep.currency || 'USDT'}</div>
+                    <div class="record-status ${statusClass[dep.status] || 'pending-status'}">${statusLabel[dep.status] || dep.status.toUpperCase()}</div>
+                </div>
+            </div>
+        `}).join('');
+    } catch (e) { }
+}
+
+function showDepositDetails(depId) {
+    const dep = (window._depositData || {})[depId];
+    if (!dep) return;
+
+    let modal = document.getElementById('deposit-details-screen');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'deposit-details-screen';
+        modal.className = 'screen full-page';
+        modal.style.zIndex = '1000';
+        modal.innerHTML = `
+        <div class="sub-header">
+            <i class="fa-solid fa-chevron-left back-btn" onclick="closeDepositDetails()"></i>
+            <h2>Deposit details</h2>
+            <span></span>
+        </div>
+        <div style="padding:20px;">
+            <div style="border-radius:12px;padding:20px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Time:</span>
+                    <span id="dep-time" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Deposit amount:</span>
+                    <span id="dep-amount" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Currency:</span>
+                    <span id="dep-currency" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;align-items:flex-start;">
+                    <span style="color:var(--text-secondary);font-size:14px;white-space:nowrap;margin-right:16px;">From address:</span>
+                    <span id="dep-from" style="color:var(--text-primary);font-size:14px;font-weight:500;word-break:break-all;text-align:right;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;align-items:flex-start;">
+                    <span style="color:var(--text-secondary);font-size:14px;white-space:nowrap;margin-right:16px;">Tx hash:</span>
+                    <span id="dep-txhash" style="color:var(--text-primary);font-size:14px;font-weight:500;word-break:break-all;text-align:right;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Status:</span>
+                    <span id="dep-status" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Reason:</span>
+                    <span id="dep-reason" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+
+    const d = new Date(dep.detectedAt || dep.createdAt);
+    document.getElementById('dep-time').textContent = d.toLocaleString();
+    document.getElementById('dep-amount').textContent = dep.amount.toFixed(2) + ' ' + (dep.currency || 'USDT');
+    document.getElementById('dep-currency').textContent = dep.currency || 'USDT';
+    document.getElementById('dep-from').textContent = dep.fromAddress || '--';
+    document.getElementById('dep-txhash').textContent = dep.txHash || '--';
+
+    const statusLabel = { pending_approval: 'Under Audit', confirmed: 'Confirmed', rejected: 'Rejected' };
+    const statusColor = { pending_approval: 'var(--text-secondary)', confirmed: 'var(--up-color)', rejected: 'var(--down-color)' };
+    const statusEl = document.getElementById('dep-status');
+    statusEl.textContent = statusLabel[dep.status] || dep.status.toUpperCase();
+    statusEl.style.color = statusColor[dep.status] || 'var(--text-secondary)';
+
+    document.getElementById('dep-reason').textContent = dep.rejectionReason || '-';
+
+    modal.style.display = 'block';
+}
+
+function closeDepositDetails() {
+    const modal = document.getElementById('deposit-details-screen');
+    if (modal) modal.style.display = 'none';
 }
 
 function showWithdrawalDetails(txId) {

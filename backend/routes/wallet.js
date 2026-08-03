@@ -207,16 +207,39 @@ router.post('/deposit', authMiddleware, async (req, res) => {
   }
 });
 
+// "All Transactions" used to only read the legacy Transaction table (the
+// old manual deposit/withdrawal-request flow + referral commissions).
+// Real crypto deposits/withdrawals live in their own Deposit/Withdrawal
+// models, admin balance credits/debits in BalanceAdjustment, and
+// Exchange/Trade/Perpetual moves in WalletTransferLog — none of those
+// ever showed up here. This merges all five sources into one normalized,
+// date-sorted list instead.
 router.get('/transactions', authMiddleware, async (req, res) => {
   try {
+    const userId = req.user.userId;
     const page = parseInt(req.query.page) || 1;
-    const txs = await prisma.transaction.findMany({
-      where: { userId: req.user.userId },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * 20,
-      take: 20
-    });
-    res.json(txs);
+
+    const depositStatusMap = { pending_approval: 'PENDING', confirmed: 'COMPLETED', rejected: 'FAILED' };
+    const withdrawalStatusMap = { pending: 'PENDING', completed: 'COMPLETED', failed: 'FAILED', rejected: 'FAILED' };
+
+    const [txs, deposits, withdrawals, adjustments, transfers] = await Promise.all([
+      prisma.transaction.findMany({ where: { userId } }),
+      prisma.deposit.findMany({ where: { userId } }),
+      prisma.withdrawal.findMany({ where: { userId } }),
+      prisma.balanceAdjustment.findMany({ where: { userId } }),
+      prisma.walletTransferLog.findMany({ where: { userId } })
+    ]);
+
+    const merged = [
+      ...txs.map(t => ({ id: t.id, type: t.type, amount: t.amount, status: t.status, createdAt: t.createdAt, note: t.note })),
+      ...deposits.map(d => ({ id: d.id, type: 'DEPOSIT', amount: d.amount, status: depositStatusMap[d.status] || d.status.toUpperCase(), createdAt: d.detectedAt, note: `${d.currency || 'USDT'} deposit` })),
+      ...withdrawals.map(w => ({ id: w.id, type: 'WITHDRAWAL', amount: w.amount, status: withdrawalStatusMap[w.status] || w.status.toUpperCase(), createdAt: w.requestedAt, note: 'To ' + w.toAddress })),
+      ...adjustments.map(a => ({ id: a.id, type: 'ADJUSTMENT_' + (a.type || '').toUpperCase(), amount: a.amount, status: 'COMPLETED', createdAt: a.createdAt, note: a.reason })),
+      ...transfers.map(w => ({ id: w.id, type: 'TRANSFER', amount: w.amount, status: 'COMPLETED', createdAt: w.createdAt, note: `${w.fromWallet} → ${w.toWallet}` }))
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const start = (page - 1) * 20;
+    res.json(merged.slice(start, start + 20));
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
   }
