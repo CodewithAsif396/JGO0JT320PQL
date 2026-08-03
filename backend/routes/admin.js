@@ -807,7 +807,11 @@ router.get('/analytics', authMiddleware, adminMiddleware, async (req, res) => {
         tronWallet.getMasterBalance(),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
       ]);
-    } catch {}
+    } catch (e) {
+      // Silently swallowing this left "Master Balance: N/A" on the dashboard
+      // with zero clue why — usually MASTER_ADDRESS isn't set on the host.
+      console.error('getMasterBalance failed (check MASTER_ADDRESS/MASTER_MNEMONIC env vars):', e.message);
+    }
 
     res.json({
       totalUsers,
