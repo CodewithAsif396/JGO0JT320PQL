@@ -79,7 +79,7 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // Serve only safe public files (not source code)
 const FRONTEND = path.join(__dirname, 'frontend');
-const PUBLIC_FILES = ['index.html','style.css','app.js','manifest.json','sw.js','pql-logo.png','favicon.png','app-icon.png','privacy-policy.html'];
+const PUBLIC_FILES = ['index.html','style.css','app.js','manifest.json','sw.js','pql-logo.png','favicon.png','app-icon.png','privacy-policy.html','pql.apk'];
 PUBLIC_FILES.forEach(f => {
   app.get('/' + f, (req, res) => res.sendFile(path.join(FRONTEND, f)));
 });
