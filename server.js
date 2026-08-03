@@ -31,10 +31,7 @@ const allowedOrigins = [
   'capacitor://localhost',
   'http://127.0.0.1',
   'http://127.0.0.1:3000',
-  'https://trexisplatform.site',
-  'https://www.trexisplatform.site',
-  'https://trexisplatorm.site',
-  'https://www.trexisplatorm.site'
+  'https://pqlofficial.onrender.com'
 ];
 if (process.env.APP_DOMAIN) {
   allowedOrigins.push(process.env.APP_DOMAIN);
@@ -139,12 +136,12 @@ app.get('/api/ticker', async (_req, res) => {
       prisma.platformSettings.findUnique({ where: { key: 'penalty_terms_text' } })
     ]);
     res.json({
-      text: tickerSetting ? tickerSetting.value : 'Trexis demonstrates commitment to legal and transparent operations with full licensing. Safe, Fast, and Easy Trading for all professional investors.',
+      text: tickerSetting ? tickerSetting.value : 'PQL demonstrates commitment to legal and transparent operations with full licensing. Safe, Fast, and Easy Trading for all professional investors.',
       penaltyTerms: termsSetting ? termsSetting.value : 'Please note that transferring principal funds from Trade back to Exchange before the lock period expires will incur an early withdrawal penalty.'
     });
   } catch (e) {
     res.json({
-      text: 'Trexis demonstrates commitment to legal and transparent operations with full licensing. Safe, Fast, and Easy Trading for all professional investors.',
+      text: 'PQL demonstrates commitment to legal and transparent operations with full licensing. Safe, Fast, and Easy Trading for all professional investors.',
       penaltyTerms: 'Please note that transferring principal funds from Trade back to Exchange before the lock period expires will incur an early withdrawal penalty.'
     });
   }
