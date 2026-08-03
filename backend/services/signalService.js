@@ -52,8 +52,17 @@ class SignalService {
       rewardPercentage = 80, delaySeconds,
       suggestedAmount, riskLevel = 'MEDIUM',
       visibilityTier = 1, growthTarget, targetUserId,
-      accessCode
+      targetUserIds, accessCode
     } = data;
+
+    // Sending to N selected users used to create N duplicate Signal rows
+    // (one per targetUserIds[i]) sharing the same entryTime/duration by
+    // coincidence, not by design. Now it's a single Signal row plus one
+    // SignalTarget row per recipient — one shared countdown, one row in
+    // the admin signal list, still delivered to every recipient instantly.
+    const targetIds = Array.isArray(targetUserIds) && targetUserIds.length > 0
+      ? [...new Set(targetUserIds)]
+      : (targetUserId ? [targetUserId] : []);
 
     if (!pair || !direction) throw new Error('Pair and direction required');
     let dir = direction.toUpperCase();
@@ -66,6 +75,11 @@ class SignalService {
       ? new Date(entryTime)
       : new Date(Date.now() + (delaySeconds || 60) * 1000);
 
+    // parseInt(visibilityTier) || 1 previously turned 0 (broadcast-to-all)
+    // into 1, silently downgrading every "Send to ALL Users" signal to a
+    // tier-1-only signal — 0 must be preserved, only a genuinely missing/
+    // invalid value should fall back to 1.
+    const parsedTier = parseInt(visibilityTier);
     const signal = await prisma.signal.create({
       data: {
         pair,
@@ -77,13 +91,23 @@ class SignalService {
         rewardPercentage: parseFloat(rewardPercentage),
         suggestedAmount: suggestedAmount ? parseFloat(suggestedAmount) : null,
         riskLevel: (riskLevel || 'MEDIUM').toUpperCase(),
-        visibilityTier: parseInt(visibilityTier) || 1,
+        visibilityTier: Number.isNaN(parsedTier) ? 1 : parsedTier,
         growthTarget: growthTarget ? parseFloat(growthTarget) : null,
-        targetUserId: targetUserId || null,
+        // Kept for single-target callers (e.g. targetEmail) — multi-user
+        // sends rely on SignalTarget rows below instead, since a single
+        // nullable column can't reference more than one user.
+        targetUserId: targetIds.length === 1 ? targetIds[0] : null,
         accessCode: accessCode ? accessCode.trim().toUpperCase() : null,
         status: 'PENDING'
       }
     });
+
+    if (targetIds.length > 0) {
+      await prisma.signalTarget.createMany({
+        data: targetIds.map(userId => ({ signalId: signal.id, userId })),
+        skipDuplicates: true
+      });
+    }
 
     const delay = entry.getTime() - Date.now();
     if (delay > 0) {
@@ -92,24 +116,27 @@ class SignalService {
       this.startSignal(signal.id);
     }
 
-    if (targetUserId) {
-      // Targeted signal — emit only to that user's socket room
-      this.io.to('user_' + targetUserId).emit('new_signal', signal);
+    if (targetIds.length > 0) {
+      // Targeted signal (single or bulk) — deliver instantly to every
+      // recipient's own socket room, not a global broadcast.
+      for (const uid of targetIds) this.io.to('user_' + uid).emit('new_signal', signal);
     } else {
       this.io.emit('new_signal', signal);
     }
-    this._notifyEligibleUsers(signal).catch(() => { });
+    this._notifyEligibleUsers(signal, targetIds).catch(() => { });
     return signal;
   }
 
-  async _notifyEligibleUsers(signal) {
+  async _notifyEligibleUsers(signal, targetIds = []) {
     const arrow = signal.direction === 'CALL' ? '↑' : '↓';
     const title = `New ${signal.marketType} Signal: ${signal.pair} ${arrow} ${signal.direction}`;
     const body = `${signal.riskLevel} risk · Suggested: $${signal.suggestedAmount || 'Flexible'} · Reward: ${signal.rewardPercentage}%`;
 
-    if (signal.targetUserId) {
-      // Only notify the specific target user
-      if (this.ns) await this.ns.send(signal.targetUserId, title, body, 'SIGNAL').catch(() => { });
+    if (targetIds.length > 0) {
+      // Only notify the selected recipients, however many there are
+      if (this.ns) {
+        for (const uid of targetIds) await this.ns.send(uid, title, body, 'SIGNAL').catch(() => { });
+      }
       return;
     }
 
@@ -137,9 +164,15 @@ class SignalService {
     try {
       const signal = await prisma.signal.update({
         where: { id: signalId },
-        data: { status: 'ACTIVE' }
+        data: { status: 'ACTIVE' },
+        include: { targets: { select: { userId: true } } }
       });
-      this.io.emit('signal_started', signal);
+      if (signal.targetUserId || signal.targets.length > 0) {
+        const uids = signal.targetUserId ? [signal.targetUserId] : signal.targets.map(t => t.userId);
+        for (const uid of uids) this.io.to('user_' + uid).emit('signal_started', signal);
+      } else {
+        this.io.emit('signal_started', signal);
+      }
       this.timers.set(
         signalId + '_end',
         setTimeout(() => this.completeSignal(signalId), signal.duration * 1000)

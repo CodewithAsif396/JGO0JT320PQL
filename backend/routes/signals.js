@@ -46,15 +46,25 @@ router.get('/', authMiddleware, async (req, res) => {
     const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
     const tiers = await getTierThresholds();
 
-    // 1. Signals targeted directly at this user
+    // 1. Signals targeted directly at this user — either the legacy
+    // single-user targetUserId column, or a row in SignalTarget (signals
+    // sent to a batch of selected users all share one Signal row).
     const targetedSignals = await prisma.signal.findMany({
-      where: { status: { in: ['PENDING', 'ACTIVE'] }, targetUserId: user.id },
+      where: {
+        status: { in: ['PENDING', 'ACTIVE'] },
+        OR: [
+          { targetUserId: user.id },
+          { targets: { some: { userId: user.id } } }
+        ]
+      },
       orderBy: { entryTime: 'asc' }
     });
 
-    // 2. Broadcast signals (visibilityTier=0) — visible to ALL users regardless of balance
+    // 2. Broadcast signals (visibilityTier=0) — visible to ALL users regardless of balance.
+    // Excludes signals with explicit targets so a batch send to selected
+    // users never also leaks out to everyone else via the public buckets.
     const broadcastSignals = await prisma.signal.findMany({
-      where: { status: { in: ['PENDING', 'ACTIVE'] }, visibilityTier: 0, targetUserId: null },
+      where: { status: { in: ['PENDING', 'ACTIVE'] }, visibilityTier: 0, targetUserId: null, targets: { none: {} } },
       orderBy: { entryTime: 'asc' }
     });
 
@@ -65,7 +75,8 @@ router.get('/', authMiddleware, async (req, res) => {
         where: {
           status: { in: ['PENDING', 'ACTIVE'] },
           visibilityTier: { gte: 1, lte: accessTier },
-          targetUserId: null
+          targetUserId: null,
+          targets: { none: {} }
         },
         orderBy: [{ visibilityTier: 'asc' }, { entryTime: 'asc' }]
       });
@@ -156,11 +167,26 @@ router.post('/trade', authMiddleware, async (req, res) => {
     }
 
     const [signal, user] = await Promise.all([
-      prisma.signal.findUnique({ where: { id: signalId } }),
+      prisma.signal.findUnique({ where: { id: signalId }, include: { _count: { select: { targets: true } } } }),
       prisma.user.findUnique({ where: { id: req.user.userId } })
     ]);
 
     if (!signal) return res.status(404).json({ error: 'Signal not found' });
+
+    // A signal targeted at specific users (single targetUserId, or a batch
+    // sent via SignalTarget) must only be tradeable by those users — the
+    // generic visibilityTier check below isn't enough on its own, since a
+    // targeted signal's visibilityTier can coincidentally match a tier any
+    // other user also qualifies for.
+    if (signal.targetUserId && signal.targetUserId !== user.id) {
+      return res.status(403).json({ error: 'This signal is not available to you.' });
+    }
+    if (!signal.targetUserId && signal._count.targets > 0) {
+      const isTargeted = await prisma.signalTarget.findUnique({
+        where: { signalId_userId: { signalId: signal.id, userId: user.id } }
+      });
+      if (!isTargeted) return res.status(403).json({ error: 'This signal is not available to you.' });
+    }
 
     // Allow trade if:
     // 1. Signal is ACTIVE, OR
@@ -261,16 +287,28 @@ router.post('/manual-trade', authMiddleware, async (req, res) => {
     if (cleanPair.includes(':')) cleanPair = cleanPair.split(':')[1]; // Strip BINANCE: or CRYPTO:
     
     const activeSignals = await prisma.signal.findMany({
-      where: { status: 'ACTIVE' }
+      where: { status: 'ACTIVE' },
+      include: {
+        targets: { where: { userId: user.id }, select: { userId: true } },
+        _count: { select: { targets: true } }
+      }
     });
-    
+
     let interceptedSignal = null;
     const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
     for (const sig of activeSignals) {
       const sigPair = sig.pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
       if (sigPair === cleanPair) {
         if (sig.targetUserId === user.id) { interceptedSignal = sig; break; }
-        if (!sig.targetUserId && sig.visibilityTier <= accessTier) { interceptedSignal = sig; break; }
+        if (sig.targetUserId) continue; // single-targeted at someone else — never intercept
+        if (sig._count.targets > 0) {
+          // Batch-targeted signal — sig.targets was queried pre-filtered to
+          // this user's id, so non-empty here means they're a recipient;
+          // empty means it was sent to other users, never intercept it.
+          if (sig.targets.length > 0) { interceptedSignal = sig; break; }
+          continue;
+        }
+        if (sig.visibilityTier <= accessTier) { interceptedSignal = sig; break; }
       }
     }
 

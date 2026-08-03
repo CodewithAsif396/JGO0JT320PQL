@@ -51,6 +51,7 @@ model User {
   balanceAdjustments BalanceAdjustment[]
   chatMessages       ChatMessage[]
   targetedSignals    Signal[]             @relation("TargetedSignals")
+  signalTargets      SignalTarget[]
   walletTransferLogs WalletTransferLog[]
   investmentLocks    InvestmentLock[]
 }
@@ -168,6 +169,21 @@ model Signal {
   targetUser       User?    @relation("TargetedSignals", fields: [targetUserId], references: [id])
   createdAt        DateTime @default(now())
   trades           Trade[]
+  targets          SignalTarget[]
+}
+
+// One row per admin "send to selected users" signal, one row per targeted
+// user — lets a signal sent to many users stay a single Signal record
+// (single shared entryTime/countdown) instead of one duplicate Signal row
+// per recipient.
+model SignalTarget {
+  id        String   @id @default(cuid())
+  signalId  String
+  signal    Signal   @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([signalId, userId])
 }
 
 model Trade {

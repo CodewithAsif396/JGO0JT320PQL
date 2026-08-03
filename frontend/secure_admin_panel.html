@@ -882,15 +882,6 @@
                 </div>
               </div>
 
-              <!-- BROADCAST TO ALL -->
-              <div class="form-group" style="background:rgba(139,92,246,0.08);border:1.5px solid rgba(139,92,246,0.3);border-radius:10px;padding:14px;">
-                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:0;">
-                  <input type="checkbox" id="sigBroadcastAll" style="width:18px;height:18px;accent-color:#8b5cf6;cursor:pointer;">
-                  <span style="font-size:14px;font-weight:700;color:#a78bfa;">📢 Send to ALL Users (All Tiers)</span>
-                </label>
-                <p style="font-size:11px;color:#6b7280;margin-top:6px;margin-bottom:0;">When checked, this signal will be visible to every user regardless of their balance or tier. Perfect for platform-wide signals.</p>
-              </div>
-
               <div class="form-group">
                 <label>Signal Access Code (Leave blank for auto-generate)</label>
                 <input type="text" id="sigAccessCode" placeholder="e.g. VIP-GOLD-123">
@@ -1295,6 +1286,41 @@
                     <label>FAQ URL</label>
                     <input type="text" id="setting_support_faq_url" placeholder="https://...">
                   </div>
+                </div>
+
+                <hr class="divider">
+                <div style="font-weight:700;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="fa fa-envelope" style="color:var(--accent)"></i> SMTP Email Server Settings</div>
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label>SMTP Host</label>
+                    <input type="text" id="setting_smtp_host" placeholder="e.g. smtp.gmail.com or smtp.mailtrap.io">
+                  </div>
+                  <div class="form-group">
+                    <label>SMTP Port</label>
+                    <input type="number" id="setting_smtp_port" placeholder="465 or 587">
+                  </div>
+                  <div class="form-group">
+                    <label>SSL / TLS Secure</label>
+                    <select id="setting_smtp_secure">
+                      <option value="true">True (Port 465 SSL)</option>
+                      <option value="false">False (Port 587 / 25 STARTTLS)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>SMTP Username / Email</label>
+                    <input type="text" id="setting_smtp_user" placeholder="your-email@gmail.com">
+                  </div>
+                  <div class="form-group">
+                    <label>SMTP Password / App Password</label>
+                    <input type="password" id="setting_smtp_pass" placeholder="••••••••••••••••">
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; margin-top:12px; margin-bottom:20px;">
+                  <input type="email" id="smtp_test_email" placeholder="Enter recipient email to test" style="max-width:300px;">
+                  <button class="btn btn-secondary" id="testSmtpBtn" onclick="testSmtpSetting()">
+                    <i class="fa fa-paper-plane"></i> Test SMTP Connection
+                  </button>
                 </div>
 
                 <button class="btn btn-primary" id="saveSettingsBtn" onclick="saveSettings()">
@@ -3200,23 +3226,29 @@ async function loadKyc(status) {
         var bg = st==='APPROVED' ? 'rgba(2,192,118,.15)' : st==='REJECTED' ? 'rgba(248,73,96,.15)' : 'rgba(243,186,47,.15)';
         return '<span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + bg + ';color:' + color + ';margin-left:6px;">' + label + ': ' + st + '</span>';
       }
-      function actionsFor(kind, st, reason) {
+      // Backend's KYC model only has a single `status` field (see
+      // backend/prisma/schema.prisma) — there is no Basic/Advanced split
+      // server-side, and no /approve-basic /approve-advanced routes exist.
+      // This used to render two independent action rows keyed off
+      // k.basicStatus/k.advancedStatus, which are always undefined, so the
+      // status defaulted to 'NONE' and no button ever rendered.
+      function actionsFor(st, reason) {
         if (st === 'PENDING') {
           return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;">' +
-            '<button onclick="approveKycPart(\'' + k.id + '\',\'' + kind + '\')" style="background:rgba(2,192,118,.15);border:1px solid #02c076;color:#02c076;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;"><i class="fa-solid fa-check"></i> Approve ' + kind + '</button>' +
+            '<button onclick="approveKycPart(\'' + k.id + '\')" style="background:rgba(2,192,118,.15);border:1px solid #02c076;color:#02c076;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;"><i class="fa-solid fa-check"></i> Approve</button>' +
             '<div style="display:flex;gap:6px;flex:1;min-width:200px;">' +
-              '<input type="text" id="reject-reason-' + kind + '-' + k.id + '" placeholder="Rejection reason..." style="flex:1;background:#131a22;border:1px solid #2a3347;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;outline:none;">' +
-              '<button onclick="rejectKycPart(\'' + k.id + '\',\'' + kind + '\')" style="background:rgba(248,73,96,.15);border:1px solid #f84960;color:#f84960;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+              '<input type="text" id="reject-reason-' + k.id + '" placeholder="Rejection reason..." style="flex:1;background:#131a22;border:1px solid #2a3347;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;outline:none;">' +
+              '<button onclick="rejectKycPart(\'' + k.id + '\')" style="background:rgba(248,73,96,.15);border:1px solid #f84960;color:#f84960;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;"><i class="fa-solid fa-xmark"></i> Reject</button>' +
             '</div></div>';
         } else if (st === 'APPROVED') {
           // Already approved is not final — an admin can still revoke it
           // (e.g. approved by mistake, or fraud discovered afterward).
           return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;">' +
-            '<input type="text" id="reject-reason-' + kind + '-' + k.id + '" placeholder="Reason for revoking..." style="flex:1;min-width:200px;background:#131a22;border:1px solid #2a3347;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;outline:none;">' +
-            '<button onclick="rejectKycPart(\'' + k.id + '\',\'' + kind + '\')" style="background:rgba(248,73,96,.15);border:1px solid #f84960;color:#f84960;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-ban"></i> Revoke / Reject</button>' +
+            '<input type="text" id="reject-reason-' + k.id + '" placeholder="Reason for revoking..." style="flex:1;min-width:200px;background:#131a22;border:1px solid #2a3347;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;outline:none;">' +
+            '<button onclick="rejectKycPart(\'' + k.id + '\')" style="background:rgba(248,73,96,.15);border:1px solid #f84960;color:#f84960;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;"><i class="fa-solid fa-ban"></i> Revoke / Reject</button>' +
           '</div>';
         } else if (st === 'REJECTED') {
-          return '<div style="font-size:12px;color:#f84960;margin-top:6px;">' + kind + ' rejected — Reason: ' + escHtml(reason || 'N/A') + '</div>';
+          return '<div style="font-size:12px;color:#f84960;margin-top:6px;">Rejected — Reason: ' + escHtml(reason || 'N/A') + '</div>';
         }
         return '';
       }
@@ -3233,16 +3265,15 @@ async function loadKyc(status) {
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:6px;">' +
           '<div><div style="font-weight:700;font-size:15px;">' + escHtml(k.user && k.user.email ? k.user.email : 'Unknown') + '</div>' +
           '<div style="font-size:12px;color:#888;margin-top:3px;">' + fmtDateTime(k.createdAt) + '</div></div>' +
-          '<div>' + badge('Basic', k.basicStatus || 'NONE') + badge('Advanced', k.advancedStatus || 'NONE') + '</div>' +
+          '<div>' + badge('Status', k.status || 'NONE') + '</div>' +
         '</div>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;font-size:13px;">' +
           '<div><span style="color:#888;">Name:</span> ' + escHtml(k.fullName || '—') + '</div>' +
           '<div><span style="color:#888;">ID No:</span> ' + escHtml(k.idNumber || '—') + '</div>' +
           '<div><span style="color:#888;">Country:</span> ' + escHtml(k.country || '—') + '</div>' +
         '</div>' +
-        actionsFor('Basic', k.basicStatus || 'NONE', k.basicRejectReason) +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">' + selfieLink + idFrontLink + idBackLink + '</div>' +
-        actionsFor('Advanced', k.advancedStatus || 'NONE', k.advancedRejectReason) +
+        actionsFor(k.status || 'NONE', k.rejectReason) +
         '</div>';
     }).join('');
     loadKycThumbnails(container);
@@ -3272,23 +3303,23 @@ async function loadKycThumbnails(container) {
   }
 }
 
-async function approveKycPart(id, kind) {
+async function approveKycPart(id) {
   try {
-    var res = await apiFetch('/api/admin/kyc/' + id + '/approve-' + kind.toLowerCase(), {method:'POST'});
+    var res = await apiFetch('/api/admin/kyc/' + id + '/approve', {method:'POST'});
     var data = await res.json();
-    if (data.success) { alert(kind + ' KYC approved successfully!'); loadKyc(currentKycFilter); }
+    if (res.ok) { alert('KYC approved successfully!'); loadKyc(currentKycFilter); }
     else { alert('Error: ' + (data.error || 'Unknown error')); }
   } catch(e) { alert('Error approving KYC: ' + e.message); }
 }
 
-async function rejectKycPart(id, kind) {
-  var reasonEl = document.getElementById('reject-reason-' + kind + '-' + id);
+async function rejectKycPart(id) {
+  var reasonEl = document.getElementById('reject-reason-' + id);
   var reason = reasonEl ? reasonEl.value.trim() : '';
   if (!reason) reason = 'Documents not clear';
   try {
-    var res = await apiFetch('/api/admin/kyc/' + id + '/reject-' + kind.toLowerCase(), {method:'POST', body: JSON.stringify({reason: reason})});
+    var res = await apiFetch('/api/admin/kyc/' + id + '/reject', {method:'POST', body: JSON.stringify({reason: reason})});
     var data = await res.json();
-    if (data.success) { alert(kind + ' KYC rejected.'); loadKyc(currentKycFilter); }
+    if (res.ok) { alert('KYC rejected.'); loadKyc(currentKycFilter); }
     else { alert('Error: ' + (data.error || 'Unknown error')); }
   } catch(e) { alert('Error rejecting KYC: ' + e.message); }
 }
@@ -3305,7 +3336,7 @@ async function loadSettings() {
       var el = document.getElementById('setting_' + k);
       if (el && data[k] !== undefined && data[k] !== null) el.value = data[k];
     });
-    var textKeys = ['deposit_bonus_enabled','app_version','apk_download_url','support_email','support_telegram','support_faq_url'];
+    var textKeys = ['deposit_bonus_enabled','app_version','apk_download_url','support_email','support_telegram','support_faq_url','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass'];
     textKeys.forEach(function(k) {
       var el = document.getElementById('setting_' + k);
       if (el && data[k] !== undefined) el.value = data[k];
@@ -3787,7 +3818,7 @@ async function saveSettings() {
     var el = document.getElementById('setting_' + k);
     if (el && el.value !== '') payload[k] = parseFloat(el.value);
   });
-  var textKeys = ['deposit_bonus_enabled','app_version','apk_download_url','support_email','support_telegram','support_faq_url'];
+  var textKeys = ['deposit_bonus_enabled','app_version','apk_download_url','support_email','support_telegram','support_faq_url','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass'];
   textKeys.forEach(function(k) {
     var el = document.getElementById('setting_' + k);
     if (el) payload[k] = el.value.trim();
@@ -3800,6 +3831,25 @@ async function saveSettings() {
   } catch(e) {
     showAlert(alertEl, e.message, 'error');
   } finally { setBtn(btn, false, '', '<i class="fa fa-save"></i> Save Settings'); }
+}
+
+async function testSmtpSetting() {
+  var alertEl = document.getElementById('settingsAlert');
+  var testEmail = document.getElementById('smtp_test_email').value.trim();
+  var btn = document.getElementById('testSmtpBtn');
+  setBtn(btn, true, 'Testing...', '<i class="fa fa-paper-plane"></i> Test SMTP Connection');
+  try {
+    var res = await apiPost('/api/admin/smtp/test', { email: testEmail });
+    if (res.success) {
+      showAlert(alertEl, res.message || 'SMTP is working successfully!', 'success');
+    } else {
+      showAlert(alertEl, res.error || 'SMTP Test failed', 'error');
+    }
+  } catch(e) {
+    showAlert(alertEl, 'SMTP Test Error: ' + (e.message || e.error || 'Connection failed'), 'error');
+  } finally {
+    setBtn(btn, false, '', '<i class="fa fa-paper-plane"></i> Test SMTP Connection');
+  }
 }
 
 async function notifyUsersOfUpdate() {
@@ -4209,8 +4259,8 @@ async function sendTargetedSignal() {
             suggestedAmount: parseFloat(document.getElementById('sigSuggestedAmount').value),
             growthTarget: document.getElementById('sigGrowthTarget').value ? parseFloat(document.getElementById('sigGrowthTarget').value) : null,
             riskLevel: document.getElementById('sigRiskLevel').value,
-            visibilityTier: document.getElementById('sigBroadcastAll')?.checked ? 0 : currentTargetPlan,
-            targetUserIds: document.getElementById('sigBroadcastAll')?.checked ? [] : Array.from(selectedUserIds),
+            visibilityTier: currentTargetPlan,
+            targetUserIds: Array.from(selectedUserIds),
             accessCode: accessCode
         };
         const entry = document.getElementById('sigEntryTime').value;

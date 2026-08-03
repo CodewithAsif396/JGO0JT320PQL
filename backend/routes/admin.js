@@ -5,6 +5,8 @@ const prisma = require('../prismaClient');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 const tronWallet = require('../services/tronWalletService');
+const { testSmtp } = require('../services/mailer');
+const depositApproval = require('../services/depositApproval');
 
 const adminMiddleware = (req, res, next) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
@@ -338,73 +340,10 @@ router.get('/deposits/pending', authMiddleware, adminMiddleware, async (req, res
 
 router.post('/deposits/:id/approve', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const deposit = await prisma.deposit.findUnique({
-      where: { id: req.params.id },
-      include: { user: { include: { tronWallet: true } } }
-    });
-    if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
-    if (deposit.status !== 'pending_approval') return res.status(400).json({ error: 'Deposit already processed' });
-    if (!deposit.user.tronWallet) return res.status(400).json({ error: 'User has no TRON wallet on record' });
-
-    // Credit user balance
-    const currency = deposit.currency || 'USDT';
-    let creditAmount = deposit.amount;
-    
-    if (currency === 'TRX') {
-      const trxPriceObj = global.ms ? global.ms.getPrice('TRX/USDT') : { price: 0 };
-      const trxPrice = trxPriceObj.price || 0;
-      if (trxPrice <= 0) {
-        return res.status(400).json({ error: 'Unable to fetch real-time TRX price. Please try again later.' });
-      }
-      creditAmount = deposit.amount * trxPrice;
-    }
-
-    await prisma.$transaction([
-      prisma.deposit.update({
-        where: { id: deposit.id },
-        data: { status: 'confirmed', approvedAt: new Date(), approvedBy: req.user.userId }
-      }),
-      prisma.user.update({
-        where: { id: deposit.userId },
-        data: { balance: { increment: creditAmount } }
-      })
-    ]);
-
-    let notificationMsg = `Your deposit of ${deposit.amount} ${currency} has been credited to your account.`;
-    if (currency === 'TRX') {
-      notificationMsg = `Your deposit of ${deposit.amount} TRX (~${creditAmount.toFixed(4)} USDT) has been credited to your account.`;
-    }
-    if (global.ns) await global.ns.send(deposit.userId, 'Deposit Approved', notificationMsg, 'DEPOSIT');
-
-    // Auto-activate + sweep in background (lock prevents concurrent runs)
-    if (!_sweepInProgress.has(deposit.id)) {
-      _sweepInProgress.add(deposit.id);
-      (async () => {
-        try {
-          const childAddress = deposit.user.tronWallet.tronAddress;
-          const derivationIndex = deposit.user.tronWallet.derivationIndex;
-          const currency = deposit.currency || 'USDT';
-
-          await tronWallet.ensureChildTRX(childAddress, currency !== 'TRX');
-
-          const txid = currency === 'TRX'
-            ? await tronWallet.sweepToMaster(derivationIndex)
-            : await tronWallet.sweepUSDTToMaster(derivationIndex);
-
-          await prisma.deposit.update({ where: { id: deposit.id }, data: { sweepTxHash: txid, sweepStatus: 'completed' } });
-          console.log(`Sweep completed for deposit ${deposit.id} (${currency}): ${txid}`);
-        } catch (err) {
-          await prisma.deposit.update({ where: { id: deposit.id }, data: { sweepStatus: 'failed', sweepError: err.message } });
-          console.error(`Sweep failed for deposit ${deposit.id}:`, err.message);
-        } finally {
-          _sweepInProgress.delete(deposit.id);
-        }
-      })();
-    }
-
+    await depositApproval.approveDeposit(req.params.id, req.user.userId);
     res.json({ success: true, message: 'Deposit approved and sweep initiated' });
   } catch (error) {
-    res.status(500).json({ error: 'An internal server error occurred.' });
+    res.status(400).json({ error: error.message || 'An internal server error occurred.' });
   }
 });
 
@@ -586,7 +525,7 @@ router.get('/signals', authMiddleware, adminMiddleware, async (req, res) => {
           { createdAt: { gte: fifteenHoursAgo } }
         ]
       },
-      include: { _count: { select: { trades: true } } },
+      include: { _count: { select: { trades: true, targets: true } } },
       orderBy: { createdAt: 'desc' },
       take: 50
     });
@@ -634,16 +573,15 @@ router.post('/signals', authMiddleware, adminMiddleware, async (req, res) => {
     const body = { ...req.body };
     
     if (body.targetUserIds && Array.isArray(body.targetUserIds) && body.targetUserIds.length > 0) {
-      const userIds = body.targetUserIds;
-      delete body.targetUserIds;
+      // One Signal row for the whole batch — however many users are
+      // selected — instead of one duplicate row per user. All of them get
+      // it delivered instantly (createSignal fans the socket emit + push
+      // notification out to every id in the list) and all place trades
+      // against the same shared entryTime/duration.
+      const userIds = [...new Set(body.targetUserIds)];
       delete body.targetEmail;
-      const createdSignals = [];
-      for (const uid of userIds) {
-        const sigBody = { ...body, targetUserId: uid };
-        const signal = await global.ss.createSignal(sigBody);
-        createdSignals.push(signal);
-      }
-      return res.json({ success: true, count: createdSignals.length, signals: createdSignals });
+      const signal = await global.ss.createSignal({ ...body, targetUserIds: userIds });
+      return res.json({ success: true, count: userIds.length, signal });
     }
 
     if (body.targetEmail) {
@@ -652,8 +590,13 @@ router.post('/signals', authMiddleware, adminMiddleware, async (req, res) => {
       body.targetUserId = target.id;
       delete body.targetEmail;
     }
+    delete body.targetUserIds;
     const signal = await global.ss.createSignal(body);
-    res.json(signal);
+    // Same response shape as the branch above — the frontend's success
+    // message always reads data.count, so a bare signal object here
+    // rendered "Successfully sent to undefined users!", which looked like a
+    // failure even when the signal was created correctly.
+    res.json({ success: true, count: 1, signal });
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
   }
@@ -754,6 +697,20 @@ router.post('/settings', authMiddleware, adminMiddleware, async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
+
+router.post('/smtp/test', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await testSmtp(email);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -1037,18 +994,35 @@ router.post('/wallets/:userId/sweep', authMiddleware, adminMiddleware, async (re
 // ── User Referral Tree ───────────────────────────────────────────────────────
 router.get('/users/:id/referral-tree', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const levels = [];
+    // Flat list of { id, parentId, level, email, joinedAt, totalDeposited, rewardEarnedByRoot }
+    // matching what the admin panel's renderReferralTree() expects.
+    const nodes = [];
     let parentIds = [req.params.id];
     for (let level = 1; level <= 5 && parentIds.length > 0; level++) {
       const children = await prisma.user.findMany({
         where: { referredById: { in: parentIds } },
-        select: { id: true, email: true, balance: true, tradeBalance: true, perpetualBalance: true, createdAt: true, referralCode: true }
+        select: { id: true, email: true, createdAt: true, referredById: true }
       });
       if (!children.length) break;
-      levels.push({ level, users: children });
+
+      for (const child of children) {
+        const depositTotal = await prisma.deposit.aggregate({
+          where: { userId: child.id, status: { in: ['confirmed', 'CONFIRMED'] } },
+          _sum: { amount: true }
+        });
+        nodes.push({
+          id: child.id,
+          parentId: child.referredById,
+          level,
+          email: child.email,
+          joinedAt: child.createdAt,
+          totalDeposited: depositTotal._sum.amount || 0,
+          rewardEarnedByRoot: 0 // per-referral reward attribution isn't tracked individually yet
+        });
+      }
       parentIds = children.map(c => c.id);
     }
-    res.json({ tree: levels });
+    res.json({ tree: nodes });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1108,8 +1082,8 @@ router.get('/report/24h', authMiddleware, adminMiddleware, async (req, res) => {
     const [newUsers, newUsersList, deposits, withdrawals, trades, signalsCreated, signalsCompleted] = await Promise.all([
       prisma.user.count({ where: { createdAt: { gte: since, lte: until } } }),
       prisma.user.findMany({ where: { createdAt: { gte: since, lte: until } }, select: { email: true, createdAt: true }, orderBy: { createdAt: 'desc' } }),
-      prisma.deposit.findMany({ where: { createdAt: { gte: since, lte: until } }, select: { amount: true, status: true, createdAt: true, user: { select: { email: true } } } }),
-      prisma.withdrawal.findMany({ where: { createdAt: { gte: since, lte: until } }, select: { amount: true, status: true } }),
+      prisma.deposit.findMany({ where: { detectedAt: { gte: since, lte: until } }, select: { amount: true, status: true, detectedAt: true, userId: true, user: { select: { email: true } } } }),
+      prisma.withdrawal.findMany({ where: { requestedAt: { gte: since, lte: until } }, select: { amount: true, status: true } }),
       prisma.trade.findMany({ where: { createdAt: { gte: since, lte: until } }, select: { amount: true, profit: true, outcome: true, userId: true } }),
       prisma.signal.count({ where: { createdAt: { gte: since, lte: until } } }),
       prisma.signal.count({ where: { createdAt: { gte: since, lte: until }, status: 'COMPLETED' } })
@@ -1143,7 +1117,7 @@ router.get('/report/24h', authMiddleware, adminMiddleware, async (req, res) => {
       },
       referralRewards: { count: 0, total: 0 },
       newUsersList: newUsersList.map(u => ({ email: u.email, date: u.createdAt })),
-      depositsList: confirmedDeps.map(d => ({ email: d.user?.email || '', amount: d.amount, currency: 'USDT', date: d.createdAt })),
+      depositsList: confirmedDeps.map(d => ({ email: d.user?.email || '', amount: d.amount, currency: 'USDT', date: d.detectedAt })),
       referralList: []
     });
   } catch (e) { res.status(500).json({ error: e.message }); }

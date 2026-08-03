@@ -18,11 +18,20 @@ let currentScreen = 'home-screen';
 
 const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'advanced-verification-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
 
+window.addEventListener('popstate', () => {
+    const p = window.location.pathname;
+    if (p === '/login') _showScreen('login-screen');
+    else if (p === '/signup' || p === '/register') _showScreen('register-screen');
+});
+
 function navTo(screenId) {
     if (PROTECTED_SCREENS.includes(screenId) && !authToken) { _showScreen('login-screen'); return; }
     if (screenId === currentScreen) return;
     navStack.push(currentScreen);
     _showScreen(screenId);
+    if (screenId === 'login-screen') history.pushState({ screen: 'login-screen' }, '', '/login');
+    else if (screenId === 'register-screen') history.pushState({ screen: 'register-screen' }, '', '/signup');
+    else if (['/login', '/signup'].includes(window.location.pathname)) history.pushState({ screen: screenId }, '', '/');
     const navScreens = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen'];
     if (navScreens.includes(screenId)) {
         const idx = navScreens.indexOf(screenId);
@@ -302,25 +311,41 @@ function coinIconHtml(sym, bg, size) {
 }
 
 const allCoins = [
-    { sym: 'DASH', name: 'Dash', bg: '#008ce7', price: '48.553', ch: '-4.35%', up: false, sp: [22, 20, 18, 15, 12, 10, 8, 5, 3, 2] },
-    { sym: 'XPT', name: 'Platinum', bg: '#7a8c99', price: '1929.052', ch: '-1.58%', up: false, sp: [18, 17, 15, 13, 11, 10, 8, 6, 5, 4] },
-    { sym: 'XAG', name: 'Silver', bg: '#6b7d8a', price: '75.011', ch: '-1.21%', up: false, sp: [15, 14, 13, 11, 10, 9, 8, 7, 5, 4] },
-    { sym: 'XPD', name: 'Palladium', bg: '#b8952a', price: '1363.532', ch: '-1.09%', up: false, sp: [19, 18, 16, 15, 13, 12, 10, 8, 7, 6] },
-    { sym: 'ZEC', name: 'Zcash', bg: '#f4b728', price: '666.783', ch: '-1.03%', up: false, sp: [20, 19, 17, 16, 14, 13, 11, 9, 8, 7] },
-    { sym: 'XAU', name: 'Gold', bg: '#ffd700', price: '4524.336', ch: '-0.48%', up: false, sp: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7] },
-    { sym: 'TRX', name: 'TRON', bg: '#ef0027', price: '0.35946', ch: '+0.05%', up: true, sp: [5, 6, 5, 7, 6, 8, 7, 9, 8, 10] },
-    { sym: 'ETH', name: 'Ethereum', bg: '#627eea', price: '2139.71', ch: '+0.48%', up: true, sp: [10, 11, 13, 12, 15, 14, 16, 18, 17, 20] },
-    { sym: 'ADA', name: 'Cardano', bg: '#0d3ca6', price: '0.2501', ch: '+0.60%', up: true, sp: [12, 13, 15, 14, 16, 15, 17, 19, 18, 22] },
-    { sym: 'BTC', name: 'Bitcoin', bg: '#f7931a', price: '78018.44', ch: '+0.60%', up: true, sp: [20, 22, 21, 24, 23, 26, 25, 28, 27, 30] },
-    { sym: 'SHIB', name: 'Shiba Inu', bg: '#ffa409', price: '0.00000581', ch: '+0.69%', up: true, sp: [8, 9, 11, 10, 13, 12, 15, 14, 17, 16] },
-    { sym: 'XRP', name: 'XRP', bg: '#00aae4', price: '1.3796', ch: '+0.90%', up: true, sp: [10, 12, 11, 14, 13, 16, 15, 18, 17, 20] },
-    { sym: 'LINK', name: 'Chainlink', bg: '#2a5ada', price: '9.723', ch: '+0.93%', up: true, sp: [15, 16, 18, 17, 20, 19, 22, 21, 24, 23] },
-    { sym: 'YFI', name: 'Yearn.finance', bg: '#006fce', price: '2520.74', ch: '+1.04%', up: true, sp: [18, 19, 21, 20, 23, 22, 25, 24, 27, 26] },
-    { sym: 'LTC', name: 'Litecoin', bg: '#828282', price: '54.612', ch: '+1.24%', up: true, sp: [12, 14, 13, 16, 15, 18, 17, 20, 19, 22] },
-    { sym: 'BCH', name: 'Bitcoin Cash', bg: '#8dc351', price: '377.87', ch: '+1.30%', up: true, sp: [14, 16, 15, 18, 17, 20, 19, 22, 21, 24] },
-    { sym: 'DOGE', name: 'Dogecoin', bg: '#c2a633', price: '0.10582', ch: '+2.12%', up: true, sp: [10, 13, 12, 15, 14, 17, 16, 19, 18, 22] },
-    { sym: 'DOT', name: 'Polkadot', bg: '#e6007a', price: '1.275', ch: '+2.25%', up: true, sp: [8, 11, 10, 14, 13, 17, 16, 20, 19, 24] },
-    { sym: 'FIL', name: 'Filecoin', bg: '#0090ff', price: '0.995', ch: '+2.48%', up: true, sp: [5, 8, 7, 11, 10, 14, 13, 17, 16, 21] }
+    { sym: 'BTC', name: 'Bitcoin', bg: '#f7931a', price: '63716.55', ch: '+1.49%', up: true, sp: [63143.10105,63206.8176,63270.53415,63334.2507,63397.96725,63461.6838,63525.40035,63589.1169,63652.83345,63716.55] },
+    { sym: 'ETH', name: 'Ethereum', bg: '#627eea', price: '1895.50', ch: '+2.78%', up: true, sp: [1878.4405,1880.336,1882.2315,1884.127,1886.0225,1887.918,1889.8135,1891.709,1893.6045,1895.5] },
+    { sym: 'BNB', name: 'BNB', bg: '#f0b90b', price: '590.49', ch: '+2.59%', up: true, sp: [585.17559,585.76608,586.35657,586.94706,587.53755,588.12804,588.71853,589.30902,589.89951,590.49] },
+    { sym: 'SOL', name: 'Solana', bg: '#00ffa3', price: '74.000', ch: '+3.09%', up: true, sp: [73.334,73.408,73.482,73.556,73.63,73.704,73.778,73.852,73.926,74.0] },
+    { sym: 'XRP', name: 'XRP', bg: '#00aae4', price: '1.088', ch: '+2.69%', up: true, sp: [1.0780098,1.0790976,1.0801854,1.0812732,1.082361,1.0834488,1.0845366,1.0856244,1.0867122,1.0878] },
+    { sym: 'DOGE', name: 'Dogecoin', bg: '#c2a633', price: '0.07091', ch: '+2.53%', up: true, sp: [0.07027181,0.07034272,0.07041363,0.07048454,0.07055545,0.07062636,0.07069727,0.07076818,0.07083909,0.07091] },
+    { sym: 'ADA', name: 'Cardano', bg: '#0d3ca6', price: '0.18990', ch: '+9.26%', up: true, sp: [0.1881909,0.1883808,0.1885707,0.1887606,0.1889505,0.1891404,0.1893303,0.1895202,0.1897101,0.1899] },
+    { sym: 'AVAX', name: 'Avalanche', bg: '#e84142', price: '6.661', ch: '+7.63%', up: true, sp: [6.601051,6.607712,6.614373,6.621034,6.627695,6.634356,6.641017,6.647678,6.654339,6.661] },
+    { sym: 'DOT', name: 'Polkadot', bg: '#e6007a', price: '0.79900', ch: '+2.83%', up: true, sp: [0.791809,0.792608,0.793407,0.794206,0.795005,0.795804,0.796603,0.797402,0.798201,0.799] },
+    { sym: 'LINK', name: 'Chainlink', bg: '#2a5ada', price: '8.386', ch: '+4.07%', up: true, sp: [8.310526,8.318912,8.327298,8.335684,8.34407,8.352456,8.360842,8.369228,8.377614,8.386] },
+    { sym: 'TRX', name: 'TRON', bg: '#ef0027', price: '0.32740', ch: '-0.09%', up: false, sp: [0.3303466,0.3300192,0.3296918,0.3293644,0.329037,0.3287096,0.3283822,0.3280548,0.3277274,0.3274] },
+    { sym: 'TON', name: 'Toncoin', bg: '#0088cc', price: '1.600', ch: '+0.95%', up: true, sp: [1.5856,1.5872,1.5888,1.5904,1.592,1.5936,1.5952,1.5968,1.5984,1.6] },
+    { sym: 'MATIC', name: 'Polygon', bg: '#8247e5', price: '0.37940', ch: '-0.29%', up: false, sp: [0.3828146,0.3824352,0.3820558,0.3816764,0.381297,0.3809176,0.3805382,0.3801588,0.3797794,0.3794] },
+    { sym: 'NEAR', name: 'NEAR Protocol', bg: '#00151a', price: '1.715', ch: '+2.63%', up: true, sp: [1.699565,1.70128,1.702995,1.70471,1.706425,1.70814,1.709855,1.71157,1.713285,1.715] },
+    { sym: 'LTC', name: 'Litecoin', bg: '#828282', price: '44.980', ch: '+2.02%', up: true, sp: [44.57518,44.62016,44.66514,44.71012,44.7551,44.80008,44.84506,44.89004,44.93502,44.98] },
+    { sym: 'BCH', name: 'Bitcoin Cash', bg: '#8dc351', price: '214.50', ch: '+2.83%', up: true, sp: [212.5695,212.784,212.9985,213.213,213.4275,213.642,213.8565,214.071,214.2855,214.5] },
+    { sym: 'UNI', name: 'Uniswap', bg: '#ff007a', price: '4.227', ch: '+4.09%', up: true, sp: [4.188957,4.193184,4.197411,4.201638,4.205865,4.210092,4.214319,4.218546,4.222773,4.227] },
+    { sym: 'XLM', name: 'Stellar', bg: '#08b5e5', price: '0.17540', ch: '+2.75%', up: true, sp: [0.1738214,0.1739968,0.1741722,0.1743476,0.174523,0.1746984,0.1748738,0.1750492,0.1752246,0.1754] },
+    { sym: 'ICP', name: 'Internet Computer', bg: '#3b00b9', price: '2.092', ch: '+2.60%', up: true, sp: [2.073172,2.075264,2.077356,2.079448,2.08154,2.083632,2.085724,2.087816,2.089908,2.092] },
+    { sym: 'APT', name: 'Aptos', bg: '#00d4b1', price: '0.56700', ch: '+2.90%', up: true, sp: [0.561897,0.562464,0.563031,0.563598,0.564165,0.564732,0.565299,0.565866,0.566433,0.567] },
+    { sym: 'SHIB', name: 'Shiba Inu', bg: '#ffa409', price: '0.00000494', ch: '+1.86%', up: true, sp: [4.9e-06,4.9e-06,4.91e-06,4.91e-06,4.92e-06,4.92e-06,4.93e-06,4.93e-06,4.94e-06,4.94e-06] },
+    { sym: 'PEPE', name: 'Pepe', bg: '#4caf50', price: '0.00000293', ch: '+5.40%', up: true, sp: [2.9e-06,2.91e-06,2.91e-06,2.91e-06,2.92e-06,2.92e-06,2.92e-06,2.92e-06,2.93e-06,2.93e-06] },
+    { sym: 'ARB', name: 'Arbitrum', bg: '#28a0f0', price: '0.08160', ch: '+3.69%', up: true, sp: [0.0808656,0.0809472,0.0810288,0.0811104,0.081192,0.0812736,0.0813552,0.0814368,0.0815184,0.0816] },
+    { sym: 'OP', name: 'Optimism', bg: '#ff0420', price: '0.08650', ch: '+3.84%', up: true, sp: [0.0857215,0.085808,0.0858945,0.085981,0.0860675,0.086154,0.0862405,0.086327,0.0864135,0.0865] },
+    { sym: 'SUI', name: 'Sui', bg: '#4da2ff', price: '0.69430', ch: '+2.69%', up: true, sp: [0.6880513,0.6887456,0.6894399,0.6901342,0.6908285,0.6915228,0.6922171,0.6929114,0.6936057,0.6943] },
+    { sym: 'SEI', name: 'Sei', bg: '#9e1f19', price: '0.04146', ch: '+1.20%', up: true, sp: [0.04108686,0.04112832,0.04116978,0.04121124,0.0412527,0.04129416,0.04133562,0.04137708,0.04141854,0.04146] },
+    { sym: 'TIA', name: 'Celestia', bg: '#7b2bf9', price: '0.33280', ch: '+3.81%', up: true, sp: [0.3298048,0.3301376,0.3304704,0.3308032,0.331136,0.3314688,0.3318016,0.3321344,0.3324672,0.3328] },
+    { sym: 'INJ', name: 'Injective', bg: '#00d2ff', price: '5.112', ch: '+3.82%', up: true, sp: [5.065992,5.071104,5.076216,5.081328,5.08644,5.091552,5.096664,5.101776,5.106888,5.112] },
+    { sym: 'RNDR', name: 'Render', bg: '#cc2b5e', price: '7.030', ch: '+2.58%', up: true, sp: [6.96673,6.97376,6.98079,6.98782,6.99485,7.00188,7.00891,7.01594,7.02297,7.03] },
+    { sym: 'FET', name: 'Fetch.ai', bg: '#3355ff', price: '0.14250', ch: '+2.44%', up: true, sp: [0.1412175,0.14136,0.1415025,0.141645,0.1417875,0.14193,0.1420725,0.142215,0.1423575,0.1425] },
+    { sym: 'STX', name: 'Stacks', bg: '#5546ff', price: '0.14010', ch: '+2.79%', up: true, sp: [0.1388391,0.1389792,0.1391193,0.1392594,0.1393995,0.1395396,0.1396797,0.1398198,0.1399599,0.1401] },
+    { sym: 'KAS', name: 'Kaspa', bg: '#70c7ba', price: '0.05000', ch: '+1.50%', up: true, sp: [0.04955,0.0496,0.04965,0.0497,0.04975,0.0498,0.04985,0.0499,0.04995,0.05] },
+    { sym: 'ATOM', name: 'Cosmos', bg: '#2e3148', price: '1.269', ch: '+3.51%', up: true, sp: [1.257579,1.258848,1.260117,1.261386,1.262655,1.263924,1.265193,1.266462,1.267731,1.269] },
+    { sym: 'XMR', name: 'Monero', bg: '#ff6600', price: '118.70', ch: '+4.77%', up: true, sp: [117.6317,117.7504,117.8691,117.9878,118.1065,118.2252,118.3439,118.4626,118.5813,118.7] },
+    { sym: 'ETC', name: 'Ethereum Classic', bg: '#328332', price: '6.650', ch: '+2.46%', up: true, sp: [6.59015,6.5968,6.60345,6.6101,6.61675,6.6234,6.63005,6.6367,6.64335,6.65] }
 ];
 
 function makeSparkline(coin) {
@@ -455,7 +480,8 @@ function renderMarkets(filter) {
     const list = document.getElementById('markets-list');
     if (!list) return;
     const q = (filter || '').toLowerCase();
-    const data = q ? allCoins.filter(c => c.sym.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) : allCoins;
+    const data = (q ? allCoins.filter(c => c.sym.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) : [...allCoins])
+        .sort((a, b) => (parseFloat(b.ch) || 0) - (parseFloat(a.ch) || 0));
     list.innerHTML = data.map(c => {
         const rawPrice = parseFloat(c.price.toString().replace(/,/g, '')) || 0;
         const fmtPrice = rawPrice < 0.1 ? rawPrice.toFixed(5) : (rawPrice < 100 ? rawPrice.toFixed(3) : rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
@@ -1017,7 +1043,11 @@ function drawCaptcha() {
     }
 }
 
-function showCaptchaModal() {
+function closeCaptcha() {
+    document.getElementById('captcha-overlay').style.display = 'none';
+}
+
+async function showCaptchaModal() {
     const email = document.getElementById('reg-email')?.value?.trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         showToast('Please enter a valid email first');
@@ -1025,27 +1055,6 @@ function showCaptchaModal() {
     }
     const btn = document.getElementById('otp-btn');
     if (!btn || btn.disabled) return;
-
-    document.getElementById('captcha-input').value = '';
-    document.getElementById('captcha-overlay').style.display = 'flex';
-    drawCaptcha();
-}
-
-function closeCaptcha() {
-    document.getElementById('captcha-overlay').style.display = 'none';
-}
-
-async function verifyCaptchaAndSend() {
-    const input = document.getElementById('captcha-input').value.trim();
-    if (input.toLowerCase() !== currentCaptchaStr.toLowerCase()) {
-        showToast('Incorrect verification code');
-        drawCaptcha();
-        return;
-    }
-    closeCaptcha();
-
-    const email = document.getElementById('reg-email').value.trim();
-    const btn = document.getElementById('otp-btn');
     btn.disabled = true;
     try {
         const res = await fetch('/api/auth/send-otp', {
@@ -1969,8 +1978,25 @@ function fmtCountdown(seconds) {
 function renderSignalCards() {
     var container = document.getElementById('signals-container');
     if (!container) return;
-    container.style.display = 'none';
-    container.innerHTML = '';
+    if (!activeSignals || !activeSignals.length) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        return;
+    }
+    container.style.display = 'block';
+    container.innerHTML = activeSignals.map(function (sig) {
+        var isCall = sig.direction === 'CALL';
+        var dirColor = isCall ? 'var(--up-color)' : 'var(--down-color)';
+        var dirIcon = isCall ? '▲' : '▼';
+        return '<div class="signal-card" onclick="followSignal(\'' + sig.id + '\')" ' +
+            'style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:8px;border-radius:10px;background:var(--card2, #1e2530);border:1px solid var(--border, #2a3347);cursor:pointer;">' +
+            '<div style="display:flex;flex-direction:column;gap:2px;">' +
+                '<span style="font-weight:700;font-size:14px;">' + sig.pair + '</span>' +
+                '<span style="font-size:11px;color:var(--text2,#888);">' + (sig.rewardPercentage ? sig.rewardPercentage + '% reward' : '') + (sig.suggestedAmount ? ' · Suggested $' + sig.suggestedAmount : '') + '</span>' +
+            '</div>' +
+            '<span style="display:flex;align-items:center;gap:6px;font-weight:700;color:' + dirColor + ';">' + dirIcon + ' ' + sig.direction + '</span>' +
+        '</div>';
+    }).join('');
 }
 
 function followSignal(signalId) {
@@ -2082,8 +2108,15 @@ async function doRegister() {
         if (data.error) { showToast(data.error); return; }
         // Save phone linked to this email in localStorage
         localStorage.setItem('phone_' + email, dialCode + phone);
-        showToast('Registration successful! Please login.');
-        _showScreen('login-screen');
+        authToken = data.token;
+        userData = data.user;
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        if (socket) socket.emit('authenticate', authToken);
+        showToast('Registration successful!');
+        refreshUserData();
+        fetchSignals();
+        navTo('home-screen');
     } catch (err) { showToast('Server error'); }
 }
 
@@ -3649,6 +3682,15 @@ async function _fetchAppSettings() {
     return _appSettings;
 }
 
+async function downloadApp() {
+    const s = await _fetchAppSettings();
+    if (s.apk_download_url) {
+        window.location.href = s.apk_download_url;
+    } else {
+        showToast('App download will be available soon');
+    }
+}
+
 async function loadAboutScreen() {
     const s = await _fetchAppSettings();
     const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
@@ -3719,8 +3761,8 @@ async function loadShareScreen() {
             const info = await infoRes.json();
             if (info.referral_title) document.getElementById('refPageTitle').textContent = info.referral_title;
             if (info.referral_description) document.getElementById('refPageDesc').textContent = info.referral_description;
-            if (info.referral_terms) document.getElementById('refTermsText').textContent = info.referral_terms;
-            if (info.referral_faq) document.getElementById('refFaqText').textContent = info.referral_faq;
+            document.getElementById('refTermsText').textContent = info.referral_terms || 'Referral rewards are credited automatically once a referred user makes a qualifying deposit. Rewards are paid per the level and percentage rates set by the platform, and may be adjusted or withheld in cases of suspected abuse, fraud, or self-referral.';
+            document.getElementById('refFaqText').textContent = info.referral_faq || 'Q: When do I earn from a referral?\nA: After you have made your own first deposit and someone in your network makes a qualifying deposit.\n\nQ: How many levels deep does the referral network go?\nA: Up to 5 levels.\n\nQ: Where can I see my referral earnings?\nA: Check your referral balance on the Assets screen.';
             document.querySelectorAll('#share-screen .ref-accordion-body').forEach(function (b) {
                 if (b.style.maxHeight && b.style.maxHeight !== '0px') b.style.maxHeight = b.scrollHeight + 'px';
             });
@@ -3790,7 +3832,7 @@ async function loadShareScreen() {
             setText('refWeekEarnings', (stats.thisWeek.earnings || 0).toFixed(2));
         }
 
-        const refLink = (API_BASE || window.location.origin) + '/?ref=' + (data.referralCode || '');
+        const refLink = window.location.origin + '/?ref=' + (data.referralCode || '');
         setText('refUserLink', refLink);
         window.currentReferralLink = refLink;
 
@@ -4201,7 +4243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchChatUnreadCount();
         fetchSignals();
     } else {
-        if (path === '/register') {
+        if (path === '/register' || path === '/signup' || refCode) {
             _showScreen('register-screen');
             if (refCode) {
                 setTimeout(() => {
