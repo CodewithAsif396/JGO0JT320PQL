@@ -4018,6 +4018,39 @@ function closePromoBannerPopup() {
     if (modal) modal.style.display = 'none';
 }
 
+// iOS has no installable APK equivalent and no JS API to trigger
+// "Add to Home Screen" — Safari only exposes that via its own Share
+// sheet, so the best we can do is walk the user through it.
+function showIosInstallInstructions() {
+    let modal = document.getElementById('ios-install-popup');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ios-install-popup';
+        modal.style.cssText = 'display:flex;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:24px;';
+        modal.innerHTML = `
+        <div style="background:#fff;border-radius:18px;max-width:340px;width:100%;padding:24px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#4c1d95,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                <i class="fa-brands fa-apple" style="color:#fff;font-size:22px;"></i>
+            </div>
+            <div style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:14px;">Install PQL on iPhone</div>
+            <div style="text-align:left;font-size:13px;color:#4b5563;line-height:2;margin-bottom:20px;">
+                1. Open this site in <b>Safari</b><br>
+                2. Tap the <b>Share</b> icon <i class="fa-solid fa-arrow-up-from-bracket"></i><br>
+                3. Tap <b>"Add to Home Screen"</b><br>
+                4. Tap <b>Add</b> — PQL now opens like an app
+            </div>
+            <button onclick="closeIosInstallInstructions()" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4c1d95,#8b5cf6);color:#fff;">Got it</button>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+}
+
+function closeIosInstallInstructions() {
+    const modal = document.getElementById('ios-install-popup');
+    if (modal) modal.style.display = 'none';
+}
+
 async function downloadApp() {
     const s = await _fetchAppSettings();
     if (s.apk_download_url) {

@@ -7,6 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PQL - Professional Crypto Trading</title>
     <link rel="icon" href="/pql-logo.png" type="image/png">
+    <!-- iOS "Add to Home Screen" — Safari does not read manifest.json for
+         install behavior; these meta tags are the only thing that makes a
+         home-screen shortcut open full-screen/app-like instead of as a
+         regular Safari tab with the URL bar visible. -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PQL">
+    <link rel="apple-touch-icon" href="/pql-logo.png">
     <link rel="stylesheet" href="style.css?v=27">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -703,6 +711,16 @@
                 <div class="pc-uid-row" id="pc-uid" style="display:none;">
                     <span>ID: <span id="pc-uid-val">--</span></span>
                     <i class="fa-regular fa-copy" style="cursor:pointer;color:#9ca3af;" onclick="copyText(document.getElementById('pc-uid-val')?.textContent)"></i>
+                </div>
+            </div>
+
+            <!-- DOWNLOAD APP -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 16px;">
+                <a href="/pql.apk" download="pql.apk" style="display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;padding:12px;border-radius:12px;border:1px solid rgba(139,92,246,0.25);color:#8b5cf6;font-size:13px;font-weight:600;background:rgba(139,92,246,0.05);">
+                    <i class="fa-brands fa-android" style="font-size:14px;"></i> Download for Android
+                </a>
+                <div onclick="showIosInstallInstructions()" style="display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;padding:12px;border-radius:12px;border:1px solid rgba(139,92,246,0.25);color:#8b5cf6;font-size:13px;font-weight:600;background:rgba(139,92,246,0.05);">
+                    <i class="fa-brands fa-apple" style="font-size:14px;"></i> Download for iOS
                 </div>
             </div>
 
@@ -1515,9 +1533,14 @@
             <!-- Bottom links -->
             <div style="padding:20px 24px;">
                 <!-- Download -->
-                <a href="/pql.apk" download="pql.apk" style="display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;padding:13px;border-radius:12px;border:1px solid rgba(139,92,246,0.25);color:#a78bfa;font-size:14px;font-weight:600;margin-bottom:20px;background:rgba(139,92,246,0.05);">
-                    <i class="fa-solid fa-download" style="font-size:13px;"></i> Download APP
-                </a>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+                    <a href="/pql.apk" download="pql.apk" style="display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;padding:13px;border-radius:12px;border:1px solid rgba(139,92,246,0.25);color:#a78bfa;font-size:13px;font-weight:600;background:rgba(139,92,246,0.05);">
+                        <i class="fa-brands fa-android" style="font-size:14px;"></i> Android
+                    </a>
+                    <div onclick="showIosInstallInstructions()" style="display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;padding:13px;border-radius:12px;border:1px solid rgba(139,92,246,0.25);color:#a78bfa;font-size:13px;font-weight:600;background:rgba(139,92,246,0.05);">
+                        <i class="fa-brands fa-apple" style="font-size:14px;"></i> iOS
+                    </div>
+                </div>
                 <!-- Register -->
                 <div style="text-align:center;margin-bottom:14px;">
                     <span style="color:rgba(255,255,255,0.35);font-size:13px;">Don't have an account? </span>
