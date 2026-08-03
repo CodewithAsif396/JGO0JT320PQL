@@ -78,7 +78,10 @@ router.post('/withdraw', authMiddleware, async (req, res) => {
       const remaining = Math.ceil((new Date(user.withdrawFreezeUntil) - new Date()) / 3600000);
       return res.status(403).json({ error: `Withdrawals frozen for ${remaining} more hour(s) after address change.` });
     }
-    if (user.balance < amt) return res.status(400).json({ error: 'Insufficient balance' });
+    // Sub-cent tolerance — Float storage/arithmetic drift (e.g. balance
+    // stored as 355.529999999999996 for a "355.53" credit) can otherwise
+    // make an exact/full-balance transfer falsely fail as "insufficient".
+    if (user.balance < amt - 0.005) return res.status(400).json({ error: 'Insufficient balance' });
 
     // Lock balance: move from balance → lockedBalance (pending admin approval)
     const [withdrawal] = await prisma.$transaction([
@@ -241,7 +244,7 @@ router.post('/convert', authMiddleware, async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.balance < amt) return res.status(400).json({ error: 'Insufficient balance' });
+    if (user.balance < amt - 0.005) return res.status(400).json({ error: 'Insufficient balance' });
 
     const toAmount = (amt / parseFloat(rate)).toFixed(8);
 
@@ -263,7 +266,7 @@ router.post('/convert', authMiddleware, async (req, res) => {
 router.post('/transfer', authMiddleware, async (req, res) => {
   try {
     const { fromWallet, toWallet, amount } = req.body;
-    const amt = parseFloat(amount);
+    let amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
     const validWallets = ['Exchange', 'Trade', 'Perpetual'];
@@ -287,7 +290,14 @@ router.post('/transfer', authMiddleware, async (req, res) => {
     const fromField = getField(fromWallet);
     const toField = getField(toWallet);
 
-    if (user[fromField] < amt) return res.status(400).json({ error: 'Insufficient balance in source wallet' });
+    // Sub-cent tolerance for Float storage/arithmetic drift, same as the
+    // other balance checks in this file — otherwise transferring the exact
+    // displayed balance (e.g. "355.53" when the stored value is really
+    // 355.529999999999996) falsely fails as insufficient. Clamp to the
+    // real stored balance afterward so the decrement below never dips
+    // the source wallet negative from float noise.
+    if (user[fromField] < amt - 0.005) return res.status(400).json({ error: 'Insufficient balance in source wallet' });
+    amt = Math.min(amt, user[fromField]);
 
     let principalAmount = 0;
     let profitAmount = 0;

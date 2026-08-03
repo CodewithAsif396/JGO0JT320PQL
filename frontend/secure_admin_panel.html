@@ -2384,7 +2384,7 @@ async function loadUsers(page) {
         '<td class="text-muted">' + ((page-1)*20 + i + 1) + '</td>' +
         '<td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#0b0e17;font-size:12px;flex-shrink:0">' + initials + '</div><div><div class="fw-600">' + escHtml(u.name||'—') + '</div><div class="text-muted" style="font-size:11px">' + escHtml(String(id||'')) + '</div></div></div></td>' +
         '<td>' + escHtml(u.email||'—') + '</td>' +
-        '<td class="text-accent fw-600">$' + fmt((u.balance||0) + (u.tradeBalance||0)) + '</td>' +
+        '<td class="text-accent fw-600">$' + fmt((u.balance||0) + (u.tradeBalance||0) + (u.perpetualBalance||0) + (u.lockedBalance||0) + (u.convertedBalance||0)) + '</td>' +
         '<td>' + statusBadge(u.status||'ACTIVE') + '</td>' +
         '<td class="text-muted">' + fmtDate(u.createdAt) + '</td>' +
         '<td><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openUserModal(\'' + id + '\')"><i class="fa fa-eye"></i> View</button></td>' +

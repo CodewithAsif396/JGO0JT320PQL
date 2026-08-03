@@ -215,7 +215,7 @@ router.post('/trade', authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     const perpBal = user.perpetualBalance || 0;
     if (perpBal === 0) return res.status(400).json({ error: 'Please transfer funds to Perpetual wallet before trading.' });
-    if (perpBal < amt) return res.status(400).json({ error: 'Insufficient Perpetual wallet balance. Available: ' + perpBal.toFixed(2) + ' USDT' });
+    if (perpBal < amt - 0.005) return res.status(400).json({ error: 'Insufficient Perpetual wallet balance. Available: ' + perpBal.toFixed(2) + ' USDT' });
 
     // No fixed % cap — amount is already set by admin's Trade Allocation setting
     const totalBalance = (user.balance || 0) + (user.perpetualBalance || 0);
@@ -280,7 +280,7 @@ router.post('/manual-trade', authMiddleware, async (req, res) => {
     if (!pair || !amt || amt <= 0) return res.status(400).json({ error: 'Invalid parameters' });
 
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (user.tradeBalance < amt) return res.status(400).json({ error: 'Insufficient trade balance' });
+    if (user.tradeBalance < amt - 0.005) return res.status(400).json({ error: 'Insufficient trade balance' });
 
     // INTERCEPT: Check if there's an ACTIVE signal for this user on this exact pair
     let cleanPair = pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
