@@ -1671,7 +1671,7 @@ function updateUIWithUserData() {
     // ── VIP BADGE (based on total balance) ──
     const pcVipBadge = document.getElementById('pc-vip-badge');
     if (pcVipBadge) {
-        const total = (userData.balance || 0) + (userData.perpetualBalance || 0) + (userData.profitBalance || 0);
+        const total = (userData.balance || 0) + (userData.perpetualBalance || 0);
         let vipLevel = 0;
         if (total >= 20000) vipLevel = 4;
         else if (total >= 5000) vipLevel = 3;
@@ -1692,7 +1692,10 @@ function updateUIWithUserData() {
 
     // My account sub-balances — initialise spot only once; futures/perp track their own balances
     // My account sub-balances from backend
-    const totalAssetVal = (userData.balance || 0) + (userData.perpetualBalance || 0) + (userData.profitBalance || 0);
+    // profitBalance is a P/L tracker, not separate money — a win's profit
+    // is already inside perpetualBalance (the full payout lands there), so
+    // adding profitBalance again double-counted every win into Total Assets.
+    const totalAssetVal = (userData.balance || 0) + (userData.perpetualBalance || 0);
     if (document.getElementById("assets-balance-val")) document.getElementById("assets-balance-val").innerHTML = `${totalAssetVal.toFixed(2)} <span style="font-size:13px;font-weight:500;margin-left:4px;">USDT</span> <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`;
     const exchBal = document.getElementById('acct-exchange-bal');
     if (exchBal) exchBal.textContent = (userData.exchangeBalance || userData.balance || 0).toFixed(2);
