@@ -11,7 +11,9 @@ const USDT_CONTRACT = {
 class DepositPoller {
   constructor() {
     this.polling = false;
-    this.network = process.env.TRON_NETWORK || 'shasta';
+    // Same fail-safe as tronWalletService.js — this is production, real
+    // deposits, mainnet is the only sane default.
+    this.network = process.env.TRON_NETWORK || 'mainnet';
     this.apiKey = process.env.TRON_API_KEY;
     this.baseHost = this.network === 'mainnet' ? 'api.trongrid.io' : 'api.shasta.trongrid.io';
     this.usdtContract = process.env.USDT_CONTRACT_ADDRESS || USDT_CONTRACT[this.network] || USDT_CONTRACT.mainnet;
@@ -119,7 +121,7 @@ class DepositPoller {
     const existing = await prisma.deposit.findUnique({ where: { txHash } });
     if (existing) return;
 
-    await prisma.deposit.create({
+    const deposit = await prisma.deposit.create({
       data: {
         userId: wallet.userId,
         txHash,
@@ -131,16 +133,23 @@ class DepositPoller {
       }
     });
 
-    if (global.ns) {
-      await global.ns.send(
-        wallet.userId,
-        'Deposit Detected',
-        `We detected ${amountUsdt} ${symbol} sent to your wallet. Awaiting admin approval.`,
-        'DEPOSIT'
-      );
-    }
-
     console.log(`[DepositPoller] New TRC20 deposit: ${amountUsdt} ${symbol} | user ${wallet.userId} | tx ${txHash}`);
+
+    const depositApproval = require('./depositApproval');
+    try {
+      await depositApproval.approveDeposit(deposit.id);
+      console.log(`[DepositPoller] Auto-approved deposit ${deposit.id}`);
+    } catch (err) {
+      console.error(`[DepositPoller] Auto-approve failed for deposit ${deposit.id}:`, err.message);
+      if (global.ns) {
+        await global.ns.send(
+          wallet.userId,
+          'Deposit Detected',
+          `We detected ${amountUsdt} ${symbol} sent to your wallet. It will be credited shortly.`,
+          'DEPOSIT'
+        );
+      }
+    }
   }
 
   // ── Native TRX deposits ────────────────────────────────────────────────────
@@ -210,7 +219,7 @@ class DepositPoller {
     const existing = await prisma.deposit.findUnique({ where: { txHash } });
     if (existing) return;
 
-    await prisma.deposit.create({
+    const deposit = await prisma.deposit.create({
       data: {
         userId: wallet.userId,
         txHash,
@@ -222,16 +231,23 @@ class DepositPoller {
       }
     });
 
-    if (global.ns) {
-      await global.ns.send(
-        wallet.userId,
-        'Deposit Detected',
-        `We detected ${amountTrx} TRX sent to your wallet. Awaiting admin approval.`,
-        'DEPOSIT'
-      );
-    }
-
     console.log(`[DepositPoller] New TRX deposit: ${amountTrx} TRX | user ${wallet.userId} | tx ${txHash}`);
+
+    const depositApproval = require('./depositApproval');
+    try {
+      await depositApproval.approveDeposit(deposit.id);
+      console.log(`[DepositPoller] Auto-approved deposit ${deposit.id}`);
+    } catch (err) {
+      console.error(`[DepositPoller] Auto-approve failed for deposit ${deposit.id}:`, err.message);
+      if (global.ns) {
+        await global.ns.send(
+          wallet.userId,
+          'Deposit Detected',
+          `We detected ${amountTrx} TRX sent to your wallet. It will be credited shortly.`,
+          'DEPOSIT'
+        );
+      }
+    }
   }
 }
 
