@@ -3966,14 +3966,12 @@ async function _fetchAppSettings() {
 }
 
 // The admin panel's "Promo Banner" (Settings → Promo Banner) saved to
-// PlatformSettings but nothing on the user side ever read it back — the
-// home screen's promo card was static hardcoded HTML. This applies the
-// admin's enabled/text/schedule onto that same card when it's currently
-// active, instead of leaving it permanently disconnected.
+// PlatformSettings but nothing on the user side ever read it back at all —
+// a dead stub. This is a real text-only popup (no image), shown once per
+// browser session while the admin's enabled/schedule window is active.
 async function applyPromoBanner() {
-    const banner = document.querySelector('.pql-promo-banner');
-    if (!banner) return;
     try {
+        if (sessionStorage.getItem('promoBannerShown')) return;
         const s = await _fetchAppSettings();
         if (!s.promo_banner) return;
         let cfg;
@@ -3990,11 +3988,34 @@ async function applyPromoBanner() {
             }
         }
 
-        const titleEl = banner.querySelector('.pql-promo-title');
-        const subEl = banner.querySelector('.pql-promo-sub');
-        if (titleEl) titleEl.textContent = cfg.text;
-        if (subEl) subEl.style.display = 'none';
+        showPromoBannerPopup(cfg.text);
+        sessionStorage.setItem('promoBannerShown', '1');
     } catch (e) { }
+}
+
+function showPromoBannerPopup(text) {
+    let modal = document.getElementById('promo-banner-popup');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'promo-banner-popup';
+        modal.style.cssText = 'display:flex;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:24px;';
+        modal.innerHTML = `
+        <div style="background:#fff;border-radius:18px;max-width:340px;width:100%;padding:24px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#4c1d95,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                <i class="fa-solid fa-bullhorn" style="color:#fff;font-size:20px;"></i>
+            </div>
+            <div id="promo-banner-popup-text" style="font-size:14px;color:#1a1a2e;line-height:1.6;margin-bottom:20px;white-space:pre-wrap;"></div>
+            <button onclick="closePromoBannerPopup()" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4c1d95,#8b5cf6);color:#fff;">Got it</button>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('promo-banner-popup-text').textContent = text;
+    modal.style.display = 'flex';
+}
+
+function closePromoBannerPopup() {
+    const modal = document.getElementById('promo-banner-popup');
+    if (modal) modal.style.display = 'none';
 }
 
 async function downloadApp() {
