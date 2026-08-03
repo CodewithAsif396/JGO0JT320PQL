@@ -3965,6 +3965,38 @@ async function _fetchAppSettings() {
     return _appSettings;
 }
 
+// The admin panel's "Promo Banner" (Settings → Promo Banner) saved to
+// PlatformSettings but nothing on the user side ever read it back — the
+// home screen's promo card was static hardcoded HTML. This applies the
+// admin's enabled/text/schedule onto that same card when it's currently
+// active, instead of leaving it permanently disconnected.
+async function applyPromoBanner() {
+    const banner = document.querySelector('.pql-promo-banner');
+    if (!banner) return;
+    try {
+        const s = await _fetchAppSettings();
+        if (!s.promo_banner) return;
+        let cfg;
+        try { cfg = JSON.parse(s.promo_banner); } catch (e) { return; }
+        if (!cfg.enabled || !cfg.text) return;
+
+        const now = Date.now();
+        if (cfg.start) {
+            const startMs = new Date(cfg.start).getTime();
+            if (!isNaN(startMs) && now < startMs) return;
+            if (cfg.durationDays && !isNaN(startMs)) {
+                const endMs = startMs + parseFloat(cfg.durationDays) * 86400000;
+                if (now > endMs) return;
+            }
+        }
+
+        const titleEl = banner.querySelector('.pql-promo-title');
+        const subEl = banner.querySelector('.pql-promo-sub');
+        if (titleEl) titleEl.textContent = cfg.text;
+        if (subEl) subEl.style.display = 'none';
+    } catch (e) { }
+}
+
 async function downloadApp() {
     const s = await _fetchAppSettings();
     if (s.apk_download_url) {
@@ -4502,6 +4534,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadTickerText();
     loadBanners();
+    applyPromoBanner();
     renderMarkets();
     renderMiniTickers();
     renderHomeMarkets('change');

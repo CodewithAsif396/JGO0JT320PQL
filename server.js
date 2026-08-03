@@ -117,7 +117,7 @@ app.get(adminPath, (_req, res) => res.sendFile(path.join(__dirname, 'frontend', 
 app.get('/api/public/settings', async (_req, res) => {
   try {
     const prisma = require('./backend/prismaClient');
-    const PUBLIC_KEYS = ['app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners','rules_content_json','withdrawal_handling_fee_pct'];
+    const PUBLIC_KEYS = ['app_name','app_version','app_description','app_website_url','app_twitter_url','app_telegram_url','support_email','support_telegram','support_faq_url','app_banners','rules_content_json','withdrawal_handling_fee_pct','promo_banner'];
     const rows = await prisma.platformSettings.findMany({ where: { key: { in: PUBLIC_KEYS } } });
     const obj = {};
     rows.forEach(r => { obj[r.key] = r.value; });
