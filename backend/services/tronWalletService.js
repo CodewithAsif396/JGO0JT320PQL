@@ -6,7 +6,11 @@ const HDKey = require('hdkey');
 const CHILD_START_INDEX = 1;
 
 function buildTronWeb(privateKey = null) {
-  const network = process.env.TRON_NETWORK || 'shasta';
+  // Defaulting to Shasta (testnet) made every balance check/sweep/withdrawal
+  // silently query the wrong network whenever TRON_NETWORK wasn't set —
+  // this is a production app handling real deposits, so mainnet is the
+  // only sane default. Set TRON_NETWORK=shasta explicitly for testing.
+  const network = process.env.TRON_NETWORK || 'mainnet';
   const fullHost = network === 'mainnet'
     ? 'https://api.trongrid.io'
     : 'https://api.shasta.trongrid.io';
