@@ -16,7 +16,7 @@ function toNumericId(cuid) {
 const navStack = [];
 let currentScreen = 'home-screen';
 
-const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'advanced-verification-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
+const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
 
 window.addEventListener('popstate', () => {
     const p = window.location.pathname;
@@ -2493,23 +2493,12 @@ async function loadKycStatus() {
     } catch (e) { }
 }
 
-function checkAdvancedKyc() {
-    closeSidebar();
-    if (!kycData || !kycData.fullName || kycData.status === 'NONE') {
-        const overlay = document.getElementById('kyc-warning-overlay');
-        if (overlay) overlay.style.display = 'flex';
-    } else {
-        navTo('advanced-verification-screen');
-    }
-}
-
 function updateKycUI() {
     const status = (kycData && kycData.status) ? kycData.status : 'NONE';
     const statusMap = { NONE: 'Not Submitted', PENDING: 'Under Review', APPROVED: 'Verified ✓', REJECTED: 'Rejected' };
     const colorMap = { NONE: 'var(--text-secondary)', PENDING: '#f3ba2f', APPROVED: 'var(--up-color)', REJECTED: 'var(--down-color)' };
 
     const basicEl = document.getElementById('basic-kyc-status');
-    const advancedEl = document.getElementById('advanced-kyc-status');
 
     if (basicEl) {
         if (!kycData || !kycData.fullName || status === 'NONE') {
@@ -2524,22 +2513,6 @@ function updateKycUI() {
         } else {
             basicEl.textContent = 'Rejected';
             basicEl.style.color = '#ffcccc';
-        }
-    }
-
-    if (advancedEl) {
-        if (!kycData || (!kycData.selfieUrl && !kycData.idFrontUrl) || status === 'NONE') {
-            advancedEl.textContent = 'Not Authenticated';
-            advancedEl.style.color = 'rgba(255, 255, 255, 0.9)';
-        } else if (status === 'PENDING') {
-            advancedEl.textContent = 'Under Review';
-            advancedEl.style.color = '#ffffff';
-        } else if (status === 'APPROVED') {
-            advancedEl.textContent = 'Verified ✓';
-            advancedEl.style.color = '#ffffff';
-        } else {
-            advancedEl.textContent = 'Rejected';
-            advancedEl.style.color = '#ffcccc';
         }
     }
 
@@ -2567,37 +2540,6 @@ function updateKycUI() {
         if (cn && kycData.country) cn.value = kycData.country;
         if (id && kycData.idNumber) id.value = kycData.idNumber;
     }
-
-    const advBanner = document.getElementById('advanced-kyc-status-banner');
-    if (advBanner) {
-        if (status === 'APPROVED') {
-            advBanner.style.display = 'block'; advBanner.textContent = 'Advanced Verified ✓';
-            advBanner.style.background = 'rgba(2,192,118,0.1)'; advBanner.style.color = 'var(--up-color)';
-        } else if (status === 'PENDING' && (kycData.selfieUrl || kycData.idFrontUrl)) {
-            advBanner.style.display = 'block'; advBanner.textContent = 'Documents submitted — Under Review';
-            advBanner.style.background = 'rgba(243,186,47,0.1)'; advBanner.style.color = '#f3ba2f';
-        } else { advBanner.style.display = 'none'; }
-    }
-}
-
-async function submitBasicKyc() {
-    if (!authToken) return showToast('Please login first');
-    const fullName = document.getElementById('kyc-fullname')?.value?.trim();
-    const country = document.getElementById('kyc-country')?.value?.trim();
-    const idNumber = document.getElementById('kyc-idnumber')?.value?.trim();
-    if (!fullName || !idNumber) { showToast('Please fill all required fields'); return; }
-    try {
-        const res = await fetch('/api/kyc/basic', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-            body: JSON.stringify({ fullName, idNumber, country })
-        });
-        const data = await res.json();
-        if (data.error) { showToast(data.error); return; }
-        kycData = data.kyc;
-        updateKycUI();
-        showToast('Basic verification submitted successfully!');
-    } catch (e) { showToast('Submission failed'); }
 }
 
 function previewKycFile(inputId, previewId) {
@@ -2611,28 +2553,81 @@ function previewKycFile(inputId, previewId) {
     reader.readAsDataURL(input.files[0]);
 }
 
-async function submitKycDocuments() {
+// Downscales/re-encodes an image client-side before upload (max 1280px on
+// the long edge, JPEG q=0.75) so a 10-20MB phone-camera photo doesn't get
+// sent as-is. Falls back to the original file if compression fails for any
+// reason (e.g. non-image type) rather than blocking the upload.
+function compressImage(file, maxDim = 1280, quality = 0.75) {
+    return new Promise((resolve) => {
+        if (!file || !file.type || !file.type.startsWith('image/')) return resolve(file);
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+                const scale = maxDim / Math.max(width, height);
+                width = Math.round(width * scale);
+                height = Math.round(height * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+                URL.revokeObjectURL(url);
+                if (!blob) return resolve(file);
+                resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+}
+
+// Single combined submit — the form fields (name/ID/country) and the three
+// document photos used to be two separate screens/submits ("Basic" then
+// "Advanced Verification"); now it's one screen and one button, calling
+// both existing backend endpoints (which both upsert the same KYC row, so
+// calling them back-to-back here is safe) instead of forcing a second step.
+async function submitFullKyc() {
     if (!authToken) return showToast('Please login first');
+    const fullName = document.getElementById('kyc-fullname')?.value?.trim();
+    const country = document.getElementById('kyc-country')?.value?.trim();
+    const idNumber = document.getElementById('kyc-idnumber')?.value?.trim();
+    if (!fullName || !idNumber) { showToast('Please fill all required fields'); return; }
+
     const selfie = document.getElementById('kyc-selfie')?.files[0];
     const idFront = document.getElementById('kyc-idfront')?.files[0];
     const idBack = document.getElementById('kyc-idback')?.files[0];
-    if (!selfie && !idFront) { showToast('Please upload at least selfie and ID front'); return; }
-    const formData = new FormData();
-    if (selfie) formData.append('selfie', selfie);
-    if (idFront) formData.append('idFront', idFront);
-    if (idBack) formData.append('idBack', idBack);
+
     try {
-        const res = await fetch('/api/kyc/upload', {
+        const res = await fetch('/api/kyc/basic', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ fullName, idNumber, country })
         });
         const data = await res.json();
         if (data.error) { showToast(data.error); return; }
         kycData = data.kyc;
+
+        if (selfie || idFront || idBack) {
+            const formData = new FormData();
+            if (selfie) formData.append('selfie', await compressImage(selfie));
+            if (idFront) formData.append('idFront', await compressImage(idFront));
+            if (idBack) formData.append('idBack', await compressImage(idBack));
+            const res2 = await fetch('/api/kyc/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+                body: formData
+            });
+            const data2 = await res2.json();
+            if (data2.error) { showToast(data2.error); return; }
+            kycData = data2.kyc;
+        }
+
         updateKycUI();
-        showToast('Documents uploaded! Under review.');
-    } catch (e) { showToast('Upload failed'); }
+        showToast('Verification submitted successfully!');
+    } catch (e) { showToast('Submission failed'); }
 }
 
 // ── WITHDRAWAL RECORDS ──
@@ -3196,7 +3191,8 @@ function renderPerpHistory(trades) {
         target.innerHTML = '<div class="no-data-block" style="padding:30px 20px;"><p style="color:var(--text-muted);text-align:center;">No trade history</p></div>';
         return;
     }
-    target.innerHTML = trades.map(t => {
+    window._perpHistoryTrades = trades;
+    target.innerHTML = trades.map((t, idx) => {
         const pair = t.signal?.pair || 'BTC/USDT';
         const dir = t.direction || 'CALL';
         const isCall = dir === 'CALL';
@@ -3208,7 +3204,7 @@ function renderPerpHistory(trades) {
         const amount = parseFloat(t.amount || 0).toFixed(2);
         const createdAt = t.createdAt ? new Date(t.createdAt).toLocaleString() : '--';
         return `
-        <div style="background:#fff;border-radius:12px;padding:14px 16px;margin:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:3px solid ${outcomeColor};">
+        <div onclick="showTradeDetails(${idx})" style="cursor:pointer;background:#fff;border-radius:12px;padding:14px 16px;margin:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:3px solid ${outcomeColor};">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
                     <div style="font-size:13px;font-weight:800;color:#1a1a2e;">${pair} <span style="font-size:10px;color:${isCall?'#02c076':'#f84960'};font-weight:700;">${dir}</span></div>
@@ -3222,6 +3218,100 @@ function renderPerpHistory(trades) {
             </div>
         </div>`;
     }).join('');
+}
+
+function showTradeDetails(idx) {
+    const t = (window._perpHistoryTrades || [])[idx];
+    if (!t) return;
+
+    let modal = document.getElementById('trade-details-screen');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'trade-details-screen';
+        modal.className = 'screen full-page';
+        modal.style.zIndex = '1000';
+        modal.innerHTML = `
+        <div class="sub-header">
+            <i class="fa-solid fa-chevron-left back-btn" onclick="closeTradeDetails()"></i>
+            <h2>Trade details</h2>
+            <span></span>
+        </div>
+        <div style="padding:20px;">
+            <div style="border-radius:12px;padding:20px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Pair:</span>
+                    <span id="td-pair" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Direction:</span>
+                    <span id="td-direction" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Time:</span>
+                    <span id="td-time" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Amount:</span>
+                    <span id="td-amount" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Entry price:</span>
+                    <span id="td-entry" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Close price:</span>
+                    <span id="td-close" style="color:var(--text-primary);font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Result:</span>
+                    <span id="td-outcome" style="font-size:14px;font-weight:500;"></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-secondary);font-size:14px;">Profit/Loss:</span>
+                    <span id="td-profit" style="font-size:14px;font-weight:500;"></span>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+
+    const pair = t.signal?.pair || t.pair || 'BTC/USDT';
+    const dir = t.direction || 'CALL';
+    const outcome = t.outcome || 'PENDING';
+    const profit = parseFloat(t.profit || 0);
+    const d = t.createdAt ? new Date(t.createdAt) : null;
+
+    document.getElementById('td-pair').textContent = pair;
+    const dirEl = document.getElementById('td-direction');
+    dirEl.textContent = dir;
+    dirEl.style.color = dir === 'CALL' ? 'var(--up-color)' : 'var(--down-color)';
+    document.getElementById('td-time').textContent = d ? d.toLocaleString() : '--';
+    document.getElementById('td-amount').textContent = parseFloat(t.amount || 0).toFixed(2) + ' USDT';
+    document.getElementById('td-entry').textContent = t.entryPrice ? parseFloat(t.entryPrice).toFixed(4) : '--';
+    document.getElementById('td-close').textContent = t.closePrice ? parseFloat(t.closePrice).toFixed(4) : '--';
+
+    const outcomeEl = document.getElementById('td-outcome');
+    const outcomeLabel = outcome === 'WIN' ? 'WIN' : outcome === 'LOSS' ? 'LOSS' : outcome === 'CANCELLED' ? 'CANCELLED' : 'PENDING';
+    outcomeEl.textContent = outcomeLabel;
+    outcomeEl.style.color = outcome === 'WIN' ? 'var(--up-color)' : outcome === 'LOSS' ? 'var(--down-color)' : 'var(--text-secondary)';
+
+    const profitEl = document.getElementById('td-profit');
+    profitEl.textContent = (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' USDT';
+    profitEl.style.color = profit >= 0 ? 'var(--up-color)' : 'var(--down-color)';
+
+    modal.style.display = 'block';
+}
+
+function closeTradeDetails() {
+    const modal = document.getElementById('trade-details-screen');
+    if (modal) modal.style.display = 'none';
 }
 
 var _perpObInterval = null;
