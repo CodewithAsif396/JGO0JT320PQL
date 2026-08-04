@@ -776,7 +776,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 14px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -4116,7 +4116,7 @@ body.light-mode .login-input-group input { color: #0d1117 !important; }
 .sub-header {
     background: #ffffff !important;
     border-bottom: 1px solid #f0f0f8 !important;
-    padding: 14px 18px !important;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 14px !important;
     position: sticky !important;
     top: 0 !important;
     z-index: 50 !important;
