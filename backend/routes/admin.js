@@ -18,15 +18,20 @@ const _sweepInProgress = new Set();
 // ── USERS ──
 router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { search, page = 1 } = req.query;
+    const { search, page = 1, limit } = req.query;
     const where = search ? { email: { contains: search } } : {};
+    // The targeted-signal user picker calls this with ?limit=5000 to load
+    // every user for its plan-tab/balance filtering — the hardcoded take:20
+    // silently limited it to the 20 most recently registered users only,
+    // regardless of balance/tier, so most eligible users never appeared.
+    const take = limit ? Math.min(parseInt(limit) || 20, 5000) : 20;
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
         include: { kycData: true, walletAddresses: true, tronWallet: true },
         orderBy: { createdAt: 'desc' },
-        skip: (parseInt(page) - 1) * 20,
-        take: 20
+        skip: (parseInt(page) - 1) * take,
+        take
       }),
       prisma.user.count({ where })
     ]);

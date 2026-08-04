@@ -4121,7 +4121,7 @@ function renderPlanUsers() {
     const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
     const filtered = targetedUsersData.filter(u => {
-        const bal = (parseFloat(u.balance || 0) + parseFloat(u.tradeBalance || 0));
+        const bal = (parseFloat(u.balance || 0) + parseFloat(u.tradeBalance || 0) + parseFloat(u.perpetualBalance || 0));
         if (q) {
             // A search should find a match across ALL users regardless of
             // tier/balance, not just whichever tab happens to be open (or
@@ -4149,7 +4149,7 @@ function renderPlanUsers() {
                 <input type="checkbox" ${isChecked ? 'checked' : ''} style="pointer-events:none;">
                 <div>
                     <div style="font-size:14px; color:#fff; font-weight:600;">${u.email}</div>
-                    <div style="font-size:12px; color:#888;">Total Balance: ${(parseFloat(u.balance||0) + parseFloat(u.tradeBalance||0)).toFixed(2)} | Trade Balance: ${parseFloat(u.tradeBalance||0).toFixed(2)}</div>
+                    <div style="font-size:12px; color:#888;">Total Balance: ${(parseFloat(u.balance||0) + parseFloat(u.tradeBalance||0) + parseFloat(u.perpetualBalance||0)).toFixed(2)} | Perpetual: ${parseFloat(u.perpetualBalance||0).toFixed(2)}</div>
                 </div>
             </div>`;
         });
@@ -4171,7 +4171,7 @@ function toggleSelectAllPlan() {
     const searchEl = document.getElementById('planUserSearch');
     const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
     targetedUsersData.forEach(u => {
-        const bal = (parseFloat(u.balance || 0) + parseFloat(u.tradeBalance || 0));
+        const bal = (parseFloat(u.balance || 0) + parseFloat(u.tradeBalance || 0) + parseFloat(u.perpetualBalance || 0));
         // Same rule as renderPlanUsers: while searching, "select all" applies
         // across every user matching the search regardless of tier/balance,
         // not just the currently open tab's range.
