@@ -1139,7 +1139,7 @@
                     <div style="font-size:12px;color:#9ca3af;font-weight:600;letter-spacing:0.5px;margin-bottom:10px;">WITHDRAWAL AMOUNT</div>
                     <div style="display:flex;align-items:center;background:#f8f5ff;border:1.5px solid rgba(139,92,246,0.2);border-radius:14px;padding:13px 16px;gap:10px;">
                         <span style="font-size:14px;color:#9ca3af;flex-shrink:0;">USDT</span>
-                        <input type="number" id="withdrawal-amount" placeholder="0.00"
+                        <input type="number" id="withdrawal-amount" placeholder="0.00" oninput="updateWithdrawalFeeCalc()"
                             style="background:none;border:none;color:#1a1a2e;font-size:18px;font-weight:700;width:100%;outline:none;text-align:right;">
                         <span onclick="setWithdrawalMax()" style="color:#8b5cf6;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;background:rgba(139,92,246,0.1);padding:4px 10px;border-radius:8px;">ALL</span>
                     </div>
@@ -1148,7 +1148,7 @@
 
                 <!-- Handling Fee -->
                 <div>
-                    <div style="font-size:12px;color:#9ca3af;font-weight:600;letter-spacing:0.5px;margin-bottom:10px;">HANDLING FEE (8%)</div>
+                    <div id="withdrawal-fee-label" style="font-size:12px;color:#9ca3af;font-weight:600;letter-spacing:0.5px;margin-bottom:10px;">HANDLING FEE</div>
                     <div style="display:flex;align-items:center;background:#f8f8f8;border:1.5px solid #e8e8f0;border-radius:14px;padding:13px 16px;gap:10px;">
                         <span style="font-size:14px;color:#9ca3af;flex-shrink:0;">USDT</span>
                         <input type="number" id="withdrawal-fee" disabled placeholder="0.00"
@@ -1159,7 +1159,7 @@
                 <!-- You receive row -->
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f8;">
                     <span style="font-size:13px;color:#6b7280;font-weight:500;">You will receive</span>
-                    <span style="font-size:16px;font-weight:800;color:#059669;">— USDT</span>
+                    <span id="withdrawal-receive-amt" style="font-size:16px;font-weight:800;color:#059669;">— USDT</span>
                 </div>
             </div>
 

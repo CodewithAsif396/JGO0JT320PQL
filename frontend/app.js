@@ -5108,6 +5108,7 @@ async function loadWithdrawalScreen() {
     if (!userData) {
         await refreshUserData();
     }
+    updateWithdrawalFeeCalc();
     const balanceText = document.getElementById('withdrawal-balance-text');
     if (balanceText && userData) {
         // Exchange balance is accessible at userData.balances.exchange
@@ -5134,6 +5135,32 @@ function setWithdrawalMax() {
         const bal = parseFloat(userData.balance || 0);
         document.getElementById('withdrawal-amount').value = bal > 0 ? bal : '';
     }
+    updateWithdrawalFeeCalc();
+}
+
+// The handling fee % is an admin-editable setting (Settings ->
+// withdrawal_handling_fee_pct) — previously this screen hardcoded "8%" in
+// the label and never actually calculated anything (the amount input had
+// no oninput handler at all), so Fee/"You will receive" always showed
+// 0.00/— regardless of what was typed.
+let _withdrawalFeePct = null;
+async function updateWithdrawalFeeCalc() {
+    if (_withdrawalFeePct === null) {
+        const s = await _fetchAppSettings();
+        _withdrawalFeePct = parseFloat(s.withdrawal_handling_fee_pct);
+        if (isNaN(_withdrawalFeePct)) _withdrawalFeePct = 8;
+        const label = document.getElementById('withdrawal-fee-label');
+        if (label) label.textContent = 'HANDLING FEE (' + _withdrawalFeePct + '%)';
+    }
+
+    const amt = parseFloat(document.getElementById('withdrawal-amount')?.value) || 0;
+    const fee = amt > 0 ? amt * (_withdrawalFeePct / 100) : 0;
+    const receive = Math.max(0, amt - fee);
+
+    const feeInput = document.getElementById('withdrawal-fee');
+    if (feeInput) feeInput.value = fee > 0 ? fee.toFixed(2) : '';
+    const receiveEl = document.getElementById('withdrawal-receive-amt');
+    if (receiveEl) receiveEl.textContent = amt > 0 ? receive.toFixed(2) + ' USDT' : '— USDT';
 }
 
 window.cancelManualTrade = async function (id) {
