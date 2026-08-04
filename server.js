@@ -85,9 +85,8 @@ PUBLIC_FILES.forEach(f => {
 });
 app.use('/assets', express.static(path.join(FRONTEND, 'assets')));
 app.use('/icons', express.static(path.join(FRONTEND, 'icons')));
-// Block KYC/chat uploads from public access — served only via auth routes
+// Block KYC uploads from public access — served only via auth routes
 app.use('/uploads/kyc', (req, res) => res.status(403).json({ error: 'Forbidden' }));
-app.use('/uploads/chat', (req, res) => res.status(403).json({ error: 'Forbidden' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Initialize Services
@@ -147,7 +146,7 @@ app.get('/api/ticker', async (_req, res) => {
   }
 });
 
-// Uploaded files served above (with KYC/chat blocked)
+// Uploaded files served above (with KYC blocked)
 
 // Attach io to every request so routes can emit events
 app.use((req, _res, next) => { req.io = io; next(); });
@@ -271,7 +270,6 @@ app.get('/api/admin_referral/report/pdf', (req, res) => res.status(501).json({ e
 app.use('/api/signals', require('./backend/routes/signals'));
 app.use('/api/wallet', require('./backend/routes/wallet'));
 app.use('/api/kyc', require('./backend/routes/kyc'));
-app.use('/api/chat', require('./backend/routes/chat'));
 app.use('/api/referral', require('./backend/routes/referral'));
 
 // SPA Catch-all route to serve index.html for client-side routing (e.g. /register?ref=...)

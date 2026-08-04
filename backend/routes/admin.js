@@ -971,58 +971,6 @@ router.post('/kyc/:id/reject', authMiddleware, adminMiddleware, async (req, res)
   } catch (error) { res.status(500).json({ error: 'An internal server error occurred.' }); }
 });
 
-// ── LIVE CHAT ──
-router.get('/chat/users', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const rows = await prisma.chatMessage.findMany({
-      distinct: ['userId'],
-      orderBy: { createdAt: 'desc' },
-      select: { userId: true }
-    });
-    const result = await Promise.all(rows.map(async r => {
-      const user = await prisma.user.findUnique({ where: { id: r.userId }, select: { id: true, email: true } });
-      const unread = await prisma.chatMessage.count({ where: { userId: r.userId, sender: 'USER', read: false } });
-      const last = await prisma.chatMessage.findFirst({ where: { userId: r.userId }, orderBy: { createdAt: 'desc' } });
-      return { ...user, unread, lastMessage: last };
-    }));
-    res.json(result);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.get('/chat/messages/:userId', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const messages = await prisma.chatMessage.findMany({
-      where: { userId: req.params.userId },
-      orderBy: { createdAt: 'asc' }
-    });
-    await prisma.chatMessage.updateMany({
-      where: { userId: req.params.userId, sender: 'USER', read: false },
-      data: { read: true }
-    });
-    res.json(messages);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.post('/chat/reply/:userId', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const { content } = req.body;
-    if (!content || !content.trim()) return res.status(400).json({ error: 'Empty message' });
-    const msg = await prisma.chatMessage.create({
-      data: { userId: req.params.userId, content: content.trim(), sender: 'ADMIN' }
-    });
-    global.io.to('user_' + req.params.userId).emit('chat_message', msg);
-    res.json(msg);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.delete('/chat/resolve/:userId', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    await prisma.chatMessage.deleteMany({ where: { userId: req.params.userId } });
-    global.io.to('user_' + req.params.userId).emit('chat_resolved');
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
 // ── Manual wallet activation (send TRX to activate an existing child wallet) ──
 router.post('/wallets/:userId/activate', authMiddleware, adminMiddleware, async (req, res) => {
   try {
@@ -1227,15 +1175,6 @@ router.post('/promo-banner', authMiddleware, adminMiddleware, async (req, res) =
 // ── Admin notify update ──────────────────────────────────────────────────────
 router.post('/notify-update', authMiddleware, adminMiddleware, async (req, res) => {
   res.json({ success: true, message: 'Update notification sent' });
-});
-
-// ── Search chat users ────────────────────────────────────────────────────────
-router.get('/chat/search-users', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const q = req.query.q || '';
-    const users = await prisma.user.findMany({ where: { email: { contains: q } }, select: { id: true, email: true }, take: 20 });
-    res.json(users);
-  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;

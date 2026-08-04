@@ -16,7 +16,7 @@ function toNumericId(cuid) {
 const navStack = [];
 let currentScreen = 'home-screen';
 
-const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'deposit-record-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
+const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'deposit-record-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen'];
 
 window.addEventListener('popstate', () => {
     const p = window.location.pathname;
@@ -73,7 +73,6 @@ function navTo(screenId) {
     if (screenId === 'referral-screen') loadReferralScreen();
     if (screenId === 'rules-screen') loadRulesScreen();
     if (screenId === 'convert-screen') loadConvertRates();
-    if (screenId === 'chat-screen') loadChatMessages();
     if (screenId === 'fund-transfer-screen') updateTransferAvail();
     if (screenId === 'about-screen') loadAboutScreen();
     if (screenId === 'support-screen') loadSupportScreen();
@@ -1460,25 +1459,6 @@ function initSocket() {
         if (activeSignal && activeSignal.id === data.signalId) activeSignal = null;
         if (signalTimers[data.signalId]) { clearInterval(signalTimers[data.signalId]); delete signalTimers[data.signalId]; }
         renderSignalCards();
-    });
-
-    // Live chat: admin reply received
-    socket.on('chat_message', (msg) => {
-        if (currentScreen === 'chat-screen') {
-            appendChatBubble(msg);
-            scrollChatToBottom();
-        } else {
-            // Show badge on Customer Support menu item
-            updateChatUnreadBadge(1);
-            showToast('Support: ' + (msg.content || 'Photo received'));
-        }
-    });
-
-    socket.on('chat_resolved', () => {
-        var area = document.getElementById('chat-messages');
-        if (area) area.innerHTML = '<div class="chat-date-label">Today</div><div class="chat-bubble admin-bubble"><span>Your issue has been resolved. Thank you for contacting support!</span><span class="chat-time">Support</span></div>';
-        updateChatUnreadBadge(0);
-        showToast('Your support case has been resolved');
     });
 
     socket.on('notification', (notif) => {
@@ -4747,7 +4727,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadKycStatus();
         initChart('ETHUSDT');
         setInterval(refreshUserData, 30000);
-        fetchChatUnreadCount();
         fetchSignals();
     } else {
         if (path === '/register' || path === '/signup' || refCode) {
@@ -4772,135 +4751,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 2800); // 2.8 seconds wait to show the animation
 });
-
-// ══════════════════════════════════════════════════════
-// LIVE CHAT
-// ══════════════════════════════════════════════════════
-var _chatImageFile = null;
-
-function openChatScreen() { return; } // Chat removed
-
-function loadChatMessages() {
-    var area = document.getElementById('chat-messages');
-    if (!area) return;
-    area.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Loading...</div>';
-    fetch('/api/chat/messages', { headers: { 'Authorization': 'Bearer ' + authToken } })
-        .then(function (r) { return r.json(); })
-        .then(function (msgs) {
-            area.innerHTML = '<div class="chat-date-label">Today</div>' +
-                '<div class="chat-bubble admin-bubble"><span>Welcome! How can we help you today?</span><span class="chat-time">Support</span></div>';
-            if (Array.isArray(msgs)) {
-                msgs.forEach(function (m) { appendChatBubble(m); });
-            }
-            scrollChatToBottom();
-            updateChatUnreadBadge(0);
-        })
-        .catch(function () {
-            area.innerHTML = '<div class="chat-date-label">Today</div>' +
-                '<div class="chat-bubble admin-bubble"><span>Welcome! How can we help you today?</span><span class="chat-time">Support</span></div>';
-        });
-}
-
-function appendChatBubble(msg) {
-    var area = document.getElementById('chat-messages');
-    if (!area) return;
-    var isAdmin = msg.sender === 'ADMIN';
-    var div = document.createElement('div');
-    div.className = 'chat-bubble ' + (isAdmin ? 'admin-bubble' : 'user-bubble');
-    var timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-    var inner = '';
-    if (msg.imageUrl) {
-        inner = '<img src="' + msg.imageUrl + '" class="chat-image" onclick="openChatImageFull(\'' + msg.imageUrl + '\')">';
-    } else {
-        inner = '<span>' + escapeHtml(msg.content || '') + '</span>';
-    }
-    inner += '<span class="chat-time">' + (isAdmin ? 'Support · ' : '') + timeStr + '</span>';
-    div.innerHTML = inner;
-    area.appendChild(div);
-}
-
-function sendChatMessage() {
-    var input = document.getElementById('chat-text-input');
-    var text = input ? input.value.trim() : '';
-
-    if (_chatImageFile) {
-        // Send image
-        var fd = new FormData();
-        fd.append('image', _chatImageFile);
-        fetch('/api/chat/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + authToken }, body: fd })
-            .then(function (r) { return r.json(); })
-            .then(function (msg) {
-                if (msg.id) { appendChatBubble(msg); scrollChatToBottom(); }
-            });
-        clearChatImage();
-    }
-
-    if (!text) return;
-    if (input) input.value = '';
-
-    // Optimistic bubble
-    var tmpMsg = { sender: 'USER', content: text, createdAt: new Date().toISOString() };
-    appendChatBubble(tmpMsg);
-    scrollChatToBottom();
-
-    fetch('/api/chat/message', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text })
-    }).then(function (r) {
-        if (!r.ok) {
-            r.json().then(function (d) {
-                showToast('Send failed: ' + (d.error || r.status));
-            }).catch(function () { showToast('Send failed: ' + r.status); });
-        }
-    }).catch(function (e) { showToast('Network error: ' + e.message); });
-}
-
-function onChatImageSelected(input) {
-    var file = input.files[0];
-    if (!file) return;
-    _chatImageFile = file;
-    var preview = document.getElementById('chat-img-preview');
-    var img = document.getElementById('chat-preview-img');
-    if (preview) preview.style.display = 'block';
-    if (img) img.src = URL.createObjectURL(file);
-}
-
-function clearChatImage() {
-    _chatImageFile = null;
-    var preview = document.getElementById('chat-img-preview');
-    var fileInput = document.getElementById('chat-file-input');
-    if (preview) preview.style.display = 'none';
-    if (fileInput) fileInput.value = '';
-}
-
-function scrollChatToBottom() {
-    var area = document.getElementById('chat-messages');
-    if (area) area.scrollTop = area.scrollHeight;
-}
-
-function openChatImageFull(url) {
-    var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    overlay.onclick = function () { overlay.remove(); };
-    overlay.innerHTML = '<img src="' + url + '" style="max-width:95vw;max-height:90vh;border-radius:8px;object-fit:contain;">';
-    document.body.appendChild(overlay);
-}
-
-function fetchChatUnreadCount() {
-    if (!authToken) return;
-    fetch('/api/chat/unread', { headers: { 'Authorization': 'Bearer ' + authToken } })
-        .then(function (r) { return r.json(); })
-        .then(function (d) { if (d.count > 0) updateChatUnreadBadge(d.count); })
-        .catch(function () { });
-}
-
-function updateChatUnreadBadge(count) {
-    var badge = document.getElementById('chat-unread-badge');
-    if (!badge) return;
-    if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'inline-block'; }
-    else { badge.style.display = 'none'; }
-}
 
 function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

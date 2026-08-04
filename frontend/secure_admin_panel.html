@@ -532,9 +532,6 @@
       <div class="nav-item" data-section="notifications" onclick="showSection('notifications',this)">
         <i class="fa fa-bell"></i> Notifications
       </div>
-      <div class="nav-item" data-section="chat" onclick="showSection('chat',this);loadChatUsers();startChatRefresh()">
-        <i class="fa fa-comments"></i> Live Chat <span id="admin-chat-badge" style="display:none;background:#f84960;color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:4px;"></span>
-      </div>
       <div class="nav-item" data-section="rules" onclick="showSection('rules',this)">
         <i class="fa fa-scale-balanced"></i> Rules
       </div>
@@ -1450,39 +1447,6 @@
         </div>
       </div>
 
-      <!-- LIVE CHAT SECTION -->
-      <div class="section" id="section-chat">
-        <div style="display:flex;gap:16px;height:calc(100vh - 120px);">
-          <!-- User list -->
-          <div class="table-card" style="width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
-            <div class="table-header" style="justify-content:space-between;">
-              <span class="table-title"><i class="fa fa-comments" style="color:var(--accent);margin-right:8px"></i>Chats</span>
-              <div style="display:flex;gap:6px;">
-                <button class="btn btn-secondary btn-sm" onclick="openNewChatSearch()" title="Message any user"><i class="fa fa-plus"></i></button>
-                <button class="btn btn-secondary btn-sm" onclick="loadChatUsers()"><i class="fa fa-sync"></i></button>
-              </div>
-            </div>
-            <div id="new-chat-search-bar" style="display:none;padding:10px;border-bottom:1px solid var(--border);">
-              <input type="text" id="new-chat-search-input" placeholder="Search user by email..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;" oninput="searchNewChatUsers(this.value)">
-              <div id="new-chat-search-results" style="max-height:180px;overflow-y:auto;margin-top:6px;"></div>
-            </div>
-            <div id="chat-user-list" style="overflow-y:auto;flex:1;"></div>
-          </div>
-          <!-- Conversation panel -->
-          <div class="table-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;" id="chat-convo-panel">
-            <div class="table-header">
-              <span class="table-title" id="chat-convo-title"><i class="fa fa-comment-dots" style="color:var(--accent);margin-right:8px"></i>Select a user</span>
-            </div>
-            <div id="admin-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#0d1117;"></div>
-            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;" id="chat-reply-bar" style="display:none;">
-              <input type="text" id="admin-chat-input" placeholder="Type reply..." style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')adminSendReply()">
-              <button class="btn btn-primary" onclick="adminSendReply()" style="padding:8px 16px;"><i class="fa fa-paper-plane"></i> Send</button>
-              <button class="btn btn-secondary" onclick="resolveAdminChat()" style="padding:8px 14px;background:#1a3a1a;color:#4caf50;border:1px solid #4caf50;" title="Resolve & clear chat"><i class="fa fa-check-circle"></i> Resolve</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div><!-- /content -->
   </main>
 </div>
@@ -1593,7 +1557,7 @@
     </div>
     <div class="modal-body">
       <div id="deleteUserAlert"></div>
-      <p style="color:var(--red);font-size:13px;margin-bottom:12px"><i class="fa fa-triangle-exclamation"></i> This permanently deletes the user and all their data — balances, trades, deposits, withdrawals, KYC, chat history, everything. This cannot be undone.</p>
+      <p style="color:var(--red);font-size:13px;margin-bottom:12px"><i class="fa fa-triangle-exclamation"></i> This permanently deletes the user and all their data — balances, trades, deposits, withdrawals, KYC, everything. This cannot be undone.</p>
       <div class="form-group">
         <label>Type <strong id="deleteUserEmailLabel"></strong> to confirm</label>
         <input type="text" id="deleteUserConfirmInput" placeholder="Enter user's email">
@@ -1892,19 +1856,6 @@ function initAdminSocket() {
     // (now room-scoped instead of broadcast to every socket) would never
     // reach this panel at all.
     _adminSocket.on('connect', function() { _adminSocket.emit('authenticate', authToken); });
-    _adminSocket.on('admin_new_chat', function(msg) {
-      if (_adminChatUserId && msg.userId === _adminChatUserId) {
-        adminAppendBubble(msg);
-        document.getElementById('admin-chat-messages').scrollTop = 99999;
-      } else {
-        const badge = document.getElementById('admin-chat-badge');
-        if (badge) {
-          const n = (parseInt(badge.textContent) || 0) + 1;
-          badge.textContent = n; badge.style.display = 'inline';
-        }
-        if (document.getElementById('section-chat').style.display !== 'none') loadChatUsers();
-      }
-    });
     _adminSocket.on('admin_new_kyc', function(msg) {
       notifyAdmin('New KYC submission (' + (msg.kind || 'basic') + ') awaiting review');
       var kycSection = document.getElementById('section-kyc');
@@ -3870,174 +3821,6 @@ async function notifyUsersOfUpdate() {
   } finally { setBtn(btn, false, '', '<i class="fa fa-bell"></i> Notify All Users of Update'); }
 }
 
-// ── LIVE CHAT ──
-var _adminChatUserId = null;
-var _chatRefreshTimer = null;
-
-function startChatRefresh() {
-  if (_chatRefreshTimer) return;
-  _chatRefreshTimer = setInterval(function() {
-    var sec = document.getElementById('section-chat');
-    if (sec && sec.style.display !== 'none') loadChatUsers();
-    else stopChatRefresh();
-  }, 5000);
-}
-
-function stopChatRefresh() {
-  if (_chatRefreshTimer) { clearInterval(_chatRefreshTimer); _chatRefreshTimer = null; }
-}
-
-async function loadChatUsers() {
-  try {
-    const users = await apiGet('/api/admin/chat/users');
-    const list = document.getElementById('chat-user-list');
-    if (!list) return;
-    let totalUnread = 0;
-    if (!users.length) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:#666;font-size:13px;">No conversations yet</div>';
-    } else {
-      list.innerHTML = users.map(u => {
-        totalUnread += u.unread || 0;
-        const lastText = u.lastMessage ? (u.lastMessage.content ? u.lastMessage.content.slice(0,30) : '📷 Photo') : '';
-        // data-* attrs + a click listener (attached below), not an inline
-        // onclick with the email interpolated into JS-string context — a
-        // user-controlled email containing a quote could otherwise break
-        // out of the handler and run arbitrary JS in the admin's session.
-        return `<div data-user-id="${escHtml(u.id)}" data-user-email="${escHtml(u.email)}" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;" class="chat-user-row" id="chat-user-${escHtml(u.id)}">
-          <div style="width:38px;height:38px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;flex-shrink:0;">${escHtml((u.email||'?')[0].toUpperCase())}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(u.email)}</div>
-            <div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(lastText)}</div>
-          </div>
-          ${u.unread ? `<span style="background:#f84960;color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:18px;height:18px;text-align:center;line-height:18px;flex-shrink:0;">${u.unread}</span>` : ''}
-        </div>`;
-      }).join('');
-      list.querySelectorAll('.chat-user-row').forEach(row => {
-        row.onclick = () => openAdminChat(row.dataset.userId, row.dataset.userEmail);
-      });
-    }
-    const badge = document.getElementById('admin-chat-badge');
-    if (badge) { badge.textContent = totalUnread || ''; badge.style.display = totalUnread ? 'inline' : 'none'; }
-  } catch(e) { console.error('loadChatUsers', e); }
-}
-
-function openNewChatSearch() {
-  const bar = document.getElementById('new-chat-search-bar');
-  if (!bar) return;
-  const showing = bar.style.display !== 'none';
-  bar.style.display = showing ? 'none' : 'block';
-  if (!showing) document.getElementById('new-chat-search-input').focus();
-  document.getElementById('new-chat-search-results').innerHTML = '';
-}
-
-let _newChatSearchTimer = null;
-function searchNewChatUsers(q) {
-  clearTimeout(_newChatSearchTimer);
-  const results = document.getElementById('new-chat-search-results');
-  if (!q || !q.trim()) { results.innerHTML = ''; return; }
-  _newChatSearchTimer = setTimeout(async () => {
-    try {
-      const users = await apiGet('/api/admin/chat/search-users?q=' + encodeURIComponent(q.trim()));
-      results.innerHTML = users.map(u => `<div data-user-id="${escHtml(u.id)}" data-user-email="${escHtml(u.email)}" class="new-chat-result-row" style="padding:8px 10px;cursor:pointer;border-radius:6px;font-size:12px;" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">${escHtml(u.email)}</div>`).join('') || '<div style="padding:8px;color:#666;font-size:12px;">No users found</div>';
-      results.querySelectorAll('.new-chat-result-row').forEach(row => {
-        row.onclick = () => startNewChat(row.dataset.userId, row.dataset.userEmail);
-      });
-    } catch (e) { results.innerHTML = ''; }
-  }, 300);
-}
-
-function startNewChat(userId, email) {
-  document.getElementById('new-chat-search-bar').style.display = 'none';
-  document.getElementById('new-chat-search-input').value = '';
-  document.getElementById('new-chat-search-results').innerHTML = '';
-  openAdminChat(userId, email);
-}
-
-async function openAdminChat(userId, email) {
-  _adminChatUserId = userId;
-  document.getElementById('chat-convo-title').innerHTML = `<i class="fa fa-user" style="color:var(--accent);margin-right:8px"></i>${escHtml(email)}`;
-  document.getElementById('chat-reply-bar').style.display = 'flex';
-  const area = document.getElementById('admin-chat-messages');
-  area.innerHTML = '<div style="text-align:center;color:#666;font-size:12px;">Loading...</div>';
-  // Highlight selected user
-  document.querySelectorAll('.chat-user-row').forEach(r => r.style.background = '');
-  const row = document.getElementById('chat-user-' + userId);
-  if (row) row.style.background = 'rgba(245,176,65,0.1)';
-  try {
-    const msgs = await apiGet('/api/admin/chat/messages/' + userId);
-    area.innerHTML = '';
-    msgs.forEach(m => adminAppendBubble(m));
-    area.scrollTop = area.scrollHeight;
-    // Remove unread indicator
-    const badge = row ? row.querySelector('span[style*="f84960"]') : null;
-    if (badge) badge.remove();
-  } catch(e) { area.innerHTML = '<div style="color:#f84960;padding:20px;">Failed to load messages</div>'; }
-}
-
-function adminAppendBubble(msg) {
-  const area = document.getElementById('admin-chat-messages');
-  if (!area) return;
-  const isAdmin = msg.sender === 'ADMIN';
-  const div = document.createElement('div');
-  const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-  div.style.cssText = 'display:flex;flex-direction:column;max-width:70%;' + (isAdmin ? 'align-self:flex-end;align-items:flex-end;' : 'align-self:flex-start;');
-  let inner = '';
-  if (msg.imageUrl) {
-    // Placeholder — /uploads/chat/<file> is blocked server-side now, so this
-    // is filled in below via the authenticated /api/chat/file route.
-    inner = `<img class="chat-bubble-img" style="max-width:200px;max-height:180px;border-radius:10px;object-fit:cover;cursor:pointer;background:#131a22;">`;
-  } else {
-    inner = `<div style="background:${isAdmin ? 'var(--accent)' : 'var(--card2)'};color:${isAdmin ? '#000' : 'var(--text)'};padding:10px 14px;border-radius:14px;font-size:13px;word-break:break-word;">${escHtml(msg.content||'')}</div>`;
-  }
-  inner += `<div style="font-size:10px;color:#666;margin-top:2px;">${isAdmin ? 'Admin · ' : ''}${timeStr}</div>`;
-  div.innerHTML = inner;
-  const img = div.querySelector('.chat-bubble-img');
-  if (img) loadChatBubbleImage(img, msg.imageUrl);
-  area.appendChild(div);
-}
-
-// Chat attachments now only come back through the authenticated
-// /api/chat/file route (apiFetch attaches the admin bearer token) —
-// a plain link to /uploads/chat/<file> is blocked server-side.
-function loadChatBubbleImage(imgEl, url) {
-  const filename = url.split('/').pop();
-  apiFetch('/api/chat/file/' + filename)
-    .then(res => res.ok ? res.blob() : null)
-    .then(blob => {
-      if (!blob) return;
-      const objUrl = URL.createObjectURL(blob);
-      imgEl.src = objUrl;
-      imgEl.onclick = () => window.open(objUrl, '_blank');
-    })
-    .catch(() => {});
-}
-
-async function adminSendReply() {
-  if (!_adminChatUserId) return;
-  const input = document.getElementById('admin-chat-input');
-  const text = input ? input.value.trim() : '';
-  if (!text) return;
-  input.value = '';
-  try {
-    const msg = await apiPost('/api/admin/chat/reply/' + _adminChatUserId, { content: text });
-    adminAppendBubble(msg);
-    document.getElementById('admin-chat-messages').scrollTop = 99999;
-  } catch(e) { alert('Failed to send: ' + e.message); }
-}
-
-async function resolveAdminChat() {
-  if (!_adminChatUserId) return;
-  if (!confirm('Resolve this conversation? All messages will be deleted.')) return;
-  try {
-    await apiFetch('/api/admin/chat/resolve/' + _adminChatUserId, { method: 'DELETE' });
-    _adminChatUserId = null;
-    document.getElementById('admin-chat-messages').innerHTML = '';
-    document.getElementById('chat-convo-title').innerHTML = '<i class="fa fa-comment-dots" style="color:var(--accent);margin-right:8px"></i>Select a user';
-    document.getElementById('chat-reply-bar').style.display = 'none';
-    loadChatUsers();
-  } catch(e) { alert('Failed: ' + e.message); }
-}
-
 // Socket initialized in initAdminSocket() called from showApp()
 </script>
 <script>
@@ -4847,4 +4630,4 @@ function renderReferralReport(data) {
 // ================================================================
 </script>
 </body>
-</html>
+</html>

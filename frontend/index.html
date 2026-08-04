@@ -1986,17 +1986,6 @@
                 <span style="width:32px;"></span>
             </div>
 
-            <!-- Live Chat CTA Card -->
-            <div style="margin:12px 14px;background:linear-gradient(135deg,#4c1d95,#8b5cf6);border-radius:20px;padding:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(139,92,246,0.35);">
-                <div>
-                    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;">Live Chat Support</div>
-                    <div style="font-size:12px;color:rgba(255,255,255,0.75);">Our team is online 24/7</div>
-                </div>
-                <button onclick="openChatScreen()" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);border-radius:12px;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;cursor:pointer;">
-                    <i class="fa-solid fa-headset" style="margin-right:6px;"></i>Chat Now
-                </button>
-            </div>
-
             <!-- Search Bar -->
             <div style="margin:0 14px 12px;background:#fff;border:1.5px solid rgba(139,92,246,0.15);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
                 <i class="fa-solid fa-magnifying-glass" style="color:#9ca3af;font-size:14px;"></i>
@@ -2734,14 +2723,14 @@
                 <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:14px;">
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);">
 
-                        <div onclick="openChatScreen()" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;cursor:pointer;border-right:1px solid #f5f5ff;">
+                        <div onclick="navTo('support-screen')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;cursor:pointer;border-right:1px solid #f5f5ff;">
                             <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(139,92,246,0.06));display:flex;align-items:center;justify-content:center;">
                                 <i class="fa-solid fa-headset" style="color:#8b5cf6;font-size:20px;"></i>
                             </div>
                             <span style="font-size:12px;font-weight:600;color:#1a1a2e;">Help</span>
                         </div>
 
-                        <div onclick="openChatScreen()" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;cursor:pointer;border-right:1px solid #f5f5ff;">
+                        <div onclick="navTo('support-screen')" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;cursor:pointer;border-right:1px solid #f5f5ff;">
                             <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(59,130,246,0.06));display:flex;align-items:center;justify-content:center;">
                                 <i class="fa-solid fa-message" style="color:#3b82f6;font-size:20px;"></i>
                             </div>
@@ -2782,59 +2771,6 @@
                     </div>
                     <p style="color:#9ca3af;font-size:14px;">No transfer records yet</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- ═══════════════════════════════════════════════════════
-     LIVE CHAT SCREEN
-════════════════════════════════════════════════════════ -->
-        <div id="chat-screen" class="screen">
-            <div class="sub-header">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="goBack()"></i>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <div
-                        style="width:34px;height:34px;background:var(--up-color);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                        <i class="fa-solid fa-headset" style="color:#fff;font-size:16px;"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:700;font-size:14px;">Customer Support</div>
-                        <div style="font-size:10px;color:var(--up-color);">Online</div>
-                    </div>
-                </div>
-                <span></span>
-            </div>
-
-            <!-- Messages Area -->
-            <div id="chat-messages" class="chat-messages-area">
-                <div class="chat-date-label">Today</div>
-                <div class="chat-bubble admin-bubble">
-                    <span>Welcome! How can we help you today?</span>
-                    <span class="chat-time">Admin</span>
-                </div>
-            </div>
-
-            <!-- Image Preview -->
-            <div id="chat-img-preview"
-                style="display:none;padding:8px 12px;background:var(--bg-card);border-top:1px solid var(--border-color);">
-                <div style="position:relative;display:inline-block;">
-                    <img id="chat-preview-img" style="height:80px;border-radius:8px;object-fit:cover;">
-                    <i class="fa-solid fa-xmark" onclick="clearChatImage()"
-                        style="position:absolute;top:-6px;right:-6px;background:#f84960;color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;"></i>
-                </div>
-            </div>
-
-            <!-- Input Area -->
-            <div class="chat-input-bar">
-                <label for="chat-file-input" class="chat-attach-btn">
-                    <i class="fa-solid fa-image"></i>
-                </label>
-                <input type="file" id="chat-file-input" accept="image/*" style="display:none;"
-                    onchange="onChatImageSelected(this)">
-                <input type="text" id="chat-text-input" class="chat-text-field" placeholder="Type a message..."
-                    onkeydown="if(event.key==='Enter')sendChatMessage()">
-                <button class="chat-send-btn" onclick="sendChatMessage()">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
             </div>
         </div>
 

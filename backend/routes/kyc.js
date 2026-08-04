@@ -7,7 +7,10 @@ const prisma = require('../prismaClient');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 
-const uploadDir = path.join(__dirname, '../uploads/kyc');
+// UPLOADS_DIR lets this point at a Render persistent disk mount (e.g.
+// /var/data/uploads) — without it, uploaded files live on the ephemeral
+// container filesystem and are wiped on every deploy/restart.
+const uploadDir = path.join(process.env.UPLOADS_DIR || path.join(__dirname, '../uploads'), 'kyc');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -24,6 +27,23 @@ const upload = multer({
     if (/^image\/(jpeg|png|jpg|gif|webp)/.test(file.mimetype)) cb(null, true);
     else cb(new Error('Only image files allowed'));
   }
+});
+
+// server.js blocks /uploads/kyc/* entirely (403) to keep KYC documents from
+// being publicly reachable by URL — but nothing ever replaced that with an
+// authenticated route, so the admin panel's KYC thumbnails (which already
+// call GET /api/kyc/file/:filename) always 404'd and never rendered any
+// image. Admin-only, since only the admin panel ever needs to view these.
+router.get('/file/:filename', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user || user.role !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });
+
+    const filename = path.basename(req.params.filename); // strip any path traversal
+    const filePath = path.join(uploadDir, filename);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    res.sendFile(filePath);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 router.get('/status', authMiddleware, async (req, res) => {
