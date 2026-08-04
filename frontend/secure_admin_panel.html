@@ -746,11 +746,8 @@
                 <button class="btn btn-secondary btn-sm" onclick="loadTargetedUsers()"><i class="fa fa-sync"></i> Refresh</button>
               </div>
               
-              <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.05); padding: 0 16px;">
-                <div class="plan-tab active" data-plan="1" onclick="switchPlanTab(1)" style="padding: 16px; cursor: pointer; color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: 600;">Plan 1</div>
-                <div class="plan-tab" data-plan="2" onclick="switchPlanTab(2)" style="padding: 16px; cursor: pointer; color: #888;">Plan 2</div>
-                <div class="plan-tab" data-plan="3" onclick="switchPlanTab(3)" style="padding: 16px; cursor: pointer; color: #888;">Plan 3</div>
-                <div class="plan-tab" data-plan="4" onclick="switchPlanTab(4)" style="padding: 16px; cursor: pointer; color: #888;">Plan 4</div>
+              <div id="planTabsRow" style="display:flex; flex-wrap:wrap; border-bottom:1px solid rgba(255,255,255,0.05); padding: 0 16px;">
+                <!-- JS rendered — one tab per configured tier, see renderPlanTabs() -->
               </div>
 
               <div style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -1182,24 +1179,25 @@
                 <hr class="divider">
 
                 <div style="font-weight:700;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;"><i class="fa fa-layer-group" style="color:var(--accent)"></i> Signal Access Tiers (by Total Balance)</div>
-                <div style="font-size:11px;color:var(--text2);margin-bottom:16px;">Minimum total balance (Exchange + Trade + Perpetual) required for each tier. Gates which public signals a user can see/trade, and drives the Plan 1-4 ranges on the Signals &rarr; Targeted Signals tab.</div>
-                <div class="settings-grid">
-                  <div class="form-group">
-                    <label>Tier 1 Min ($)</label>
-                    <input type="number" id="setting_tier1_min" placeholder="e.g. 500" min="0">
+                <div style="font-size:11px;color:var(--text2);margin-bottom:16px;">Minimum total balance (Exchange + Trade + Perpetual) required for each tier. Gates which public signals a user can see/trade, and drives the Plan ranges on the Signals &rarr; Targeted Signals tab. Add or remove tiers freely — not fixed at 4.</div>
+                <div class="table-card" style="margin-bottom:16px;">
+                  <div class="table-header flex-between">
+                    <span class="table-title">Tiers</span>
+                    <button class="btn btn-secondary btn-sm" onclick="loadSignalTiers()"><i class="fa fa-sync"></i> Refresh</button>
                   </div>
-                  <div class="form-group">
-                    <label>Tier 2 Min ($)</label>
-                    <input type="number" id="setting_tier2_min" placeholder="e.g. 1000" min="0">
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Tier</th><th>Min Balance ($)</th><th>Actions</th></tr></thead>
+                      <tbody id="signalTiersBody"></tbody>
+                    </table>
                   </div>
-                  <div class="form-group">
-                    <label>Tier 3 Min ($)</label>
-                    <input type="number" id="setting_tier3_min" placeholder="e.g. 1500" min="0">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+                  <div class="form-group" style="flex:1;margin-bottom:0;">
+                    <label>New Tier Min Balance ($)</label>
+                    <input type="number" id="newTierMin" placeholder="e.g. 2500" min="0">
                   </div>
-                  <div class="form-group">
-                    <label>Tier 4 Min ($)</label>
-                    <input type="number" id="setting_tier4_min" placeholder="e.g. 2000" min="0">
-                  </div>
+                  <button class="btn btn-primary" onclick="addSignalTier()"><i class="fa fa-plus"></i> Add Tier</button>
                 </div>
                 <hr class="divider">
 
@@ -3345,6 +3343,7 @@ async function loadSettings() {
     // Also load tiers
     loadTiers(data);
     loadDepositBonusSlabs();
+    loadSignalTiers();
     loadPromoBanner();
 
 
@@ -4046,37 +4045,48 @@ async function resolveAdminChat() {
 let currentTargetPlan = 1;
 let targetedUsersData = [];
 let selectedUserIds = new Set();
-// Defaults match tierService.js's fallbacks — overwritten by the real
-// values as soon as loadTierThresholds() resolves.
-let tierThresholds = { t1: 500, t2: 1000, t3: 1500, t4: 2000 };
+// Tiers are now a dynamic list (any number of tiers, not fixed at 4) —
+// loaded from /api/admin/signal-tiers. Defaults here only cover the gap
+// before loadTierThresholds() resolves on first paint.
+let tierThresholds = { list: [{level:1,min:500},{level:2,min:1000},{level:3,min:1500},{level:4,min:2000}] };
 
 // Single source of truth for plan balance ranges, shared by the tab labels,
 // the user list filter, and "Select All in Plan" — previously each had its
-// own hardcoded copy of these numbers (500-800/801-1500/etc.) which didn't
-// even match each other, let alone the tier1_min..tier4_min settings that
-// actually gate signal visibility for non-targeted signals.
+// own hardcoded copy of these numbers which didn't even match each other,
+// let alone the settings that actually gate signal visibility for
+// non-targeted signals. Now driven entirely by the dynamic tier list.
 function getPlanRange(plan) {
-    const t = tierThresholds;
-    if (plan === 1) return { min: t.t1, max: t.t2 - 0.01 };
-    if (plan === 2) return { min: t.t2, max: t.t3 - 0.01 };
-    if (plan === 3) return { min: t.t3, max: t.t4 - 0.01 };
-    return { min: t.t4, max: Infinity };
+    const list = tierThresholds.list || [];
+    const idx = list.findIndex(t => t.level === plan);
+    if (idx === -1) return { min: 0, max: Infinity };
+    const min = list[idx].min;
+    const next = list[idx + 1];
+    return { min, max: next ? next.min - 0.01 : Infinity };
 }
 
 async function loadTierThresholds() {
     try {
-        const data = await apiGet('/api/admin/settings');
-        tierThresholds = {
-            t1: parseFloat(data.tier1_min) || 500,
-            t2: parseFloat(data.tier2_min) || 1000,
-            t3: parseFloat(data.tier3_min) || 1500,
-            t4: parseFloat(data.tier4_min) || 2000
-        };
+        const data = await apiGet('/api/admin/signal-tiers');
+        if (Array.isArray(data) && data.length) {
+            tierThresholds = { list: data.slice().sort((a, b) => a.level - b.level) };
+        }
     } catch (e) { /* keep defaults on failure */ }
-    for (let p = 1; p <= 4; p++) {
-        const tab = document.querySelector('.plan-tab[data-plan="' + p + '"]');
-        if (tab) tab.textContent = 'Plan ' + p + ' ($' + getPlanRange(p).min + '+)';
+    renderPlanTabs();
+}
+
+function renderPlanTabs() {
+    const row = document.getElementById('planTabsRow');
+    if (!row) return;
+    const list = tierThresholds.list || [];
+    // If the currently selected plan no longer exists (a tier was deleted),
+    // fall back to the first available one instead of showing a dead tab.
+    if (!list.some(t => t.level === currentTargetPlan)) {
+        currentTargetPlan = list[0] ? list[0].level : 1;
     }
+    row.innerHTML = list.map(t =>
+        '<div class="plan-tab" data-plan="' + t.level + '" onclick="switchPlanTab(' + t.level + ')" style="padding:16px;cursor:pointer;color:#888;white-space:nowrap;">Plan ' + t.level + ' ($' + t.min + '+)</div>'
+    ).join('');
+    switchPlanTab(currentTargetPlan);
 }
 
 function switchPlanTab(plan) {
@@ -4093,6 +4103,76 @@ function switchPlanTab(plan) {
         activeTab.style.fontWeight = '600';
     }
     renderPlanUsers();
+}
+
+// ==================== SIGNAL TIERS (Settings) ====================
+async function loadSignalTiers() {
+    const tbody = document.getElementById('signalTiersBody');
+    if (!tbody) return;
+    tbody.innerHTML = loadingRow(3);
+    try {
+        const tiers = await apiGet('/api/admin/signal-tiers');
+        if (!tiers.length) { tbody.innerHTML = emptyRow(3, 'No tiers configured.'); return; }
+        tbody.innerHTML = tiers.map(t =>
+            '<tr>' +
+                '<td>Tier ' + t.level + '</td>' +
+                '<td><input type="number" min="0" value="' + t.min + '" id="tierMinInput_' + t.level + '" style="width:110px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);padding:6px 8px;"></td>' +
+                '<td style="display:flex;gap:6px;">' +
+                    '<button class="btn btn-sm btn-primary" onclick="saveSignalTier(' + t.level + ')"><i class="fa fa-save"></i></button>' +
+                    '<button class="btn btn-sm btn-danger" onclick="deleteSignalTier(' + t.level + ')" ' + (tiers.length <= 1 ? 'disabled title="At least one tier is required"' : '') + '><i class="fa fa-trash"></i></button>' +
+                '</td>' +
+            '</tr>'
+        ).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="3"><div class="alert alert-error" style="margin:16px">Failed: ' + escHtml(e.message) + '</div></td></tr>';
+    }
+}
+
+async function addSignalTier() {
+    const input = document.getElementById('newTierMin');
+    const min = parseFloat(input.value);
+    if (!input.value || isNaN(min) || min < 0) { alert('Enter a valid minimum balance first'); return; }
+    try {
+        const tiers = await apiGet('/api/admin/signal-tiers');
+        if (tiers.some(t => t.min === min)) { alert('A tier with that minimum balance already exists'); return; }
+        tiers.push({ min });
+        await apiPost('/api/admin/signal-tiers', tiers);
+        input.value = '';
+        loadSignalTiers();
+        loadTierThresholds();
+    } catch (e) {
+        alert('Failed to add tier: ' + e.message);
+    }
+}
+
+async function saveSignalTier(level) {
+    const input = document.getElementById('tierMinInput_' + level);
+    const min = parseFloat(input.value);
+    if (!input.value || isNaN(min) || min < 0) { alert('Enter a valid minimum balance first'); return; }
+    try {
+        const tiers = await apiGet('/api/admin/signal-tiers');
+        if (tiers.some(t => t.level !== level && t.min === min)) { alert('Another tier already uses that minimum balance'); return; }
+        const updated = tiers.map(t => t.level === level ? { min } : { min: t.min });
+        await apiPost('/api/admin/signal-tiers', updated);
+        loadSignalTiers();
+        loadTierThresholds();
+    } catch (e) {
+        alert('Failed to update tier: ' + e.message);
+    }
+}
+
+async function deleteSignalTier(level) {
+    if (!confirm('Delete Tier ' + level + '? Any signal already sent at this visibility level stays as-is, but no new users will be evaluated against it.')) return;
+    try {
+        const tiers = await apiGet('/api/admin/signal-tiers');
+        if (tiers.length <= 1) { alert('At least one tier is required.'); return; }
+        const remaining = tiers.filter(t => t.level !== level);
+        await apiPost('/api/admin/signal-tiers', remaining);
+        loadSignalTiers();
+        loadTierThresholds();
+    } catch (e) {
+        alert('Failed to delete tier: ' + e.message);
+    }
 }
 
 async function loadTargetedUsers() {

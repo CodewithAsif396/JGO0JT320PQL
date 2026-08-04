@@ -540,6 +540,55 @@ router.get('/signals', authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+// ── Signal Access Tiers (dynamic — any number of tiers, not fixed at 4) ────
+// Stored as one JSON array in PlatformSettings instead of the old fixed
+// tier1_min..tier4_min keys, so the admin can add/remove tiers freely.
+router.get('/signal-tiers', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const setting = await prisma.platformSettings.findUnique({ where: { key: 'signal_tiers' } });
+    if (setting) {
+      const tiers = JSON.parse(setting.value);
+      if (Array.isArray(tiers) && tiers.length) return res.json(tiers);
+    }
+    // One-time fallback: migrate the old fixed keys if they were ever set,
+    // otherwise fall back to the original hardcoded defaults.
+    const legacy = await prisma.platformSettings.findMany({
+      where: { key: { in: ['tier1_min', 'tier2_min', 'tier3_min', 'tier4_min'] } }
+    });
+    const map = {};
+    legacy.forEach(r => { map[r.key] = parseFloat(r.value); });
+    const defaults = [500, 1000, 1500, 2000];
+    const tiers = defaults.map((d, i) => ({ level: i + 1, min: map['tier' + (i + 1) + '_min'] ?? d }));
+    res.json(tiers);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+router.post('/signal-tiers', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const tiers = req.body;
+    if (!Array.isArray(tiers) || !tiers.length) return res.status(400).json({ error: 'Provide a non-empty array of tiers' });
+    for (const t of tiers) {
+      if (t.min === undefined || t.min === null || isNaN(parseFloat(t.min))) {
+        return res.status(400).json({ error: 'Every tier needs a valid minimum balance' });
+      }
+    }
+    // Re-number levels 1..N by ascending minimum so save order never matters
+    const sorted = tiers
+      .map(t => ({ min: parseFloat(t.min) }))
+      .sort((a, b) => a.min - b.min)
+      .map((t, i) => ({ level: i + 1, min: t.min }));
+    await prisma.platformSettings.upsert({
+      where: { key: 'signal_tiers' },
+      update: { value: JSON.stringify(sorted) },
+      create: { key: 'signal_tiers', value: JSON.stringify(sorted) }
+    });
+    res.json({ success: true, tiers: sorted });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/bulk-signals/users', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const rows = await prisma.platformSettings.findMany({

@@ -4,34 +4,54 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 
 // Cache tier thresholds — refreshed every 60s
+// Tiers now live as a dynamic JSON array (PlatformSettings key
+// "signal_tiers") instead of a fixed tier1_min..tier4_min set, so an admin
+// can add/remove tiers freely. `list` is the authoritative, unlimited-length
+// source; t1..t4 are kept populated too since several existing call sites
+// (and the user-facing VIP tiers table) still read those specific keys.
 let _tierCache = null;
 let _tierCacheAt = 0;
 async function getTierThresholds() {
   if (_tierCache && Date.now() - _tierCacheAt < 60000) return _tierCache;
-  const rows = await prisma.platformSettings.findMany({
-    where: { key: { in: ['tier1_min', 'tier2_min', 'tier3_min', 'tier4_min'] } }
-  });
-  const map = {};
-  rows.forEach(r => { map[r.key] = parseFloat(r.value); });
-  _tierCache = {
-    t1: map['tier1_min'] ?? 500,
-    t2: map['tier2_min'] ?? 1000,
-    t3: map['tier3_min'] ?? 1500,
-    t4: map['tier4_min'] ?? 2000
-  };
+
+  let list = null;
+  const setting = await prisma.platformSettings.findUnique({ where: { key: 'signal_tiers' } });
+  if (setting) {
+    try { list = JSON.parse(setting.value); } catch { list = null; }
+  }
+  if (!Array.isArray(list) || !list.length) {
+    const rows = await prisma.platformSettings.findMany({
+      where: { key: { in: ['tier1_min', 'tier2_min', 'tier3_min', 'tier4_min'] } }
+    });
+    const map = {};
+    rows.forEach(r => { map[r.key] = parseFloat(r.value); });
+    const defaults = [500, 1000, 1500, 2000];
+    list = defaults.map((d, i) => ({ level: i + 1, min: map['tier' + (i + 1) + '_min'] ?? d }));
+  }
+  list = list.slice().sort((a, b) => a.level - b.level);
+
+  const result = { list };
+  list.forEach(t => { result['t' + t.level] = t.min; });
+  result.t1 = result.t1 ?? 500;
+  result.t2 = result.t2 ?? 1000;
+  result.t3 = result.t3 ?? 1500;
+  result.t4 = result.t4 ?? 2000;
+
+  _tierCache = result;
   _tierCacheAt = Date.now();
-  return _tierCache;
+  return result;
 }
 
-// Server-side balance tier — uses total balance across all wallets
+// Server-side balance tier — uses total balance across all wallets.
+// Supports any number of configured tiers, not just 4.
 async function getAccessTier(balance, tradeBalance, perpetualBalance) {
   const total = (balance || 0) + (tradeBalance || 0) + (perpetualBalance || 0);
-  const { t1, t2, t3, t4 } = await getTierThresholds();
-  if (total >= t4) return 4;
-  if (total >= t3) return 3;
-  if (total >= t2) return 2;
-  if (total >= t1) return 1;
-  return 0;
+  const { list } = await getTierThresholds();
+  let tier = 0;
+  for (const t of list) {
+    if (total >= t.min) tier = t.level;
+  }
+  return tier;
 }
 
 
