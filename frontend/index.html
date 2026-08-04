@@ -1088,14 +1088,13 @@
                 </div>
             </div>
 
-            <!-- NETWORK TABS -->
+            <!-- NETWORK — only TRC20 is actually supported (wallet generation and
+                 deposit detection only exist for TRON); ERC20/BEP20 tabs used to
+                 sit here but selecting them just showed a broken "—" placeholder
+                 address, since no address for those networks is ever generated. -->
             <div style="padding:0 16px 16px;background:#fff;">
-                <div style="font-size:12px;color:#9ca3af;font-weight:600;margin-bottom:10px;letter-spacing:0.5px;">SELECT NETWORK</div>
-                <div class="network-tabs" style="border:none;padding:0;background:transparent;gap:8px;display:flex;">
-                    <button class="active" onclick="setNetworkTab(this,'TRC20')" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #8b5cf6;background:rgba(139,92,246,0.08);color:#7c3aed;font-size:13px;font-weight:700;cursor:pointer;">TRC20</button>
-                    <button onclick="setNetworkTab(this,'ERC20')" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #e0e0f0;background:#fff;color:#9ca3af;font-size:13px;font-weight:600;cursor:pointer;">ERC20</button>
-                    <button onclick="setNetworkTab(this,'BEP20')" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #e0e0f0;background:#fff;color:#9ca3af;font-size:13px;font-weight:600;cursor:pointer;">BEP20</button>
-                </div>
+                <div style="font-size:12px;color:#9ca3af;font-weight:600;margin-bottom:10px;letter-spacing:0.5px;">NETWORK</div>
+                <div style="display:inline-flex;padding:10px 16px;border-radius:12px;border:1.5px solid #8b5cf6;background:rgba(139,92,246,0.08);color:#7c3aed;font-size:13px;font-weight:700;">TRC20</div>
             </div>
 
             <!-- QR + ADDRESS CARD -->
