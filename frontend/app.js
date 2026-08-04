@@ -16,7 +16,7 @@ function toNumericId(cuid) {
 const navStack = [];
 let currentScreen = 'home-screen';
 
-const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'trade-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'deposit-record-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
+const PROTECTED_SCREENS = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen', 'deposit-screen', 'withdrawal-screen', 'transaction-screen', 'share-screen', 'notifications-screen', 'referrals-screen', 'exchange-screen', 'fund-transfer-screen', 'withdrawal-record-screen', 'basic-verification-screen', 'deposit-record-screen', 'change-password-screen', 'bind-address-screen', 'withdrawal-password-screen', 'google-auth-screen', 'more-screen', 'settings-screen', 'convert-screen', 'transfer-record-screen', 'perp-chart-screen', 'chat-screen'];
 
 window.addEventListener('popstate', () => {
     const p = window.location.pathname;
@@ -38,7 +38,7 @@ function navTo(screenId) {
         document.querySelectorAll('.pql-nav-btn, .nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
     }
     // Refresh data on important screen changes
-    if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen', 'trade-screen'].includes(screenId)) {
+    if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen'].includes(screenId)) {
         refreshUserData();
     }
     // Screen-specific loading
@@ -87,7 +87,7 @@ function switchTab(screenId, btnEl) {
     if (btnEl && btnEl.classList && (btnEl.classList.contains('pql-nav-btn') || btnEl.classList.contains('nav-btn'))) btnEl.classList.add('active');
     const app = document.getElementById('app');
     if (app) app.scrollTop = 0;
-    if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen', 'trade-screen'].includes(screenId)) {
+    if (['assets-screen', 'futures-screen', 'perpetual-screen', 'exchange-screen'].includes(screenId)) {
         refreshUserData();
     }
     if (screenId === 'futures-screen') {
@@ -757,7 +757,7 @@ function openOrderPanel(dir) {
     const btn = document.getElementById('order-action-btn');
     if (btn) { btn.textContent = dir; btn.style.background = dir === 'CALL' ? 'var(--up-color)' : 'var(--down-color)'; }
     const availSpan = document.querySelector('#order-panel .order-minmax .up');
-    if (availSpan && userData) availSpan.textContent = (userData.tradeBalance || 0).toFixed(2);
+    if (availSpan && userData) availSpan.textContent = (userData.perpetualBalance || 0).toFixed(2);
 
     // Set pair title in panel header
     const pairTitle = document.querySelector('#order-panel .order-pair-title');
@@ -778,7 +778,7 @@ function closeOrderPanel() {
 }
 function setOrderPct(pct) {
     const el = document.getElementById('order-amount');
-    const balance = userData?.tradeBalance || 0;
+    const balance = userData?.perpetualBalance || 0;
     if (el) {
         // Use Math.floor to truncate to 2 decimals instead of rounding up
         el.value = (Math.floor((balance * pct / 100) * 100) / 100).toFixed(2);
@@ -823,7 +823,7 @@ function setPerpPct(pct) { showToast(pct + '% selected'); }
 
 // ── ASSETS ──
 let assetsVisible = true;
-let _spotBal = null, _futuresBal = null, _perpBal = null;
+let _spotBal = null, _perpBal = null;
 function toggleAssetsVisibility() {
     assetsVisible = !assetsVisible;
     const bal = document.getElementById('assets-balance-val');
@@ -895,13 +895,11 @@ function selectTransferWallet(side, wallet) {
 
 function _getSubBal(name) {
     if (name === 'Exchange') return _spotBal !== null ? _spotBal : (userData ? userData.balance : 0);
-    if (name === 'Trade') return _futuresBal !== null ? _futuresBal : (userData ? (userData.tradeBalance || 0) : 0);
     if (name === 'Perpetual') return _perpBal !== null ? _perpBal : (userData ? (userData.perpetualBalance || 0) : 0);
     return 0;
 }
 function _setSubBal(name, val) {
     if (name === 'Exchange') _spotBal = val;
-    else if (name === 'Trade') _futuresBal = val;
     else if (name === 'Perpetual') _perpBal = val;
 }
 
@@ -956,7 +954,6 @@ async function doTransfer() {
                 const balData = await balResp.json();
                 if (balResp.ok) {
                     _spotBal = balData.balance ?? _spotBal;
-                    _futuresBal = balData.tradeBalance ?? _futuresBal;
                     _perpBal = balData.perpetualBalance ?? _perpBal;
                 }
             } catch (e2) {
@@ -964,10 +961,8 @@ async function doTransfer() {
                 _setSubBal(to, _getSubBal(to) + amount);
             }
             const spotEl = document.getElementById('acct-exchange-bal');
-            const futEl = document.getElementById('acct-trade-bal');
             const perpEl = document.getElementById('acct-perpetual-bal');
             if (spotEl) spotEl.textContent = (_spotBal || 0).toFixed(2);
-            if (futEl) futEl.textContent = (_futuresBal || 0).toFixed(2);
             if (perpEl) perpEl.textContent = (_perpBal || 0).toFixed(2);
             document.getElementById('transfer-amount').value = '';
             updateTransferAvail();
@@ -979,10 +974,8 @@ async function doTransfer() {
         _setSubBal(from, fromBal - amount);
         _setSubBal(to, _getSubBal(to) + amount);
         const spotEl = document.getElementById('acct-exchange-bal');
-        const futEl = document.getElementById('acct-trade-bal');
         const perpEl = document.getElementById('acct-perpetual-bal');
         if (spotEl) spotEl.textContent = (_spotBal || 0).toFixed(2);
-        if (futEl) futEl.textContent = (_futuresBal || 0).toFixed(2);
         if (perpEl) perpEl.textContent = (_perpBal || 0).toFixed(2);
         document.getElementById('transfer-amount').value = '';
         updateTransferAvail();
@@ -1700,8 +1693,6 @@ function updateUIWithUserData() {
     if (document.getElementById("assets-balance-val")) document.getElementById("assets-balance-val").innerHTML = `${totalAssetVal.toFixed(2)} <span style="font-size:13px;font-weight:500;margin-left:4px;">USDT</span> <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`;
     const exchBal = document.getElementById('acct-exchange-bal');
     if (exchBal) exchBal.textContent = (userData.exchangeBalance || userData.balance || 0).toFixed(2);
-    const tradeBal = document.getElementById('acct-trade-bal');
-    if (tradeBal) tradeBal.textContent = (userData.tradeBalance || 0).toFixed(2);
     const perpBal = document.getElementById('acct-perpetual-bal');
     if (perpBal) perpBal.textContent = (userData.perpetualBalance || 0).toFixed(2);
 
@@ -1709,17 +1700,6 @@ function updateUIWithUserData() {
     const exBalVal = userData.exchangeBalance || userData.balance || 0;
     const exchHeader = document.getElementById('exchange-assets-bal');
     if (exchHeader) exchHeader.innerHTML = `${exBalVal.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`;
-
-    // Trade sub-screen
-    const trBalVal = userData.tradeBalance || 0;
-    const tradeHeader = document.getElementById('trade-assets-bal');
-    if (tradeHeader) tradeHeader.innerHTML = `${trBalVal.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`;
-    const trAvail = document.getElementById('trade-usdt-avail');
-    if (trAvail) trAvail.textContent = trBalVal.toFixed(2);
-    const trFreeze = document.getElementById('trade-usdt-freeze');
-    if (trFreeze) trFreeze.textContent = (userData.lockedBalance || 0).toFixed(2);
-    const trVal = document.getElementById('trade-usdt-val');
-    if (trVal) trVal.textContent = `≈ ${trBalVal.toFixed(2)}`;
 
     // PnL
     const pVal = userData.todayPnl !== undefined ? userData.todayPnl : (userData.profitBalance || 0);
@@ -1785,7 +1765,7 @@ function updateUIWithUserData() {
 
     // Order panel available balance
     const availSpan = document.querySelector('#order-panel .order-minmax .up');
-    if (availSpan) availSpan.textContent = (userData.tradeBalance || 0).toFixed(2);
+    if (availSpan) availSpan.textContent = (userData.perpetualBalance || 0).toFixed(2);
 
     // Fund transfer available balance
     updateTransferAvail();
@@ -1800,13 +1780,6 @@ function updateUIWithUserData() {
         if (depEl) depEl.textContent = userData.depositAddress;
     }
 
-    // Trade screen balance
-    const tradeBalEls = document.querySelectorAll('#trade-screen .assets-balance');
-    tradeBalEls.forEach(el => {
-        el.innerHTML = `${userData.balance.toFixed(2)} <i class="fa-solid fa-caret-down" style="font-size:14px;margin-left:4px;"></i>`;
-    });
-    const tradeAvailEl = document.querySelector('#trade-screen .detail-val.up');
-    if (tradeAvailEl) tradeAvailEl.textContent = userData.balance.toFixed(2);
 }
 
 async function loadDepositInfo() {
@@ -2441,7 +2414,7 @@ async function placeOrder() {
     if (!authToken) { showToast('Please login first'); return; }
     const amount = parseFloat(document.getElementById('order-amount')?.value);
     if (!amount || amount <= 0) { showToast('Please enter a valid amount'); return; }
-    if (userData && amount > (userData.tradeBalance || 0)) { showToast('Insufficient balance'); return; }
+    if (userData && amount > (userData.perpetualBalance || 0)) { showToast('Insufficient balance'); return; }
 
     const actionBtn = document.getElementById('order-action-btn');
     if (actionBtn) { actionBtn.textContent = 'Placing...'; actionBtn.disabled = true; }
@@ -3074,7 +3047,7 @@ async function checkPctTier(pct, btnId) {
     // Tier thresholds (USDT balance required to unlock)
     const tiers = { 25: 100, 50: 500, 75: 1000, 100: 2000 };
     const required = tiers[pct] || 9999;
-    const balance = parseFloat(userData?.balance || 0) + parseFloat(userData?.tradeBalance || 0);
+    const balance = parseFloat(userData?.balance || 0) + parseFloat(userData?.perpetualBalance || 0);
 
     // Check backend tier setting
     try {
@@ -4786,8 +4759,8 @@ setInterval(() => {
 
 // ── FUND TRANSFER LOGIC ──
 let transferFrom = 'Exchange';
-let transferTo = 'Trade';
-let transferBalances = { Exchange: 0, Trade: 0, Perpetual: 0 };
+let transferTo = 'Perpetual';
+let transferBalances = { Exchange: 0, Perpetual: 0 };
 
 function openFundTransferModal() {
     document.getElementById('fund-transfer-overlay').style.display = 'flex';
@@ -4803,7 +4776,6 @@ function fetchBalancesForTransfer() {
         .then(r => r.json())
         .then(d => {
             transferBalances.Exchange = parseFloat(d.exchangeBalance || d.balance || 0);
-            transferBalances.Trade = parseFloat(d.tradeBalance || 0);
             transferBalances.Perpetual = parseFloat(d.perpetualBalance || 0);
             updateTransferUI();
         }).catch(e => console.error(e));
@@ -4857,12 +4829,10 @@ function closePenaltyTermsModal() {
 }
 
 function confirmNewTransfer() {
-    if (transferFrom === 'Trade' && transferTo === 'Exchange') {
-        document.getElementById('penalty-terms-text').textContent = window.penaltyTermsText || 'Please note that transferring principal funds from Trade back to Exchange before the lock period expires will incur an early withdrawal penalty.';
-        document.getElementById('penalty-terms-overlay').style.display = 'flex';
-    } else {
-        proceedNewTransfer();
-    }
+    // Exchange <-> Perpetual is now free/instant — no lock period or
+    // early-withdrawal penalty (Trade wallet, which had that policy, has
+    // been removed).
+    proceedNewTransfer();
 }
 
 function proceedNewTransfer() {

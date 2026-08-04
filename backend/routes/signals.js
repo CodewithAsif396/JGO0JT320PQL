@@ -42,10 +42,11 @@ async function getTierThresholds() {
   return result;
 }
 
-// Server-side balance tier — uses total balance across all wallets.
-// Supports any number of configured tiers, not just 4.
-async function getAccessTier(balance, tradeBalance, perpetualBalance) {
-  const total = (balance || 0) + (tradeBalance || 0) + (perpetualBalance || 0);
+// Server-side balance tier — Exchange (balance) + Perpetual only. Trade
+// wallet has been removed; Exchange is deposit/withdrawal, Perpetual is
+// trading.
+async function getAccessTier(balance, perpetualBalance) {
+  const total = (balance || 0) + (perpetualBalance || 0);
   const { list } = await getTierThresholds();
   let tier = 0;
   for (const t of list) {
@@ -63,7 +64,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
+    const accessTier = await getAccessTier(user.balance, user.perpetualBalance);
     const tiers = await getTierThresholds();
 
     // 1. Signals targeted directly at this user — either the legacy
@@ -110,7 +111,7 @@ router.get('/', authMiddleware, async (req, res) => {
       return true;
     });
 
-    res.json({ signals, accessTier, balance: user.balance, tradeBalance: user.tradeBalance, tiers });
+    res.json({ signals, accessTier, balance: user.balance, tiers });
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
   }
@@ -241,7 +242,7 @@ router.post('/trade', authMiddleware, async (req, res) => {
     const totalBalance = (user.balance || 0) + (user.perpetualBalance || 0);
 
     // Server-side balance tier validation — cannot be bypassed from frontend
-    const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
+    const accessTier = await getAccessTier(user.balance, user.perpetualBalance);
     const { t1: tierMin } = await getTierThresholds();
     if (accessTier === 0) {
       return res.status(403).json({ error: `Minimum $${tierMin} Trade balance required to trade signals.` });
@@ -300,7 +301,12 @@ router.post('/manual-trade', authMiddleware, async (req, res) => {
     if (!pair || !amt || amt <= 0) return res.status(400).json({ error: 'Invalid parameters' });
 
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (user.tradeBalance < amt - 0.005) return res.status(400).json({ error: 'Insufficient trade balance' });
+    // This was checking tradeBalance while every branch below always
+    // decrements perpetualBalance — a real pre-existing bug (a user with
+    // plenty of Trade balance but none in Perpetual could pass this check
+    // then get their Perpetual balance decremented into the negative).
+    // Trade wallet is removed; Perpetual funds trades directly now.
+    if (user.perpetualBalance < amt - 0.005) return res.status(400).json({ error: 'Insufficient Perpetual balance' });
 
     // INTERCEPT: Check if there's an ACTIVE signal for this user on this exact pair
     let cleanPair = pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
@@ -315,7 +321,7 @@ router.post('/manual-trade', authMiddleware, async (req, res) => {
     });
 
     let interceptedSignal = null;
-    const accessTier = await getAccessTier(user.balance, user.tradeBalance, user.perpetualBalance);
+    const accessTier = await getAccessTier(user.balance, user.perpetualBalance);
     for (const sig of activeSignals) {
       const sigPair = sig.pair.replace(/[\s\/]/g, '').replace('USDTUSDT', 'USDT').toUpperCase();
       if (sigPair === cleanPair) {

@@ -149,10 +149,10 @@ class SignalService {
 
     const users = await prisma.user.findMany({
       where: { suspended: false },
-      select: { id: true, balance: true, tradeBalance: true, perpetualBalance: true }
+      select: { id: true, balance: true, perpetualBalance: true }
     });
     for (const user of users) {
-      const total = (user.balance || 0) + (user.tradeBalance || 0) + (user.perpetualBalance || 0);
+      const total = (user.balance || 0) + (user.perpetualBalance || 0);
       const tier = total >= t3 ? 3 : total >= t2 ? 2 : total >= t1 ? 1 : 0;
       if (tier > 0 && signal.visibilityTier <= tier && this.ns) {
         await this.ns.send(user.id, title, body, 'SIGNAL').catch(() => { });

@@ -35,7 +35,6 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             email: true,
             referralCode: true,
             balance: true,
-            tradeBalance: true,
             perpetualBalance: true,
             referralBalance: true,
             createdAt: true,
@@ -45,7 +44,6 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
                 email: true,
                 referralCode: true,
                 balance: true,
-                tradeBalance: true,
                 perpetualBalance: true,
                 referralBalance: true,
                 createdAt: true,
@@ -55,7 +53,6 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
                     email: true,
                     referralCode: true,
                     balance: true,
-                    tradeBalance: true,
                     perpetualBalance: true,
                     referralBalance: true,
                     createdAt: true,
@@ -65,7 +62,6 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
                         email: true,
                         referralCode: true,
                         balance: true,
-                        tradeBalance: true,
                         perpetualBalance: true,
                         referralBalance: true,
                         createdAt: true
@@ -101,7 +97,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
     let weekEarnings = 0;
 
     function processNode(member, level, parentEmail) {
-      const totalBal = (member.balance || 0) + (member.tradeBalance || 0) + (member.perpetualBalance || 0);
+      const totalBal = (member.balance || 0) + (member.perpetualBalance || 0);
       const joinedAt = member.createdAt;
       const isActive = totalBal > 0;
 

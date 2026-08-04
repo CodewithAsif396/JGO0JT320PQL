@@ -22,10 +22,10 @@ router.get('/balance', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { balance: true, exchangeBalance: true, tradeBalance: true, perpetualBalance: true, lockedBalance: true }
+      select: { balance: true, exchangeBalance: true, perpetualBalance: true, lockedBalance: true }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ balance: user.balance, exchangeBalance: user.exchangeBalance, tradeBalance: user.tradeBalance, perpetualBalance: user.perpetualBalance, lockedBalance: user.lockedBalance });
+    res.json({ balance: user.balance, exchangeBalance: user.exchangeBalance, perpetualBalance: user.perpetualBalance, lockedBalance: user.lockedBalance });
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
   }
@@ -173,7 +173,6 @@ router.get('/info', authMiddleware, async (req, res) => {
     res.json({
       balance: user.balance,
       exchangeBalance: user.exchangeBalance,
-      tradeBalance: user.tradeBalance,
       perpetualBalance: user.perpetualBalance,
       lockedBalance: user.lockedBalance,
       profitBalance: user.profitBalance,
@@ -285,123 +284,40 @@ router.post('/convert', authMiddleware, async (req, res) => {
   }
 });
 
-// ── WALLET TRANSFER ──
+// ── WALLET TRANSFER — Exchange <-> Perpetual only (Trade wallet removed) ──
+// Exchange (balance) is for deposit/withdrawal; Perpetual is for trading.
+// Free, instant transfer — no lock period or early-withdrawal penalty.
 router.post('/transfer', authMiddleware, async (req, res) => {
   try {
     const { fromWallet, toWallet, amount } = req.body;
     let amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
-    const validWallets = ['Exchange', 'Trade', 'Perpetual'];
+    const validWallets = ['Exchange', 'Perpetual'];
     if (!validWallets.includes(fromWallet) || !validWallets.includes(toWallet) || fromWallet === toWallet) {
       return res.status(400).json({ error: 'Invalid transfer wallets' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      include: { investmentLocks: true }
-    });
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Map wallet names to model fields
-    const getField = (w) => {
-      if (w === 'Exchange') return 'balance'; // Using balance as exchange balance
-      if (w === 'Trade') return 'tradeBalance';
-      if (w === 'Perpetual') return 'perpetualBalance';
-    };
+    const fromField = fromWallet === 'Exchange' ? 'balance' : 'perpetualBalance';
+    const toField = toWallet === 'Exchange' ? 'balance' : 'perpetualBalance';
 
-    const fromField = getField(fromWallet);
-    const toField = getField(toWallet);
-
-    // Sub-cent tolerance for Float storage/arithmetic drift, same as the
-    // other balance checks in this file — otherwise transferring the exact
-    // displayed balance (e.g. "355.53" when the stored value is really
-    // 355.529999999999996) falsely fails as insufficient. Clamp to the
-    // real stored balance afterward so the decrement below never dips
-    // the source wallet negative from float noise.
+    // Sub-cent tolerance for Float storage/arithmetic drift — otherwise
+    // transferring the exact displayed balance (e.g. "355.53" when the
+    // stored value is really 355.529999999999996) falsely fails as
+    // insufficient. Clamp to the real stored balance afterward so the
+    // decrement below never dips the source wallet negative from float noise.
     if (user[fromField] < amt - 0.005) return res.status(400).json({ error: 'Insufficient balance in source wallet' });
     amt = Math.min(amt, user[fromField]);
-
-    let principalAmount = 0;
-    let profitAmount = 0;
-    let penaltyAmount = 0;
-    let actualTransferAmt = amt;
-
-    // Special logic for Trade -> Exchange (Profit vs Principal)
-    if (fromWallet === 'Trade' && toWallet === 'Exchange') {
-      const lock = user.investmentLocks[0]; // Assuming single active lock for simplicity
-      let lockActive = false;
-      let penaltyPct = 0;
-
-      if (lock && lock.lockEndDate && new Date() < new Date(lock.lockEndDate)) {
-         lockActive = true;
-         penaltyPct = lock.penaltyPercentage;
-      }
-
-      const totalTrade = user.tradeBalance;
-      const profit = user.profitBalance;
-      const principal = Math.max(0, totalTrade - profit);
-
-      if (amt <= profit) {
-        // Only transferring profit
-        profitAmount = amt;
-      } else {
-        // Transferring profit + some principal
-        profitAmount = profit;
-        principalAmount = amt - profit;
-      }
-
-      if (lockActive && principalAmount > 0) {
-        penaltyAmount = principalAmount * (penaltyPct / 100);
-        actualTransferAmt = amt - penaltyAmount;
-      }
-      
-      // Update profitBalance if we withdrew profit
-      if (profitAmount > 0) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { profitBalance: { decrement: profitAmount } }
-        });
-      }
-    }
-    
-    // Special logic for Exchange -> Trade (Creating/Updating InvestmentLock)
-    if (fromWallet === 'Exchange' && toWallet === 'Trade') {
-      const lockDaysSetting = await prisma.platformSettings.findUnique({ where: { key: 'withdrawal_lock_days' } });
-      const penaltyPctSetting = await prisma.platformSettings.findUnique({ where: { key: 'withdrawal_penalty_pct' } });
-      const lockDays = parseInt(lockDaysSetting?.value || '35');
-      const penaltyPct = parseFloat(penaltyPctSetting?.value || '20');
-
-      if (lockDays > 0) {
-        const lockEndDate = new Date();
-        lockEndDate.setDate(lockEndDate.getDate() + lockDays);
-        
-        await prisma.investmentLock.upsert({
-          where: { userId: user.id },
-          create: {
-            userId: user.id,
-            principalLocked: amt,
-            lockStartDate: new Date(),
-            lockEndDate: lockEndDate,
-            penaltyPercentage: penaltyPct,
-            remainingLockedPrincipal: amt
-          },
-          update: {
-            principalLocked: { increment: amt },
-            remainingLockedPrincipal: { increment: amt },
-            lockEndDate: lockEndDate, // Reset lock duration on new deposit
-            penaltyPercentage: penaltyPct
-          }
-        });
-      }
-    }
 
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
         data: {
           [fromField]: { decrement: amt },
-          [toField]: { increment: actualTransferAmt }
+          [toField]: { increment: amt }
         }
       }),
       prisma.walletTransferLog.create({
@@ -410,15 +326,12 @@ router.post('/transfer', authMiddleware, async (req, res) => {
           fromWallet,
           toWallet,
           amount: amt,
-          transferType: `${fromWallet}_TO_${toWallet}`,
-          principalAmount,
-          profitAmount,
-          penaltyAmount
+          transferType: `${fromWallet}_TO_${toWallet}`
         }
       })
     ]);
 
-    res.json({ success: true, actualTransferAmt, penaltyAmount });
+    res.json({ success: true, actualTransferAmt: amt, penaltyAmount: 0 });
   } catch (error) {
     res.status(500).json({ error: 'An internal server error occurred.' });
   }

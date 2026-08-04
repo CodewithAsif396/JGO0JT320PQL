@@ -1027,42 +1027,6 @@
             <div style="height:20px;"></div>
         </div>
 
-        <!-- TRADE SCREEN -->
-        <div id="trade-screen" class="screen">
-            <div class="sub-header">
-                <i class="fa-solid fa-chevron-left back-btn" onclick="navTo('assets-screen')"></i>
-                <h2>Trade</h2>
-                <i class="fa-solid fa-clock-rotate-left" style="color:var(--text-secondary);cursor:pointer;"></i>
-            </div>
-            <div class="assets-top-card" style="background:linear-gradient(135deg,#1a6b4a,#02c076);">
-                <div class="assets-card-inner">
-                    <div class="assets-title-row">Trade Assets <i class="fa-regular fa-eye"></i></div>
-                    <div class="assets-balance" id="trade-assets-bal">0.00 <i class="fa-solid fa-caret-down"
-                            style="font-size:14px;margin-left:4px;"></i></div>
-                    <div class="assets-pnl">Today's PnL: <span id="trade-pnl-val">0.00</span> <i
-                            class="fa-solid fa-rotate-right" style="margin-left:4px;"></i></div>
-                </div>
-            </div>
-            <div class="assets-list" style="padding:10px 20px;">
-                <div class="asset-item">
-                    <div class="asset-header-row">
-                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png"
-                            style="width:32px;height:32px;border-radius:50%;">
-                        <span class="coin-name">USDT</span>
-                    </div>
-                    <div class="asset-details">
-                        <div class="detail-col"><span class="detail-lbl">Available</span><span class="detail-val up"
-                                id="trade-usdt-avail">0.00</span></div>
-                        <div class="detail-col"><span class="detail-lbl">Freeze</span><span class="detail-val"
-                                id="trade-usdt-freeze">0</span>
-                        </div>
-                        <div class="detail-col right"><span class="detail-lbl">Valuation</span><span class="detail-val"
-                                id="trade-usdt-val">≈ $0.00</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ═══════════════════════════════════════════════════════
      DEPOSIT SCREEN
 ════════════════════════════════════════════════════════ -->
@@ -3030,7 +2994,6 @@
                             <div class="dropdown-menu" id="transfer-from-dd"
                                 style="display:none; right:0; top:30px; min-width:140px;">
                                 <div class="dropdown-item" onclick="setTransferVal('from', 'Exchange')">Exchange</div>
-                                <div class="dropdown-item" onclick="setTransferVal('from', 'Trade')">Trade</div>
                                 <div class="dropdown-item" onclick="setTransferVal('from', 'Perpetual')">Perpetual</div>
                             </div>
                         </div>
@@ -3043,14 +3006,13 @@
                                 style="flex:1; border:none; padding:0; justify-content:flex-end;"
                                 onclick="toggleDropdown('transfer-to-dd')">
                                 <span id="transfer-to-val"
-                                    style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Trade</span>
+                                    style="font-weight:500; font-size:15px; margin-right:8px; color:var(--text-primary);">Perpetual</span>
                                 <i class="fa-solid fa-chevron-right"
                                     style="font-size:12px; color:var(--text-secondary);"></i>
                             </div>
                             <div class="dropdown-menu" id="transfer-to-dd"
                                 style="display:none; right:0; top:30px; min-width:140px;">
                                 <div class="dropdown-item" onclick="setTransferVal('to', 'Exchange')">Exchange</div>
-                                <div class="dropdown-item" onclick="setTransferVal('to', 'Trade')">Trade</div>
                                 <div class="dropdown-item" onclick="setTransferVal('to', 'Perpetual')">Perpetual</div>
                             </div>
                         </div>

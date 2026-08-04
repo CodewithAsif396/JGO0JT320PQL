@@ -157,7 +157,6 @@ router.post('/balance/adjust', authMiddleware, adminMiddleware, async (req, res)
     if (!user) return res.status(404).json({ error: 'User not found' });
     
     let targetField = 'balance';
-    if (walletDestination === 'Trade') targetField = 'tradeBalance';
     if (walletDestination === 'Perpetual') targetField = 'perpetualBalance';
     
     if (type === 'debit' && user[targetField] < val) return res.status(400).json({ error: 'Insufficient balance to debit' });
@@ -602,12 +601,12 @@ router.get('/bulk-signals/users', authMiddleware, adminMiddleware, async (req, r
     const t4 = map['tier4_min'] ?? 2000;
 
     const users = await prisma.user.findMany({
-      select: { id: true, email: true, balance: true, tradeBalance: true, perpetualBalance: true }
+      select: { id: true, email: true, balance: true, perpetualBalance: true }
     });
-    
+
     const tiers = { t1: [], t2: [], t3: [], t4: [], t0: [] };
     users.forEach(u => {
-      const tot = (u.balance||0) + (u.tradeBalance||0) + (u.perpetualBalance||0);
+      const tot = (u.balance||0) + (u.perpetualBalance||0);
       if (tot >= t4) tiers.t4.push(u);
       else if (tot >= t3) tiers.t3.push(u);
       else if (tot >= t2) tiers.t2.push(u);
@@ -798,7 +797,7 @@ router.get('/dashboard', authMiddleware, adminMiddleware, async (req, res) => {
       prisma.kYC.count({ where: { status: 'PENDING' } }),
       prisma.transaction.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { user: { select: { email: true } } } }),
       prisma.signal.findMany({ where: { status: { in: ['ACTIVE', 'PENDING'] } }, orderBy: { createdAt: 'desc' }, take: 5 }),
-      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { tradeBalance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
+      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
     ]);
 
     const inactiveUsers = totalUsers - activeUsers;
@@ -850,7 +849,7 @@ router.get('/analytics', authMiddleware, adminMiddleware, async (req, res) => {
       prisma.deposit.count({ where: { status: 'pending_approval' } }),
       prisma.withdrawal.count({ where: { status: 'pending' } }),
       prisma.kYC.count({ where: { status: 'PENDING' } }),
-      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { tradeBalance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
+      prisma.user.count({ where: { OR: [{ balance: { gt: 0 } }, { perpetualBalance: { gt: 0 } }] } })
     ]);
 
     const inactiveUsers = totalUsers - activeUsers;
