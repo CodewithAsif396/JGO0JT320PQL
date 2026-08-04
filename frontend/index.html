@@ -2492,12 +2492,23 @@
 
             <div style="padding:16px;">
                 <!-- Already enabled badge -->
-                <div id="google-auth-enabled-badge" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+                <div id="google-auth-enabled-badge" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:14px 16px;margin-bottom:12px;align-items:center;gap:10px;">
                     <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:20px;"></i>
-                    <span style="font-size:14px;font-weight:700;color:#16a34a;">Google Authenticator is Active</span>
+                    <span style="font-size:14px;font-weight:700;color:#16a34a;flex:1;">Google Authenticator is Active</span>
+                </div>
+
+                <!-- Shown when already enabled — re-binding a new authenticator
+                     requires confirming the account password first, so a stolen
+                     session alone can't silently swap out someone's 2FA. -->
+                <div id="google-auth-remove-card" style="display:none;background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size:13px;color:#6b7280;margin-bottom:16px;">To change or remove your authenticator, confirm your account password first.</div>
+                    <button onclick="promptDisable2fa()" style="width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;background:#fef2f2;color:#dc2626;">
+                        <i class="fa-solid fa-trash-can" style="margin-right:8px;"></i>Remove / Change Authenticator
+                    </button>
                 </div>
 
                 <!-- Step 1: QR Code Card -->
+                <div id="google-auth-setup-form">
                 <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                         <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">1</div>
@@ -2531,6 +2542,7 @@
                 <button onclick="bindGoogleAuth()" style="width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4c1d95,#8b5cf6);color:#fff;box-shadow:0 4px 16px rgba(139,92,246,0.35);">
                     <i class="fa-solid fa-link" style="margin-right:8px;"></i>Bind Authenticator
                 </button>
+                </div>
             </div>
         </div>
 

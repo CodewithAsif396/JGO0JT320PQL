@@ -3843,17 +3843,36 @@ async function doUnbindAddress() {
 
 // ── GOOGLE AUTHENTICATOR (2FA) ──
 async function loadGoogleAuthSetup() {
-    const qrImg = document.getElementById('google-auth-qr');
-    const qrPlaceholder = document.getElementById('google-auth-qr-placeholder');
-    const keyEl = document.getElementById('google-auth-key');
     const badge = document.getElementById('google-auth-enabled-badge');
-
-    if (keyEl) keyEl.textContent = 'Loading...';
-    if (qrImg) { qrImg.style.display = 'none'; qrImg.src = ''; }
-    if (qrPlaceholder) qrPlaceholder.style.display = 'block';
-    if (badge) badge.style.display = 'none';
+    const removeCard = document.getElementById('google-auth-remove-card');
+    const setupForm = document.getElementById('google-auth-setup-form');
 
     try {
+        const statusRes = await fetch('/api/auth/2fa/status', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+        const statusData = await statusRes.json();
+        const enabled = !!statusData.enabled;
+
+        if (badge) badge.style.display = enabled ? 'flex' : 'none';
+
+        if (enabled) {
+            // Already active — don't show the QR/secret again or let a stolen
+            // session silently rebind a new authenticator; require the
+            // account password first (see promptDisable2fa()).
+            if (removeCard) removeCard.style.display = 'block';
+            if (setupForm) setupForm.style.display = 'none';
+            return;
+        }
+
+        if (removeCard) removeCard.style.display = 'none';
+        if (setupForm) setupForm.style.display = 'block';
+
+        const qrImg = document.getElementById('google-auth-qr');
+        const qrPlaceholder = document.getElementById('google-auth-qr-placeholder');
+        const keyEl = document.getElementById('google-auth-key');
+        if (keyEl) keyEl.textContent = 'Loading...';
+        if (qrImg) { qrImg.style.display = 'none'; qrImg.src = ''; }
+        if (qrPlaceholder) qrPlaceholder.style.display = 'block';
+
         const res = await fetch('/api/auth/2fa/setup', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
         const data = await res.json();
         if (!res.ok) { showToast(data.error || 'Failed to load 2FA setup'); return; }
@@ -3864,10 +3883,60 @@ async function loadGoogleAuthSetup() {
             qrImg.style.display = 'block';
         }
         if (qrPlaceholder) qrPlaceholder.style.display = 'none';
-        if (badge) badge.style.display = data.enabled ? 'flex' : 'none';
     } catch (e) {
         showToast('Network error loading 2FA');
     }
+}
+
+function promptDisable2fa() {
+    let modal = document.getElementById('disable-2fa-popup');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'disable-2fa-popup';
+        modal.style.cssText = 'display:flex;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:24px;';
+        modal.innerHTML = `
+        <div style="background:#fff;border-radius:18px;max-width:340px;width:100%;padding:24px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+            <div style="width:48px;height:48px;border-radius:14px;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;font-size:20px;"></i>
+            </div>
+            <div style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:14px;">Confirm Your Password</div>
+            <input type="password" id="disable-2fa-password" placeholder="Account password" style="width:100%;padding:13px;border:1.5px solid rgba(139,92,246,0.25);border-radius:12px;font-size:15px;margin-bottom:16px;outline:none;">
+            <button id="disable-2fa-confirm-btn" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;background:#dc2626;color:#fff;margin-bottom:10px;">Remove Authenticator</button>
+            <button onclick="closeDisable2faPrompt()" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;background:#f3f4f6;color:#6b7280;">Cancel</button>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    const input = document.getElementById('disable-2fa-password');
+    const btn = document.getElementById('disable-2fa-confirm-btn');
+    input.value = '';
+    btn.onclick = async () => {
+        const password = input.value;
+        if (!password) { showToast('Enter your password'); return; }
+        btn.textContent = 'Verifying...';
+        btn.style.pointerEvents = 'none';
+        try {
+            const res = await fetch('/api/auth/2fa/disable', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || 'Failed to remove authenticator'); btn.textContent = 'Remove Authenticator'; btn.style.pointerEvents = 'auto'; return; }
+            closeDisable2faPrompt();
+            showToast('Authenticator removed — set up a new one below.');
+            loadGoogleAuthSetup();
+        } catch (e) {
+            showToast('Network error');
+            btn.textContent = 'Remove Authenticator';
+            btn.style.pointerEvents = 'auto';
+        }
+    };
+    modal.style.display = 'flex';
+    input.focus();
+}
+function closeDisable2faPrompt() {
+    const modal = document.getElementById('disable-2fa-popup');
+    if (modal) modal.style.display = 'none';
 }
 
 async function bindGoogleAuth() {

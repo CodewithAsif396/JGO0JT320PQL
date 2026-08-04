@@ -270,6 +270,30 @@ router.post('/2fa/verify', authMiddleware, async (req, res) => {
   }
 });
 
+// ── 2FA DISABLE (remove/change) — requires the account password, not just
+// being logged in, since a stolen session token alone shouldn't be enough
+// to silently swap out someone's 2FA method ──
+router.post('/2fa/disable', authMiddleware, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: 'Password required' });
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: 'Incorrect password' });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { twoFaEnabled: false, otpSecret: null }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
+
 // ── 2FA STATUS ──
 router.get('/2fa/status', authMiddleware, async (req, res) => {
   try {
