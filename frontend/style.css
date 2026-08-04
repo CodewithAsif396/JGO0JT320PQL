@@ -138,6 +138,11 @@ body {
 
 .screen.active {
     display: block;
+    /* Without this, a screen shorter than the viewport (e.g. an empty
+       records list) doesn't fill it — #app's own dark background shows
+       through below the screen's own (often light) background. */
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .screen.full-page {
