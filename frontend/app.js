@@ -186,14 +186,20 @@ function toggleTheme() {
 _applyTheme();
 
 // ── TOAST ──
+let _toastHideTimer = null;
 function showToast(msg, duration = 2600) {
     const toast = document.getElementById('toast');
     if (!toast) return;
+    // Without clearing the previous timer, a fast second call (e.g. two
+    // quick actions) got its hide cancelled early by the first toast's
+    // still-pending timeout, making the second toast flicker/disappear
+    // before its own duration was up.
+    if (_toastHideTimer) clearTimeout(_toastHideTimer);
     toast.textContent = msg;
     toast.classList.remove('show');
     void toast.offsetWidth;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), duration);
+    _toastHideTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 // ── COPY ──

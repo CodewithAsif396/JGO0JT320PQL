@@ -84,18 +84,22 @@ model Deposit {
 }
 
 model Withdrawal {
-  id               String    @id @default(cuid())
-  userId           String
-  user             User      @relation(fields: [userId], references: [id])
-  toAddress        String
-  amount           Float
-  status           String    @default("pending")
-  txHash           String?
-  errorMessage     String?
-  rejectionReason  String?
-  requestedAt      DateTime  @default(now())
-  processedAt      DateTime?
-  processedBy      String?
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  toAddress         String
+  network           String?   @default("TRC20")
+  amount            Float
+  handlingFeePct    Float?
+  handlingFeeAmount Float?
+  finalAmount       Float?
+  status            String    @default("pending")
+  txHash            String?
+  errorMessage      String?
+  rejectionReason   String?
+  requestedAt       DateTime  @default(now())
+  processedAt       DateTime?
+  processedBy       String?
 }
 
 model BalanceAdjustment {

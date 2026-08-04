@@ -93,13 +93,26 @@ router.post('/withdraw', authMiddleware, async (req, res) => {
     // make an exact/full-balance transfer falsely fail as "insufficient".
     if (user.balance < amt - 0.005) return res.status(400).json({ error: 'Insufficient balance' });
 
+    // The admin panel's withdrawals table already had UI ready to show a
+    // Fee/Send breakdown per row (handlingFeeAmount/handlingFeePct/
+    // finalAmount), but nothing ever calculated or stored these — every
+    // withdrawal showed just the raw amount with no fee breakdown at all.
+    const feeSetting = await prisma.platformSettings.findUnique({ where: { key: 'withdrawal_handling_fee_pct' } });
+    const feePct = parseFloat(feeSetting?.value ?? '8');
+    const feeAmount = amt * (feePct / 100);
+    const finalAmount = Math.max(0, amt - feeAmount);
+
     // Lock balance: move from balance → lockedBalance (pending admin approval)
     const [withdrawal] = await prisma.$transaction([
       prisma.withdrawal.create({
         data: {
           userId: req.user.userId,
           toAddress: user.boundAddress,
+          network: 'TRC20',
           amount: amt,
+          handlingFeePct: feePct,
+          handlingFeeAmount: feeAmount,
+          finalAmount,
           status: 'pending'
         }
       }),
