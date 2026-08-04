@@ -54,6 +54,43 @@ function downloadAndroidApk(ev) {
     return true; // regular browser — let the <a download> handle it natively
 }
 
+// ── APP UPDATE CHECK (native Android only) ──
+async function checkForAppUpdate() {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+    const CapAppInfo = window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (!CapAppInfo) return;
+    try {
+        const [info, settings] = await Promise.all([
+            CapAppInfo.getInfo(),
+            fetch('/api/public/settings').then(r => r.json())
+        ]);
+        const latest = (settings.app_version || '').trim();
+        const installed = (info.version || '').trim();
+        if (!latest || !installed || latest === installed) return;
+        if (localStorage.getItem('dismissedUpdateVersion') === latest) return;
+        window._pendingApkUrl = settings.apk_download_url || (window.location.origin + '/pql.apk');
+        const overlay = document.getElementById('app-update-overlay');
+        if (overlay) overlay.style.display = 'flex';
+    } catch (e) { /* silent — never block app usage over a failed version check */ }
+}
+
+function dismissAppUpdate() {
+    const overlay = document.getElementById('app-update-overlay');
+    if (overlay) overlay.style.display = 'none';
+    fetch('/api/public/settings').then(r => r.json()).then(s => {
+        if (s.app_version) localStorage.setItem('dismissedUpdateVersion', s.app_version.trim());
+    }).catch(() => {});
+}
+
+function downloadAppUpdate() {
+    const overlay = document.getElementById('app-update-overlay');
+    if (overlay) overlay.style.display = 'none';
+    const url = window._pendingApkUrl || (window.location.origin + '/pql.apk');
+    const CapBrowser = window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+    if (CapBrowser) CapBrowser.open({ url });
+    else window.open(url, '_system');
+}
+
 // ── HARDWARE BACK BUTTON (Android) ──
 // Capacitor injects window.Capacitor even when the app loads a remote
 // server.url, so this works despite the app not bundling its own frontend.
@@ -4764,6 +4801,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateCountdown, 1000);
     initSocket();
     fetchInitialPrices();
+    checkForAppUpdate();
 
     const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);

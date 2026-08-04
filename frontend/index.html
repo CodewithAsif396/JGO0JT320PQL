@@ -3030,6 +3030,27 @@
         </div>
     </div>
 
+    <!-- APP UPDATE AVAILABLE MODAL (native Android only) -->
+    <div id="app-update-overlay" class="tips-overlay" style="display:none;">
+        <div class="wrong-pass-modal" style="padding:24px;width:320px;max-width:90%;text-align:center;"
+            onclick="event.stopPropagation()">
+            <div class="wrong-pass-icon" style="margin-bottom:16px;">
+                <i class="fa-brands fa-android" style="color:#8b5cf6;font-size:36px;"></i>
+            </div>
+            <h3 style="margin-bottom:12px;font-size:18px;color:var(--text-primary);">Update Available</h3>
+            <p id="app-update-text"
+                style="font-size:14px;color:var(--text-secondary);line-height:1.5;margin-bottom:24px;">
+                A new version of PQL is available. Update now for the latest features and fixes.
+            </p>
+            <div style="display:flex;gap:12px;">
+                <button class="btn-secondary" style="flex:1;padding:12px;border-radius:8px;font-weight:600;"
+                    onclick="dismissAppUpdate()">Later</button>
+                <button class="btn-green-full" style="flex:1;padding:12px;border-radius:8px;font-weight:600;"
+                    onclick="downloadAppUpdate()">Update</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SUCCESS TOAST MODAL -->
     <div id="success-toast-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">

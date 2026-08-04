@@ -1174,7 +1174,16 @@ router.post('/promo-banner', authMiddleware, adminMiddleware, async (req, res) =
 
 // ── Admin notify update ──────────────────────────────────────────────────────
 router.post('/notify-update', authMiddleware, adminMiddleware, async (req, res) => {
-  res.json({ success: true, message: 'Update notification sent' });
+  try {
+    const { title, message } = req.body;
+    if (!title || !message) return res.status(400).json({ error: 'title and message required' });
+    const users = await prisma.user.findMany({ where: { role: 'USER' }, select: { id: true } });
+    await prisma.notification.createMany({
+      data: users.map(u => ({ userId: u.id, title, message, type: 'SYSTEM' }))
+    });
+    if (global.io) users.forEach(u => global.io.to(`user_${u.id}`).emit('notification', { title, message, type: 'SYSTEM' }));
+    res.json({ success: true, count: users.length });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
