@@ -248,6 +248,28 @@ router.post('/2fa/enable', authMiddleware, async (req, res) => {
   }
 });
 
+// ── 2FA VERIFY: check a code against an already-enabled user's secret
+// (used to gate sensitive actions like withdrawals) — does not change
+// twoFaEnabled, unlike /2fa/enable which is the one-time setup flow ──
+router.post('/2fa/verify', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Verification code required' });
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user || !user.twoFaEnabled || !user.otpSecret) {
+      return res.status(400).json({ error: '2FA is not enabled on this account' });
+    }
+
+    const valid = speakeasy.totp.verify({ secret: user.otpSecret, encoding: 'base32', token: String(code), window: 2 });
+    if (!valid) return res.status(400).json({ error: 'Invalid verification code' });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
+
 // ── 2FA STATUS ──
 router.get('/2fa/status', authMiddleware, async (req, res) => {
   try {
