@@ -3728,7 +3728,13 @@ video::-webkit-media-controls, video::-webkit-media-controls-start-playback-butt
 /* ── CORE ── */
 body { background: #0b0d1e !important; }
 #app { background: #0b0d1e !important; }
-.screen { background: #0b0d1e !important; }
+/* NOT !important — the base .screen rule (line ~135) already defaults to
+   var(--bg-dark) without !important specifically so screens that need a
+   light background (Rules & Guidelines, Withdrawal/Deposit Records, More,
+   Verification, etc. — all inline style="background:#f5f5ff") can override
+   it. A prior !important here silently forced every one of those screens
+   near-black regardless of their own background, with only their white
+   content cards visible as scattered boxes on a black page. */
 .screen.active { animation: fadeInUpPremium 0.22s ease; }
 
 /* ── BANNER / HOME HEADER ── */
