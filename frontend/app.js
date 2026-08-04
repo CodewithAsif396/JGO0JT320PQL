@@ -24,6 +24,42 @@ window.addEventListener('popstate', () => {
     else if (p === '/signup' || p === '/register') _showScreen('register-screen');
 });
 
+// Pops navStack and shows the previous screen, without pushing a new
+// entry (unlike navTo). Returns false if there is nowhere to go back to.
+function navBack() {
+    if (navStack.length === 0) return false;
+    const prev = navStack.pop();
+    _showScreen(prev);
+    const navScreens = ['home-screen', 'markets-screen', 'futures-screen', 'perpetual-screen', 'assets-screen'];
+    if (navScreens.includes(prev)) {
+        const idx = navScreens.indexOf(prev);
+        document.querySelectorAll('.pql-nav-btn, .nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+    }
+    return true;
+}
+
+// ── HARDWARE BACK BUTTON (Android) ──
+// Capacitor injects window.Capacitor even when the app loads a remote
+// server.url, so this works despite the app not bundling its own frontend.
+(function () {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+    const CapApp = window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (!CapApp) return;
+    let lastBackPress = 0;
+    CapApp.addListener('backButton', () => {
+        // Close the topmost visible modal/overlay first, if any.
+        const overlays = document.querySelectorAll('[id$="-overlay"], [id$="-modal"]');
+        for (const el of overlays) {
+            if (el.offsetParent !== null) { el.style.display = 'none'; return; }
+        }
+        if (navBack()) return;
+        // Nowhere left to go back to — require a second press to exit.
+        const now = Date.now();
+        if (now - lastBackPress < 2000) { CapApp.exitApp(); }
+        else { lastBackPress = now; showToast('Press back again to exit'); }
+    });
+})();
+
 function navTo(screenId) {
     if (PROTECTED_SCREENS.includes(screenId) && !authToken) { _showScreen('login-screen'); return; }
     if (screenId === currentScreen) return;
@@ -298,8 +334,7 @@ function coinIconHtml(sym, bg, size) {
     size = size || 34;
     const fs = Math.max(10, Math.floor(size * 0.45));
 
-    let url = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/svg/color/' + sym.toLowerCase() + '.svg';
-    if (sym === 'SHIB') url = 'https://assets.coincap.io/assets/icons/shib@2x.png';
+    let url = 'https://assets.coincap.io/assets/icons/' + sym.toLowerCase() + '@2x.png';
 
     let fallbackHtml = '<span style="font-size:' + fs + 'px;color:#fff;font-weight:700;z-index:1;">' + sym.charAt(0) + '</span>';
     if (sym === 'XAU') fallbackHtml = '<i class="fa-solid fa-coins" style="color:#fff;font-size:' + fs + 'px;z-index:1;"></i>';
