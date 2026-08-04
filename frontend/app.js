@@ -38,6 +38,22 @@ function navBack() {
     return true;
 }
 
+// The embedded Android WebView has no download manager, so tapping a plain
+// <a download> link inside the app silently does nothing. When running
+// natively, hand the APK URL off to the system browser instead — it can
+// actually save the file.
+function downloadAndroidApk(ev) {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        if (ev) ev.preventDefault();
+        const url = window.location.origin + '/pql.apk';
+        const CapBrowser = window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+        if (CapBrowser) CapBrowser.open({ url });
+        else window.open(url, '_system');
+        return false;
+    }
+    return true; // regular browser — let the <a download> handle it natively
+}
+
 // ── HARDWARE BACK BUTTON (Android) ──
 // Capacitor injects window.Capacitor even when the app loads a remote
 // server.url, so this works despite the app not bundling its own frontend.
