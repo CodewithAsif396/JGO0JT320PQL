@@ -202,11 +202,13 @@ router.post('/trade', authMiddleware, async (req, res) => {
     if (signal.targetUserId && signal.targetUserId !== user.id) {
       return res.status(403).json({ error: 'This signal is not available to you.' });
     }
+    let isDirectTarget = !!signal.targetUserId;
     if (!signal.targetUserId && signal._count.targets > 0) {
       const isTargeted = await prisma.signalTarget.findUnique({
         where: { signalId_userId: { signalId: signal.id, userId: user.id } }
       });
       if (!isTargeted) return res.status(403).json({ error: 'This signal is not available to you.' });
+      isDirectTarget = true;
     }
 
     // Allow trade if:
@@ -241,14 +243,19 @@ router.post('/trade', authMiddleware, async (req, res) => {
     // No fixed % cap — amount is already set by admin's Trade Allocation setting
     const totalBalance = (user.balance || 0) + (user.perpetualBalance || 0);
 
-    // Server-side balance tier validation — cannot be bypassed from frontend
+    // Server-side balance tier validation — cannot be bypassed from frontend.
+    // Skipped for signals the admin sent directly to hand-picked users: the
+    // admin's selection is itself the authorization, so a user below the
+    // tier minimum must still be able to trade a signal targeted at them.
     const accessTier = await getAccessTier(user.balance, user.perpetualBalance);
-    const { t1: tierMin } = await getTierThresholds();
-    if (accessTier === 0) {
-      return res.status(403).json({ error: `Minimum $${tierMin} Trade balance required to trade signals.` });
-    }
-    if (signal.visibilityTier > accessTier) {
-      return res.status(403).json({ error: 'Your Trade balance tier does not grant access to this signal.' });
+    if (!isDirectTarget) {
+      const { t1: tierMin } = await getTierThresholds();
+      if (accessTier === 0) {
+        return res.status(403).json({ error: `Minimum $${tierMin} Trade balance required to trade signals.` });
+      }
+      if (signal.visibilityTier > accessTier) {
+        return res.status(403).json({ error: 'Your Trade balance tier does not grant access to this signal.' });
+      }
     }
 
     // Prevent duplicate active trade on same signal
@@ -260,12 +267,15 @@ router.post('/trade', authMiddleware, async (req, res) => {
     }
 
     // Tier-based concurrent signal limit: Tier 1 = 1 signal, Tier 2 = 2 signals, Tier 3 = 3, etc.
+    // Directly-targeted users below any tier (accessTier 0) still get 1 slot —
+    // the tier count is otherwise meaningless for them.
+    const concurrentLimit = isDirectTarget ? Math.max(accessTier, 1) : accessTier;
     const activeSignalTrades = await prisma.trade.count({
       where: { userId: user.id, outcome: 'PENDING', signalId: { not: null } }
     });
-    if (activeSignalTrades >= accessTier) {
+    if (activeSignalTrades >= concurrentLimit) {
       return res.status(403).json({
-        error: `Tier ${accessTier} allows maximum ${accessTier} active signal trade${accessTier > 1 ? 's' : ''} at a time. Please wait for your current trade${accessTier > 1 ? 's' : ''} to complete.`
+        error: `Tier ${accessTier} allows maximum ${concurrentLimit} active signal trade${concurrentLimit > 1 ? 's' : ''} at a time. Please wait for your current trade${concurrentLimit > 1 ? 's' : ''} to complete.`
       });
     }
 
